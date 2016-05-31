@@ -1,0 +1,31 @@
+---
+title: "TopoSpecies"
+author: "Sylvain Schmitt"
+date: "May 26, 2016"
+output: html_document
+---
+# Data
+```{r Data, echo=TRUE, message=FALSE, warning=FALSE}
+rm(list = ls()); invisible(gc())
+library(Uppangala)
+library(raster)
+Env <- genEnv()
+Trees <- genTrees()
+Species <- genSpecies()
+Trees$SpCode <- as.factor(tolower(as.character(Trees$SpCode))) # Should be treated in gen functions
+row.names(Species) <- tolower(row.names(Species))
+```
+
+# Species plots
+```{r Plot sp, echo=FALSE, fig.height=10, fig.width=10, message=FALSE, warning=FALSE}
+SpCode <- levels(Trees$SpCode)
+for(Sp in SpCode){
+  main <- Sp
+  if(Sp %in% row.names(Species)){
+    main <- paste(Species[as.character(Sp),2], Species[as.character(Sp),3], sep = ', ')
+  }
+  plot(Env$DEM, main = main)
+  contour(Env$DEM, add = T)
+  points(Y ~ X, Trees[Trees$SpCode == Sp,], pch = 20)
+}
+```
