@@ -1,0 +1,59 @@
+\documentclass{article}
+
+\textwidth=6.2in
+\textheight=8.5in
+\oddsidemargin=.1in
+\evensidemargin=.1in
+\headheight=-.3in
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+\title{Uppangala tree functionnal traits: \\ Preliminary results}
+\author{Sylvain Schmitt}
+\date{31 may 2016}
+
+\maketitle
+
+\section*{Method}
+
+\subsection*{Functionnal traits}
+
+\subsubsection*{Measured traits}
+
+<<PFT, results=tex, eval=T, echo=F>>=
+rm(list = ls()); invisible(gc())
+library(Uppangala)
+PFT <- genPFT()
+captions <- genCaptions()
+table <- data.frame(row.names = c('Thickness', 'Leaf area', 'Leaf dry matter content', 'Specific leaf area', 'Wood density'), code = c('Thick', 'LA', 'LDMC', 'SLA', 'WD'), unit = c('\u00b5m', 'mm\u00b2', 'mg.g\u207b\u00b9', 'm\u00b2.kg\u207b\u00b9', 'g.cm\u207b\u00b3'))
+xtable::xtable(table)
+@
+
+
+\subsubsection*{Traits distribution by species}
+
+\begin{figure}[htbp]
+<<distributions, eval=T, echo=F, fig=T, width=30, height=30, message=F, warning=F>>=
+par(mfrow = c(3,2))
+bymedian <- with(PFT, reorder(Sp_Code, -Thick,  mean, na.rm = T))
+boxplot(Thick ~ bymedian, data = PFT, las = 2, horizontal = F, main = captions['Thick'])
+bymedian <- with(PFT, reorder(Sp_Code, -LA,  mean, na.rm = T))
+boxplot(log(LA) ~ bymedian, data = PFT, las = 2, horizontal = F, main = captions['log(LA)'])
+bymedian <- with(PFT, reorder(Sp_Code, -LDMC,  mean, na.rm = T))
+boxplot(LDMC ~ bymedian, data = PFT, las = 2, horizontal = F, main = captions['LDMC'])
+bymedian <- with(PFT, reorder(Sp_Code, -SLA,  mean, na.rm = T))
+boxplot(log(SLA) ~ bymedian, data = PFT, las = 2, horizontal = F, main = captions['log(SLA)'])
+bymedian <- with(PFT, reorder(Sp_Code, -log(SHA),  mean, na.rm = T))
+boxplot(log(SHA) ~ bymedian, data = PFT, las = 2, horizontal = F, main = captions['log(SHA)'])
+bymedian <- with(PFT, reorder(Sp_Code, -WD,  mean, na.rm = T))
+boxplot(WD ~ bymedian, data = PFT, las = 2, horizontal = F, main = captions['WD'])
+rm(bymedian)
+@
+\caption{Traits distribution by species for all measured leaves}
+\label{distributions}
+\end{figure}
+
+Thickness outliers and extreme values are due to too close secondary veins but can't be correctes. Some outlier are still to be corrected in individual leaf trait value, see fig~\ref{distributions}.Nevertheless we can observe som ranking between species with functionnal traits.
+
+\end{document}

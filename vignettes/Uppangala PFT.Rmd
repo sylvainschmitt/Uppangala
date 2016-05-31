@@ -7,7 +7,7 @@ fig_caption: yes
 vignette: |
   %\VignetteIndexEntry{Uppangala PFT} %\VignetteEngine{knitr::rmarkdown} %\VignetteEncoding{UTF-8}
 ---
-# Data
+# Traits
 
 ## Data cleaning
 
@@ -32,7 +32,7 @@ Errors in PFT values :
 ### Outlier research
 
 ```{r variances, echo=FALSE, fig.height=8, fig.width=8, message=FALSE, warning=FALSE}
-par(mfrow = c(3,1))
+par(mfrow = c(3,2))
 bymedian <- with(PFT, reorder(Sp_Code, -Thick,  mean, na.rm = T))
 boxplot(Thick ~ bymedian, data = PFT, las = 2, horizontal = F, main = captions['Thick'])
 bymedian <- with(PFT, reorder(Sp_Code, -LA,  mean, na.rm = T))
@@ -111,7 +111,8 @@ barplot((pca.var / sum(pca.var)), las = 2,
 lines(bstick(7), col = 'red')
 legend('bottomleft', c('PCA', 'broken stick'), fill = c('grey', 'red'))
 biplot(pca, col = c('grey', 'red'), choices = c(1,2))
-PCAscores <- as.data.frame(pca$scores) # Adding PCA axis in PFT values
+PCAscores <- as.data.frame(pca$scores)[1:3] # Adding PCA axis in PFT values
+names(PCAscores) <- c('PCA1', 'PCA2', 'PCA3')
 PCAscores$ID <- row.names(PCAscores)
 PFT_ind$ID <- row.names(PFT_ind)
 PFT_ind <- merge(PFT_ind, PCAscores, all = T)
@@ -158,11 +159,9 @@ rm(c, X, Y)
 ```
 
 
-# Trees and environment
+# Environment
 
-## Environment
-
-### Load data
+## Load data
 
 ```{r Load env, echo=TRUE, message=FALSE, warning=FALSE}
 library(raster)
@@ -172,6 +171,7 @@ Species <- genSpecies()
 hillshade <- DEMderiv(Env$DEM, c("slope", "aspect", "hillshade"))$Hillshade # For plotting purposes
 ```
 
+## Trees
 ```{r Trees plot, echo=FALSE, fig.height=8, fig.width=8, message=FALSE, warning=FALSE}
 par(mfrow = c(1,1))
 plot(hillshade, col = grey(0:100/100), main = 'Trees ~ Girth + Sp')
@@ -179,7 +179,7 @@ points(Y ~ X, Trees, col = SpCode, cex = `2013_girth`/100, pch = 20)
 legend("bottomleft", legend = 'Species', fill = 'lightgrey')
 ```
 
-## Trees
+## Traits
 
 ```{r Species aggregation, message=FALSE, warning=FALSE}
 PFT_sp <- aggregate(PFT_ind, by = list(PFT_ind$SP), FUN = mean, na.rm = T)
@@ -222,11 +222,11 @@ rm(col)
 
 # Null Models
 
-## Community
+## Communities
 
 Community definition by quadrat
 
-```{r Community}
+```{r Communities}
 com <- quadrats()
 Trees$com <- NA
 XY <- data.frame(X = Trees$X, Y = Trees$Y)
@@ -246,8 +246,6 @@ legend("bottomleft", legend = 'community', fill = 'grey')
 rm(col, XY, Trees_bin)
 ```
 
-### Distribution of traits
-
 Some species distribtuion for SLA and WD by community
 
 ```{r dist com, echo=FALSE, fig.height=8, fig.width=8, message=FALSE, warning=FALSE}
@@ -261,79 +259,71 @@ plotDistri(as.matrix(Trees$WD[rows]), Trees$com[rows], Trees$SpCode[rows],
 rm(rows)
 ```
 
-## Topographical classes definition
-
-### Adding topo to communities
+Adding topo to communities
 
 ```{r com topo, echo=TRUE, message=FALSE, warning=FALSE}
 com@data$id <- paste0('C', com@data$id)
 com@data$DEM <- extract(Env$DEM, as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
 Deriv <- DEMderiv(raster(com, 'DEM'), c('slope', 'curvature', 'plancurvature', 'profcurvature', 'aspect', 'wetness'))
 com@data <- cbind(com@data, extract(Deriv, as(com, "SpatialPolygons"), df = T, fun = mean)[-1])
-com@data$SouthWesterness <- sin((com@data$Aspect + 202.5) / 180 * pi)
-com@data$NorthEasterness <- cos((com@data$Aspect + 202.5) / 180 * pi)
+com@data$SouthWesterness <- sin((com@data$Aspect + 225) / 180 * pi)
+com@data$NorthEasterness <- cos((com@data$Aspect + 225) / 180 * pi)
 com@data$Canopy <- extract(Env$Canopy, as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
 rm(Deriv)
 ```
 
-### Adding CWM to communities
+Topographical classes assignation and plot
 
-```{r CWM}
-CWM <- aggregate(Trees, by = list(Trees$com), mean, na.rm = T)
-names(CWM)[1] <- 'id'
-CWM <- CWM[-c(2:6,19)]
-com <- merge(com, CWM)
-summary(com)
-plot(stack(com)[[12:23]])
-rm(CWM)
+```{r Plot topo, echo=FALSE, fig.height=8, fig.width=9, message=FALSE, warning=FALSE}
+com@data$topo <- as.factor(with(com@data, topo_classes(Slope, Curvature, Aspect)))
+par(mfrow = c(1,1))
+col <- c("#008B00", "#00CD00", "#009ACD", "#00BFFF", "#CD9B1D", "#FFC125")
+# col <- terrain.colors(7)[c(1,2,5,6,3,4)]
+plot(raster(com, 'topo'), col = col, main = 'Topographical classes', legend = F)
+contour(Env$DEM, add = T)
+legend('bottomleft', fill = col, legend = levels(com@data$topo), cex = 0.7)
+rm(col)
 ```
 
-### Topographical variables selection
+Adding CWM to communities
+
+```{r CWM, message=FALSE, warning=FALSE}
+CWM <- aggregate(Trees, by = list(Trees$com), mean, na.rm = T)
+names(CWM)[1] <- 'id'
+CWM <- CWM[which(names(CWM) %in% c('id', 'Thick', 'LA', 'LDMC', 'SLA', 'WD', 'PCA1', 'PCA2', 'PCA3'))]
+com <- merge(com, CWM)
+rm(CWM)
+summary(com)
+plot(stack(com)[[which(names(com) %in% c('Thick', 'LA', 'LDMC', 'SLA', 'WD'))]])
+```
+
+## Filters
 
 Linear regression on all variables
 
-```{r lm(CWm ~ topo), message=FALSE, warning=FALSE}
-reg <- '~ DEM + Slope + Curvature + PlanCurvature + ProfileCurvature + Wetness + SouthWesterness*NorthEasterness'
-LM <- with(com@data, list(Comp.1 = lm(formula(paste('Comp.1', reg))),
-                          Comp.2 = lm(formula(paste('Comp.2', reg))),
-                          Comp.3 = lm(formula(paste('Comp.3', reg))),
+```{r lm, echo=FALSE, message=FALSE, warning=FALSE}
+reg <- '~ DEM + Slope + Curvature + PlanCurvature + ProfileCurvature + Wetness + SouthWesterness'
+reg
+LM <- with(com@data, list(PCA1 = lm(formula(paste('PCA1', reg))),
+                          PCA2 = lm(formula(paste('PCA2', reg))),
+                          PCA3 = lm(formula(paste('PCA3', reg))),
                           logSLA = lm(formula(paste('log(SLA)', reg))),
                           LDMC = lm(formula(paste('LDMC', reg))),
                           logLA = lm(formula(paste('log(LA)', reg))),
                           Thick = lm(formula(paste('Thick', reg))),
                           WD = lm(formula(paste('WD', reg)))))
 cat('Shapiro test p-values :\n') ; unlist(lapply(LM, function(x){stars(shapiro.test(x$residuals)$p.value)})) # Homoscedasticity
-# lapply(LM, summary)
 lapply(LM, function(x){summary(step(x, trace = 0))})
 rm(LM, reg)
-```
 
-Classes assignation and plot
-```{r Plot pop, echo=FALSE, fig.height=8, fig.width=9, message=FALSE, warning=FALSE}
-com@data$topo <- as.factor(with(com@data, topo_classes(Slope, Curvature, Aspect)))
-par(mfrow = c(1,1))
-col <- terrain.colors(7)[c(1,2,5,6,3,4)]
-plot(raster(com, 'topo'), col = col, main = 'Topographical classes')
-contour(Env$DEM, add = T)
-legend('bottomleft', fill = col, legend = c('Concave surface', 'Convex plane surface', 'North-East steep slope', 'South-West steep slope', 'North-East mean slope', 'South-West mean slope'), cex = 0.7)
-rm(col)
-```
-
-Species distribtuion for SLA and WD by populations
-
-```{r dist pop, echo=FALSE, fig.height=8, fig.width=8, message=FALSE, warning=FALSE}
-par(mfrow = c(3,4))
-Trees$topo <- extract(raster(com, 'topo'), Trees[2:3])
-plotDistri(as.matrix(Trees$SLA), Trees$topo, Trees$SpCode, xlim = c(0, 35), ylim.cex = 1, plot.ask = F, multipanel = F, leg = F)
-plotDistri(as.matrix(Trees$WD) , Trees$topo, Trees$SpCode, xlim = c(0.3, 0.85), ylim.cex = 3, plot.ask = F, multipanel = F, leg = F)
 ```
 
 Anova with topographical classes
 
-```{r ANOVA, message=FALSE, warning=FALSE}
-ANOVA <- with(com@data, list(Comp.1 = aov(Comp.1 ~ topo),
-                             Comp.2 = aov(Comp.2 ~ topo),
-                             Comp.3 = aov(Comp.3 ~ topo),
+```{r anova, echo=FALSE, message=FALSE, warning=FALSE}
+ANOVA <- with(com@data, list(PCA1 = aov(PCA1 ~ topo),
+                             PCA2 = aov(PCA2 ~ topo),
+                             PCA3 = aov(PCA3 ~ topo),
                              SLA = aov(SLA ~ topo),
                              LDMC = aov(LDMC ~ topo),
                              LA = aov(LA ~ topo),
@@ -347,61 +337,12 @@ rm(ANOVA)
 
 ## Hypothesis
 
-* Tree species mortality can be induced by both hydraulic failure as emboly or predation as herbivory
-* PCA first compoment his loaded mainly by wood density, thickness ans leaf dry matter content
-* Wood density is a proxy of species security face to water stress
-* Both thickness and leaf dry matter content are proxy of resistance to herbivory
-* As a conclusion PCA first component can be considered as link to tree species strategy for demographic performance
-* We can consider Uppangala plots as relatively even in terms of precipitation, temperature, and soil properties (!strong assumption!)
-* So far, influencing environmental filter on tree species demographic performance will be topography
-* Topography will induced differences in water flow and soil accretion and stability
-* Finally, PCA first component, as proxy of tree species demographic performance, should be non randomly distributed in communities because filtered by topography represented by defined topographical classes
+## Null models
 
-## Model
-
-```{r Model}
-n <- 1000 # Number of wanted values
-stat <-  c()
-t0 <- Sys.time()
-for(i in 1:(n-1)){ 
-  NullPFT_sp <- PFT_sp
-  row.names(NullPFT_sp) <- sample(row.names(PFT_sp))
-  NullPFT_sp$Sp_Code <- SpCode[row.names(NullPFT_sp)]
-  NullTrees <- Trees[c(1:4,18)]
-  NullTrees$ID <- row.names(Trees)
-  NullTrees <- merge(NullTrees, NullPFT_sp, by.x = 'SpCode', by.y = 'Sp_Code')
-  row.names(NullTrees) <- NullTrees$ID
-  NullTrees <- NullTrees[-which(names(NullTrees) == 'ID')]
-  NullCWM <- aggregate(NullTrees, by = list(NullTrees$com), mean, na.rm = T)
-  names(NullCWM)[1] <- 'id'
-  NullCWM <- NullCWM[-c(2:6)]
-  Nullcom <- com
-  Nullcom@data <- Nullcom@data[c(1:10,24)]
-  Nullcom <- merge(Nullcom, NullCWM)
-  # plot(stack(raster(com, 'Comp.1'), raster(Nullcom, 'Comp.1')), 
-  #      main = c('Reality', paste('Null model', i)))
-  # cat(i, '\n')
-  Fval <- summary(aov(WD ~ topo, Nullcom@data))[[1]][['F value']][1]
-  stat <- c(stat, Fval)
-}
-stat.val <- summary(aov(WD ~ topo, com@data))[[1]][['F value']][1]
-(Sys.time() - t0)
-rm(NullPFT_sp, NullTrees, NullCWM, Nullcom)
+```{r Model, echo=FALSE, fig.height=9, fig.width=9, message=FALSE, warning=FALSE}
+model <- null_model(formula = 'WD ~ Slope + Curvature + SouthWesterness', 
+                    test = 'Anova lm Fvalue',
+                    PFT_sp = PFT_sp, Trees = Trees, com = com, SpCode = SpCode,
+                    n = 1000, plot = F, count = T, time = T)
+plot_model(model)
 ```
-
-## Result
-
-```{r Result, echo=FALSE, fig.height=9, fig.width=9, message=FALSE, warning=FALSE}
-par(mfrow = c(1,1))
-ranks <- (rank(c(stat.val, stat))/n)
-pval <- ranks[1]
-if(pval > 0.5){
-  pval <- 1 - pval # Two sided
-}
-plot(density(stat), main = 'Null Model with ANOVA F.stat : CWMbin(WD) ~ topo.classes')
-lines(c(stat.val, stat.val), c(0,1), col = 'red', lwd = 2)
-text(stat.val + 0.2, 0.1, 'Com\nval', col = 'red')
-mtext(paste('p-value =', pval, stars(pval)), 3)
-mtext(paste('Repetitions =', n), 1)
-```
-

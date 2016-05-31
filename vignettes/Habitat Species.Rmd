@@ -55,21 +55,16 @@ knitr::kable(habitat_association)
 # Species - Habitats plots
 ```{r Plot sp habitat, echo=FALSE, fig.height=10, fig.width=10, message=FALSE, warning=FALSE}
 SpCode <- levels(Trees$SpCode)
-col <- terrain.colors(7)[c(1,2,5,6,3,4)]
+col <- c("#008B00", "#00CD00", "#009ACD", "#00BFFF", "#CD9B1D", "#FFC125")
+# col <- terrain.colors(7)[c(1,2,5,6,3,4)]
 for(Sp in SpCode){
   main <- Sp
   if(Sp %in% row.names(Species)){
     main <- paste(Species[as.character(Sp),2], Species[as.character(Sp),3], sep = ', ')
   }
-  plot(raster(com, 'topo'), col = col, main = main)
-  # contour(Env$DEM, add = T)
-  legend('bottomleft', fill = col, 
-         legend = c(paste('Concave surface', habitat_association[Sp,1], '%'),
-                    paste('Convex plane surface', habitat_association[Sp,2], '%'),
-                    paste('North-East steep slope', habitat_association[Sp,3], '%'),
-                    paste('South-West steep slope', habitat_association[Sp,4], '%'),
-                    paste('North-East mean slope', habitat_association[Sp,5], '%'),
-                    paste('South-West mean slope', habitat_association[Sp,6], '%')), cex = 0.7)
+  plot(raster(com, 'topo'), col = col, legend = F, main = main)
+  contour(Env$DEM, add = T)
+  legend('bottomleft', fill = col, legend = levels(com@data$topo), cex = 0.7)
   points(Y ~ X, Trees[Trees$SpCode == Sp,], pch = 20)
 }
 ```

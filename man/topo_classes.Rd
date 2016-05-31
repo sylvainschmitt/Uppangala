@@ -4,7 +4,7 @@
 \alias{topo_classes}
 \title{Topographical classes}
 \usage{
-topo_classes(Slope, Curvature, Aspect, degree = c(20, 30), dir = 202.5)
+topo_classes(Slope, Curvature, Aspect, degree = c(20, 30), dir = 225)
 }
 \arguments{
 \item{Slope}{num. Slope model values}

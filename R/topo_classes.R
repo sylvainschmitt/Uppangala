@@ -15,7 +15,7 @@
 #' data("Trees")
 #' topo_classes(Trees$X, Trees$Y, Env$DEM$Ground, Env$DEM$Slope, Env$DEM$Curvature)
 #'
-topo_classes = function(Slope, Curvature, Aspect, degree = c(20,30), dir = 202.5){
+topo_classes = function(Slope, Curvature, Aspect, degree = c(20,30), dir = 225){
 
   # Factorizing aspect
   AspectDir <- sin((Aspect + dir) / 180 * pi)
@@ -24,12 +24,12 @@ topo_classes = function(Slope, Curvature, Aspect, degree = c(20,30), dir = 202.5
   # Attributing classes
   topo <- data.frame(d = Slope, c = Curvature, a = AspectDir)
   topo$class <- NA
-  topo$class[topo$d < degree[1] &  topo$c >= 0] <- 'CvPS' # Concave plane surface
-  topo$class[topo$d < degree[1] &  topo$c < 0] <- 'CxPS' # Convex plane surface
-  topo$class[topo$d >= degree[2] &  topo$a == 1] <- 'WSS' # West steep slope
-  topo$class[topo$d >= degree[2] &  topo$a == 0] <- 'ESS' # East steep slope
-  topo$class[topo$d >= degree[1] & topo$d < degree[2] &  topo$a == 1] <- 'WMS' # West mean slope
-  topo$class[topo$d >= degree[1] & topo$d <  degree[2] & topo$a == 0] <- 'EMS' # East mean slope
+  topo$class[topo$d < degree[1] &  topo$c >= 0] <- 'CvP' # Concave plane surface
+  topo$class[topo$d < degree[1] &  topo$c < 0] <- 'CxP' # Convex plane surface
+  topo$class[topo$d >= degree[2] &  topo$a == 1] <- 'SWSS' # South - West steep slope
+  topo$class[topo$d >= degree[2] &  topo$a == 0] <- 'NESS' # North - East steep slope
+  topo$class[topo$d >= degree[1] & topo$d < degree[2] &  topo$a == 1] <- 'SWMS' # South - West mean slope
+  topo$class[topo$d >= degree[1] & topo$d <  degree[2] & topo$a == 0] <- 'NEMS' # North - East mean slope
 
 #   # Classes Gunatileke et al, 2006
 #   topo$class = NA
