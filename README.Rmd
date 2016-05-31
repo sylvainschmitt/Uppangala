@@ -1,0 +1,24 @@
+---
+output: github_document
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-"
+)
+```
+
+* Uppangala
+
+** Description
+
+```{r}
+packageDescription('Uppangala')
+```
+
+** Install
+
+Please check *?extdata* to correctly install the package
+
