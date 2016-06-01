@@ -21,8 +21,8 @@
 #' @examples
 #' # No example yet see Uppangala_PFT vignette
 #'
-null_model = function(formula = 'WD ~ topo',
-                      test = 'Anova Fvalue',
+null_model = function(formula,
+                      test,
                       PFT_sp,
                       Trees,
                       com,

@@ -12,7 +12,10 @@
 #' # No example yet see Uppangala_PFT vignette
 #'
 plot_model = function(model){
-  plot(density(model$nullvalues),
+  hist(model$nullvalues, freq = F, col = 'lightgrey', border = F, xlab = "", breaks = 20,
+       main = paste('Null Model with', model$test, ':', model$formula),
+       xlim = range(c(model$nullvalues, (model$value+0.2))))
+  lines(density(model$nullvalues),
        main = paste('Null Model with', model$test, ':', model$formula),
        xlim = range(c(model$nullvalues, (model$value+0.2))))
   lines(c(model$value, model$value), c(0,1), col = 'red', lwd = 2)
@@ -25,7 +28,7 @@ plot_model = function(model){
   lines(c(x1, x1), c(0,1), lty = 2)
   lines(c(x2, x2), c(0,1), lty = 2)
   lines(c(x3, x3), c(0,1), lty = 6)
-  text(x1 + 0.2, 0.1, '0.025')
-  text(x2 + 0.2, 0.1, '0.975')
-  text(x3 + 0.2, 0.1, '0.95')
+  text(x1 + 0.2, 0.1, '0.025', cex = 0.7)
+  text(x2 + 0.2, 0.1, '0.975', cex = 0.7)
+  text(x3 + 0.2, 0.1, '0.95', cex = 0.7)
 }

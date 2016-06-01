@@ -294,7 +294,7 @@ CWM <- CWM[which(names(CWM) %in% c('id', 'Thick', 'LA', 'LDMC', 'SLA', 'WD', 'PC
 com <- merge(com, CWM)
 rm(CWM)
 summary(com)
-plot(stack(com)[[which(names(com) %in% c('Thick', 'LA', 'LDMC', 'SLA', 'WD'))]])
+plot(stack(com)[[which(names(com) %in% c('Thick', 'LA', 'LDMC', 'SLA', 'WD', 'PCA1', 'PCA2', 'PCA3'))]])
 ```
 
 ## Filters
@@ -340,7 +340,7 @@ rm(ANOVA)
 ## Null models
 
 ```{r Model, echo=FALSE, fig.height=9, fig.width=9, message=FALSE, warning=FALSE}
-model <- null_model(formula = 'WD ~ Slope + Curvature + SouthWesterness', 
+model <- null_model(formula = 'WD ~ SouthWesterness', 
                     test = 'Anova lm Fvalue',
                     PFT_sp = PFT_sp, Trees = Trees, com = com, SpCode = SpCode,
                     n = 1000, plot = F, count = T, time = T)
