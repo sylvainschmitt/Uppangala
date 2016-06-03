@@ -7,7 +7,7 @@
 DEMderiv(DEM, choices = c("slope", "curvature", "plancurvature",
   "profcurvature", "aspect", "wetness", "flowdir", "hillshade"),
   minslope = 0.5, workspace = NULL,
-  path = "C:/Program Files/QGIS Chugiak/apps/saga",
+  path = "C:/Program Files/QGIS Essen/apps/saga",
   method = "poly2zevenbergen")
 }
 \arguments{

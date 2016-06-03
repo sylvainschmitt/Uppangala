@@ -21,7 +21,7 @@
 #' @examples
 #' # No example yet see Uppangala_PFT vignette
 #'
-null_model = function(formula,
+null_model = function(formulas,
                       test,
                       PFT_sp,
                       Trees,
@@ -37,8 +37,11 @@ null_model = function(formula,
   if(is.null(tcol)){
     tcol <- which(names(Trees) %in% c('SpCode', 'com'))
   }
-  formul <- formula(formula)
-  stat <-  c()
+  formul <- formulas
+  formulas <- as.list(formulas)
+  formulas <- lapply(formulas, formula)
+  stat <-  matrix(ncol = length(formulas), nrow = (n-1))
+  colnames(stat) <- formul
   t0 <- Sys.time()
   for(i in 1:(n-1)){
     NullPFT_sp <- PFT_sp
@@ -54,16 +57,13 @@ null_model = function(formula,
     NullCWM <- NullCWM[which(names(NullCWM)
                              %in% c('id', 'Thick', 'LA', 'LDMC', 'SLA', 'WD', 'PCA1', 'PCA2', 'PCA3'))]
     Nullcom <- com
-    summary(com)
     Nullcom@data <- Nullcom@data[ccol]
     Nullcom <- merge(Nullcom, NullCWM)
-    if(test == 'Anova Fvalue'){
-      summary(Nullcom)
-      Nullval <- summary(aov(formul, Nullcom))[[1]][['F value']][1]
-    } else if(test == 'Anova lm Fvalue'){
-      Nullval <- summary(aov(lm(formul, Nullcom)))[[1]][['F value']][1]
-    }
-    stat <- c(stat, Nullval)
+      if(test == 'Anova Fvalue'){
+        stat[i,] <- unlist(lapply(formulas, function(x){summary(aov(x, Nullcom))[[1]][['F value']][1]}))
+      } else if(test == 'Anova lm Fvalue'){
+        stat[i,] <- unlist(lapply(formulas, function(x){summary(aov(lm(x, Nullcom)))[[1]][['F value']][1]}))
+      }
     if(plot){
       plot(stack(raster(com, 'Comp.1'), raster(Nullcom, 'Comp.1')),
            main = c('Reality', paste('Null model', i)))
@@ -73,27 +73,23 @@ null_model = function(formula,
     }
   }
   if(test == 'Anova Fvalue'){
-    stat.val <- summary(aov(formul, com@data))[[1]][['F value']][1]
+    stat.val <- lapply(formulas, function(x){summary(aov(x, com@data))[[1]][['F value']][1]})
   } else if(test == 'Anova lm Fvalue'){
-    stat.val <- summary(aov(lm(formul, com@data)))[[1]][['F value']][1]
+    stat.val <- lapply(formulas, function(x){summary(aov(lm(x, com@data)))[[1]][['F value']][1]})
   }
-  rm(NullPFT_sp, NullTrees, NullCWM, Nullcom)
+  ranks <- mapply(function(x,y){(rank(c(x, y))/n)}, x = stat.val, y = as.list(data.frame(stat)))
+  pval <- ranks[1,]
+  pval[pval > 0.5] <- 1 - pval[pval > 0.5] # Two sided
+  lim = unlist(mapply(function(X,Y,Z){c(X,Y)[which(abs(Z - 0.95) == min(abs(Z - 0.95)))]},
+                      X = stat.val, Y = as.list(data.frame(stat)), Z = as.list(data.frame(ranks))))
   if(time){
     print(Sys.time() - t0)
   }
-  ranks <- (rank(c(stat.val, stat))/n)
-  pval <- ranks[1]
-  if(pval > 0.5){
-    pval <- 1 - pval # Two sided
-  }
-  x1 = c(stat.val, stat)[which(abs(ranks - 0.025) == min(abs(ranks - 0.025)))]
-  x2 = c(stat.val, stat)[which(abs(ranks - 0.975) == min(abs(ranks - 0.975)))]
-  x3 = c(stat.val, stat)[which(abs(ranks - 0.95) == min(abs(ranks - 0.95)))]
-  return(list(formula = formula,
+  return(list(formula = formul,
               test = test,
               rep = n,
               nullvalues = stat,
-              value = stat.val,
+              value = unlist(stat.val),
               pvalue = pval,
-              lim = c(x1, x2, x3)))
+              lim = lim))
 }

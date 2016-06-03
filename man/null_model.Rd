@@ -4,13 +4,11 @@
 \alias{null_model}
 \title{Null model}
 \usage{
-null_model(formula = "WD ~ topo", test = "Anova Fvalue", PFT_sp, Trees, com,
-  SpCode, tcol = NULL, cwmcol = c(1:1), ccol = c(1:12), n = 1000,
-  plot = F, count = F, time = T)
+null_model(formulas, test, PFT_sp, Trees, com, SpCode, tcol = NULL,
+  cwmcol = c(1:1), ccol = c(1:12), n = 1000, plot = F, count = F,
+  time = T)
 }
 \arguments{
-\item{formula}{char. test formula}
-
 \item{test}{char. name of the used test (Anova Fvalue or lm R2)}
 
 \item{PFT_sp}{data.frame. PFT values by species}
@@ -30,6 +28,8 @@ null_model(formula = "WD ~ topo", test = "Anova Fvalue", PFT_sp, Trees, com,
 \item{count}{logical. do the number of the realized null model need to be counted}
 
 \item{time}{logical. do the time of the operation need to be measured}
+
+\item{formula}{char. test formula}
 }
 \value{
 a list with the formula, the test, the null values, and the community value

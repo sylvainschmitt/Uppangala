@@ -4,3 +4,7 @@
 .Ruserdata
 inst/doc
 inst/extdata/*
+vignettes/PreliminaryResults/*.pdf
+vignettes/PreliminaryResults/*.tex
+vignettes/PreliminaryResults/*.gz
+vignettes/PreliminaryResults/*.log

@@ -10,13 +10,13 @@
 #'
 stars = function(val){
   if(val < 0.001){
-    s = '***'
+    s = '*** '
   } else if (val < 0.01) {
-    s = '**'
+    s = '**  '
   } else if (val < 0.05) {
-    s = '*'
+    s = '*   '
   } else if (val < 0.1) {
-    s = '.'
+    s = '.   '
   } else {
     s = 'n.s.'
   }

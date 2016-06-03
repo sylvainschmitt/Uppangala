@@ -11,8 +11,8 @@
 genPFT <- function(){
   # Opening
   path <- system.file('extdata', 'data.csv', package = 'Uppangala')
-  PFT <- read.csv(path, header = T, stringsAsFactors = F, na.strings = c('#N/A', 'NA'))
-  PFT <- PFT[-c(12:13)] # Deleting SD & VD in waiting of measurements
+  PFT <- read.csv(path, stringsAsFactors = F, na.strings = c('#N/A', 'NA'))
+  PFT <- PFT[-c(13:14)] # Deleting SD & VD in waiting of measurements
   # Factors
   PFT$Thick <- as.numeric(PFT$Thick)
   PFT$CE <- as.factor(tolower(PFT$CE))
@@ -20,6 +20,7 @@ genPFT <- function(){
   PFT$Sp_Code <- as.factor(PFT$Sp_Code)
   # Variables modification
   PFT$CEs <- as.numeric(as.character(substr(PFT$CE, 1, 1)))
+  PFT$LTD <- as.numeric(PFT$LTD)
   PFT$LDMC = 1000 * PFT$LDMC # from g.g-1 to mg.g-1
   PFT$SLA = PFT$SLA / 1000 # from mm2.g-1 to m2.kg-1
   PFT$HA = PFT$HA / PFT$LA

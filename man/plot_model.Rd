@@ -4,10 +4,14 @@
 \alias{plot_model}
 \title{Plot null model}
 \usage{
-plot_model(model)
+plot_model(model, formula = NULL, index = NULL)
 }
 \arguments{
 \item{model}{null_model list. result from null_model function (could do an object)}
+
+\item{formula}{char. formula of the model to be plotted in the object}
+
+\item{model}{int. indice of the model to be plotted in the object}
 }
 \value{
 nothing but a plot of the result

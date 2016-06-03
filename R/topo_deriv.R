@@ -23,7 +23,7 @@ NULL
 #'
 DEMderiv = function(DEM, choices = c('slope', 'curvature', 'plancurvature', 'profcurvature', 'aspect',
                                      'wetness', 'flowdir', 'hillshade'),
-                    minslope = 0.5, workspace = NULL, path = "C:/Program Files/QGIS Chugiak/apps/saga",
+                    minslope = 0.5, workspace = NULL, path = "C:/Program Files/QGIS Essen/apps/saga",
                      method = "poly2zevenbergen") {
 
   if(is.null(workspace)){
@@ -42,6 +42,8 @@ DEMderiv = function(DEM, choices = c('slope', 'curvature', 'plancurvature', 'pro
     rsaga.slope(in.dem = "dem.sgrd", out.slope = "slope.sgrd", env = myenv,
                 method = method, show.output.on.console = F)
     Slope <- raster(file.path(workspace, 'slope.sdat'))
+    Slope <- Slope / pi * 180
+    names(Slope) <- 'Slope'
     Deriv <- stack(Deriv, Slope)
   }
 
@@ -78,6 +80,8 @@ DEMderiv = function(DEM, choices = c('slope', 'curvature', 'plancurvature', 'pro
     rsaga.aspect(in.dem="dem.sgrd", out.aspect="aspect.sgrd",env=myenv,
                  method=method, show.output.on.console = F)
     Aspect <- raster(file.path(workspace, 'aspect.sdat'))
+    Aspect <- Aspect / pi * 180
+    names(Aspect) <- 'Aspect'
     Deriv <- stack(Deriv, Aspect)
   }
 

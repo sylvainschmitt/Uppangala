@@ -32,7 +32,7 @@ Errors in PFT values :
 ### Outlier research
 
 ```{r variances, echo=FALSE, fig.height=8, fig.width=8, message=FALSE, warning=FALSE}
-par(mfrow = c(3,2))
+par(mfrow = c(1,1))
 bymedian <- with(PFT, reorder(Sp_Code, -Thick,  mean, na.rm = T))
 boxplot(Thick ~ bymedian, data = PFT, las = 2, horizontal = F, main = captions['Thick'])
 bymedian <- with(PFT, reorder(Sp_Code, -LA,  mean, na.rm = T))
@@ -45,12 +45,15 @@ bymedian <- with(PFT, reorder(Sp_Code, -log(SHA),  mean, na.rm = T))
 boxplot(log(SHA) ~ bymedian, data = PFT, las = 2, horizontal = F, main = captions['log(SHA)'])
 bymedian <- with(PFT, reorder(Sp_Code, -WD,  mean, na.rm = T))
 boxplot(WD ~ bymedian, data = PFT, las = 2, horizontal = F, main = captions['WD'])
+bymedian <- with(PFT, reorder(Sp_Code, -LTD,  median, na.rm = T))
+boxplot(LTD ~ bymedian, data = PFT, las = 2, horizontal = F, main = captions['LTD'])
 rm(bymedian)
 ```
 
 ### Leaf Principal component analysis
 
 ```{r Leaf PCA, echo=FALSE, fig.height=6, fig.width=6, message=FALSE, warning=FALSE}
+# pca <- princomp(~ LA + WD + Thick + LDMC + LTD + SLA + SHA, data = PFT, cor = T)
 pca <- princomp(~ LA + WD + Thick + LDMC + SLA + SHA, data = PFT, cor = T)
 par(mfrow = c(1,1))
 col = rainbow(93)[as.numeric(PFT[row.names(pca$scores),3])]
@@ -63,13 +66,15 @@ rm(col, pca)
 #### Distributions
 
 ```{r distributions, echo=FALSE, fig.height=8, fig.width=8}
-par(mfrow = c(3,2))
+par(mfrow = c(1,1))
 hist(PFT$Thick, prob = T)
 lines(density(PFT$Thick, na.rm = T), col = "red")
 hist(log(PFT$LA), prob = T)
 lines(density(log(PFT$LA), na.rm = T), col = "red")
 hist(PFT$LDMC, prob = T)
 lines(density(PFT$LDMC, na.rm = T), col = "red")
+# hist(PFT$LTD, prob = T)
+# lines(density(PFT$LTD, na.rm = T), col = "red")
 hist(log(PFT$SLA), prob = T)
 lines(density(log(PFT$SLA), na.rm = T), col = "red")
 hist(log(PFT$SHA), prob = T)
@@ -103,7 +108,8 @@ rm(SpT, Sp, SpCodeT, CET, CE, PFT)
 
 ```{r Tree PCA, echo=FALSE, fig.height=6, fig.width=6, message=FALSE, warning=FALSE}
 library(vegan)
-pca <- princomp(~ LA + WD + Thick + LDMC + SLA + SHA, data = PFT_ind, cor = T)
+# pca <- princomp(~ LA + WD + Thick + LDMC + LTD + SLA, data = PFT_ind, cor = T)
+pca <- princomp(~ LA + WD + Thick + LDMC + SLA, data = PFT_ind, cor = T)
 par(mfrow = c(1,1))
 pca.var = apply(pca$score, 2, var)
 barplot((pca.var / sum(pca.var)), las = 2, 
@@ -235,7 +241,6 @@ coordinates(XY) <- ~ X + Y
 proj4string(XY) <- crs(com)
 Trees$com[which(!is.na(Trees$X))] <- (XY %over% com)[,1]
 Trees$com[which(!is.na(Trees$com))] <- paste0('C', Trees$com[which(!is.na(Trees$com))])
-Trees_bin <- Trees[-which(duplicated(cbind(Trees$SpCode, Trees$com))),] ; Trees <- Trees_bin # For presence absence analysis
 ```
 ```{r Plot com, echo=FALSE, fig.height=8, fig.width=8, message=FALSE, warning=FALSE}
 plot(hillshade, col=grey(0:100/100), main = 'Communities')
@@ -287,14 +292,43 @@ rm(col)
 
 Adding CWM to communities
 
-```{r CWM, message=FALSE, warning=FALSE}
+```{r CWM abundance, message=FALSE, warning=FALSE}
 CWM <- aggregate(Trees, by = list(Trees$com), mean, na.rm = T)
 names(CWM)[1] <- 'id'
-CWM <- CWM[which(names(CWM) %in% c('id', 'Thick', 'LA', 'LDMC', 'SLA', 'WD', 'PCA1', 'PCA2', 'PCA3'))]
+CWM <- CWM[which(names(CWM) %in% c('id', 'Thick', 'LA', 'LDMC', 'LTD', 'SLA', 'WD', 'PCA1', 'PCA2', 'PCA3'))]
 com <- merge(com, CWM)
 rm(CWM)
 summary(com)
-plot(stack(com)[[which(names(com) %in% c('Thick', 'LA', 'LDMC', 'SLA', 'WD', 'PCA1', 'PCA2', 'PCA3'))]])
+plot(stack(com)[[which(names(com) %in% c('Thick', 'LA', 'LDMC', 'LTD', 'SLA', 'WD', 'PCA1', 'PCA2', 'PCA3'))]])
+```
+```{r CWM binary, message=FALSE, warning=FALSE}
+# Trees_bin <- Trees[-which(duplicated(cbind(Trees$SpCode, Trees$com))),]
+# CWM <- aggregate(Trees_bin, by = list(Trees_bin$com), mean, na.rm = T)
+# names(CWM)[1] <- 'id'
+# CWM <- CWM[which(names(CWM) %in% c('id', 'Thick', 'LA', 'LDMC', 'SLA', 'WD', 'PCA1', 'PCA2', 'PCA3'))]
+# com <- merge(com, CWM)
+# rm(CWM)
+# summary(com)
+# plot(stack(com)[[which(names(com) %in% c('Thick', 'LA', 'LDMC', 'SLA', 'WD', 'PCA1', 'PCA2', 'PCA3'))]])
+```
+```{r CWM basal area, message=FALSE, warning=FALSE}
+# library(plyr)
+# TreesBA <- Trees[-which(is.na(Trees$`2013_girth`)),]
+# CWM <- ddply(TreesBA, .(com), function(x){
+#   weighted.mean(x$SLA, x$`2013_girth`/2*pi, na.rm = T)})
+# CWM <- data.frame(id = CWM$com,
+#                   Thick = CWM$V1,
+#                   LA = ddply(TreesBA, .(com), function(x){weighted.mean(x$LA, x$`2013_girth`/2*pi, na.rm = T)})[,2],
+#                   LDMC = ddply(TreesBA, .(com), function(x){weighted.mean(x$SLA, x$`2013_girth`/2*pi, na.rm = T)})[,2],
+#                   SLA = ddply(TreesBA, .(com), function(x){weighted.mean(x$SLA, x$`2013_girth`/2*pi, na.rm = T)})[,2],
+#                   WD = ddply(TreesBA, .(com), function(x){weighted.mean(x$WD, x$`2013_girth`/2*pi, na.rm = T)})[,2],
+#                   PCA1 = ddply(TreesBA, .(com), function(x){weighted.mean(x$PCA1, x$`2013_girth`/2*pi, na.rm = T)})[,2],
+#                   PCA2 = ddply(TreesBA, .(com), function(x){weighted.mean(x$PCA2, x$`2013_girth`/2*pi, na.rm = T)})[,2],
+#                   PCA3 = ddply(TreesBA, .(com), function(x){weighted.mean(x$PCA3, x$`2013_girth`/2*pi, na.rm = T)})[,2])
+# com <- merge(com, CWM)
+# rm(CWM, SpCom, weight)
+# summary(com)
+# plot(stack(com)[[which(names(com) %in% c('Thick', 'LA', 'LDMC', 'SLA', 'WD', 'PCA1', 'PCA2', 'PCA3'))]])
 ```
 
 ## Filters
@@ -303,19 +337,18 @@ Linear regression on all variables
 
 ```{r lm, echo=FALSE, message=FALSE, warning=FALSE}
 reg <- '~ DEM + Slope + Curvature + PlanCurvature + ProfileCurvature + Wetness + SouthWesterness'
-reg
 LM <- with(com@data, list(PCA1 = lm(formula(paste('PCA1', reg))),
                           PCA2 = lm(formula(paste('PCA2', reg))),
                           PCA3 = lm(formula(paste('PCA3', reg))),
                           logSLA = lm(formula(paste('log(SLA)', reg))),
                           LDMC = lm(formula(paste('LDMC', reg))),
+                          # LTD = lm(formula(paste('LTD', reg))),
                           logLA = lm(formula(paste('log(LA)', reg))),
                           Thick = lm(formula(paste('Thick', reg))),
                           WD = lm(formula(paste('WD', reg)))))
 cat('Shapiro test p-values :\n') ; unlist(lapply(LM, function(x){stars(shapiro.test(x$residuals)$p.value)})) # Homoscedasticity
-lapply(LM, function(x){summary(step(x, trace = 0))})
-rm(LM, reg)
-
+LM <- lapply(LM, function(x){step(x, direction = 'both', trace = 0)})
+lapply(LM, summary)
 ```
 
 Anova with topographical classes
@@ -326,6 +359,7 @@ ANOVA <- with(com@data, list(PCA1 = aov(PCA1 ~ topo),
                              PCA3 = aov(PCA3 ~ topo),
                              SLA = aov(SLA ~ topo),
                              LDMC = aov(LDMC ~ topo),
+                             LTD = aov(LTD ~ topo),
                              LA = aov(LA ~ topo),
                              Thick = aov(Thick ~ topo),
                              WD = aov(WD ~ topo)))
@@ -335,14 +369,18 @@ lapply(ANOVA, TukeyHSD)
 rm(ANOVA)
 ```
 
-## Hypothesis
+Correlations with Speraman
 
 ## Null models
 
-```{r Model, echo=FALSE, fig.height=9, fig.width=9, message=FALSE, warning=FALSE}
-model <- null_model(formula = 'WD ~ SouthWesterness', 
+```{r Model, echo=FALSE, fig.height=9, fig.width=9, message=FALSE, warning=FALSE} 
+model <- null_model(formulas = lapply(LM, function(x){as.character(x$call)[2]}), 
                     test = 'Anova lm Fvalue',
                     PFT_sp = PFT_sp, Trees = Trees, com = com, SpCode = SpCode,
-                    n = 1000, plot = F, count = T, time = T)
-plot_model(model)
+                    n = 100, plot = F, count = T, time = T)
+par(mfrow = c(2,4))
+for(i in 1:8){
+  plot_model(model, index = i)
+}
+knitr::kable(regression_table(LM, model, reg))
 ```

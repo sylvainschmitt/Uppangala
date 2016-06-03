@@ -61,3 +61,11 @@
 #   coords <- rbind(coords, rbind(c(0,0,0),pca$loadings[i,1:3]))
 # }
 # lines3d(coords, col="red", lwd=4)
+
+# library(spgrass6)
+# loc <- initGRASS('C:/Program Files/QGIS Essen/apps/grass/grass-7.0.4',
+#                  tempdir(), override = T)
+# execGRASS(cmd='r.watershed', flags='overwrite',
+#           parameters =  list(elevation='val_srtm30@flood', threshold='2000',
+#                              drainage='wat30_drain', accumulation='wat30_accu', basin='wat30__basin',
+#                              stream='wat30__stream', memory='2000'))

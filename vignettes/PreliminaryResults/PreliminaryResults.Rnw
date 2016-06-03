@@ -42,11 +42,12 @@ table <- data.frame(
 xtable::xtable(table, caption="Functionnal traits measured. \\emph{Traits with their abbreviation, range of values in the sampling, standard unit, and associated strategy in tree development.}",  label="traits")
 @
 
-Uppangala tree measured functionnal trait vary in the ranges of tropical species values that we can find in litterature. We can notice in table~\ref{traits} that wood density has a pretty high range as we could expect in a stable old untouched forest. Functionnal traits can be separated in three categories of strategy which with they are linked : leaf resource capture for leaf area, leaf resource capture and defense for leaf thickness, dry matter content and specific area, and stem transport, structure and defense for wood density (Baraloto et al, 2010).
+Uppangala measured functionnal trait vary in the ranges of tropical species values that we can find in litterature. We can notice in table~\ref{traits} that wood density has a range with high values as we could expect in a stable old untouched forest. Functionnal traits can be separated in three categories of strategy which with they are linked : leaf resource capture for leaf area, leaf resource capture and defense for leaf thickness, dry matter content and specific area, and stem transport, structure and defense for wood density (Baraloto et al, 2010).
 
 \subsection*{Traits distribution by species}
 
 \begin{figure}[ht]
+\caption{Traits distribution by species for all measured leaves. \emph{Some outliers can still be noticed, for instance in wood density, but we can notice the ranking of species in functionnal traits values.}}
 <<distributions, eval=T, echo=F, fig=T, width=30, height=30, message=F, warning=F>>=
 par(mfrow = c(3,2))
 bymedian <- with(PFT, reorder(Sp_Code, -Thick,  mean, na.rm = T))
@@ -62,11 +63,10 @@ boxplot(log(SHA) ~ bymedian, data = PFT, las = 2, horizontal = F, main = caption
 bymedian <- with(PFT, reorder(Sp_Code, -WD,  mean, na.rm = T))
 boxplot(WD ~ bymedian, data = PFT, las = 2, horizontal = F, main = captions['WD'])
 @
-\caption{Traits distribution by species for all measured leaves. \emph{Some outliers can still be noticed, for instance in wood density, but we can notice the ranking of species in functionnal traits values.}}
 \label{distributions}
 \end{figure}
 
-Thickness outliers and extreme values are due to too close secondary veins but can't be corrected. Some outlier are still to be corrected in individual leaf trait value, see figure~\ref{distributions}.Nevertheless we can observe some ranking between species with functionnal trait values.
+Thickness outliers and extreme values are due to too close secondary veins but can't be corrected. Some outlier are still to be corrected in individual leaf trait value, see figure~\ref{distributions}. Nevertheless we can observe some ranking between species with functionnal trait values.
 
 <<PFT_ind, echo=F>>=
 PFT_ind <- aggregate(PFT, by = list(PFT$Tree), FUN = mean, na.rm = T)
@@ -146,7 +146,7 @@ PFT_ind <- PFT_ind[-which(names(PFT_ind) == 'ID')]
 \label{pca}
 \end{figure}
 
-Principal component analysis first axis (PCA1) bare relations observed between functionnal traits. Effectively it opposes leaf thickness and area to leaf dry matter content and wood density. Consequently PCA1 can be interpreted as tree development strategy axis opposing acquisitve (positive side) to conservative species (negative side). Specific leaf area is almost orthogonal to PCA1 and bare mainly the second axis (PCA2), that consequently can be interpreted as repreenting the individual strategy in leaf resource capture against leaf defense.
+Principal component analysis first axis (PCA1) bare relations observed between functionnal traits. Effectively it opposes leaf thickness and area to leaf dry matter content and wood density. Consequently PCA1 can be interpreted as tree development strategy axis opposing acquisitve (positive side) to conservative species (negative side). Specific leaf area is almost orthogonal to PCA1 and bare mainly the second axis (PCA2), that consequently can be interpreted as representing the individual strategy in leaf resource capture against leaf defense.
 
 \subsection*{Environment and trees}
 
@@ -209,5 +209,19 @@ com <- merge(com, CWM)
 
 
 Among the whole 10 hectares plot from Uppangala, 240 spatial communities where defined with $20 * 20 m$ quadrats assumed as homogeneous in traits composition. For all those community, community weighted means (CWM) were computed for each functionnal traits and the 3 first axes from the principal component analysis (PCA1, PCA2, PCA3) weighted by abundance, presence-absence, or basal area. Linked between community weighted means and environment was study by both linear regression on continuous topographical variables and anova with topgraphical classes. Linear regression models were chosen by a step mesure on a first regression with elevation, slopre, curvature, plane curvature, profile curvature, and southwesterness.
+
+\subsubsection*{Principal component analysis first axis (PCA1)}
+
+\subsubsection*{Wood density (WD)}
+
+\subsubsection*{Leaf dry matter content (LDMC)}
+
+\subsubsection*{Leaf area (LA)}
+
+\subsubsection*{Leaf thickness (Thick)}
+
+\subsubsection*{Principal component analysis second axis (PCA2)}
+
+\subsubsection*{Specific leaf area (SLA)}
 
 \end{document}

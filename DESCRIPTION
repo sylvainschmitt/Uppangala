@@ -1,7 +1,7 @@
 Package: Uppangala
 Type: Package
 Title: Uppangala tree functionnal traits analysis
-Version: 0.1.9003
+Version: 0.1.9004
 Author: Sylvain Schmitt
 Description: Uppangala tree functionnal traits analysis
 License: GPL (>=3)
@@ -25,6 +25,7 @@ Collate:
     'null_model.R'
     'plot.null_model.R'
     'quadrats.R'
+    'regression_table.R'
     'stars.R'
     'topo_classes.R'
     'topo_deriv.R'
