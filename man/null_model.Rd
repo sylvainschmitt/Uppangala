@@ -4,12 +4,14 @@
 \alias{null_model}
 \title{Null model}
 \usage{
-null_model(formulas, test, PFT_sp, Trees, com, SpCode, tcol = NULL,
+null_model(formulas, test, ba = F, PFT_sp, Trees, com, SpCode, tcol = NULL,
   cwmcol = c(1:1), ccol = c(1:12), n = 1000, plot = F, count = F,
   time = T)
 }
 \arguments{
 \item{test}{char. name of the used test (Anova Fvalue or lm R2)}
+
+\item{ba}{logical. True if basal area wighted mean}
 
 \item{PFT_sp}{data.frame. PFT values by species}
 

@@ -1,9 +1,14 @@
+#' @importFrom car Anova
+#' @importFrom plyr ddply
+NULL
+
 #' Null model
 #'
 #' Function to compute null model
 #'
 #' @param formula char. test formula
 #' @param test char. name of the used test (Anova Fvalue or lm R2)
+#' @param ba logical. True if basal area wighted mean
 #' @param PFT_sp data.frame. PFT values by species
 #' @param Trees data.frame. trees table
 #' @param com SpatialGridDataFrame. communities
@@ -23,6 +28,7 @@
 #'
 null_model = function(formulas,
                       test,
+                      ba = F,
                       PFT_sp,
                       Trees,
                       com,
@@ -35,7 +41,7 @@ null_model = function(formulas,
                       count = F,
                       time = T){
   if(is.null(tcol)){
-    tcol <- which(names(Trees) %in% c('SpCode', 'com'))
+    tcol <- which(names(Trees) %in% c('SpCode', 'com', '2013_girth'))
   }
   formul <- formulas
   formulas <- as.list(formulas)
@@ -52,17 +58,30 @@ null_model = function(formulas,
     NullTrees <- merge(NullTrees, NullPFT_sp, by.x = 'SpCode', by.y = 'Sp_Code')
     row.names(NullTrees) <- NullTrees$ID
     NullTrees <- NullTrees[-which(names(NullTrees) == 'ID')]
-    NullCWM <- aggregate(NullTrees, by = list(NullTrees$com), mean, na.rm = T)
-    names(NullCWM)[1] <- 'id'
-    NullCWM <- NullCWM[which(names(NullCWM)
-                             %in% c('id', 'Thick', 'LA', 'LDMC', 'SLA', 'WD', 'PCA1', 'PCA2', 'PCA3'))]
     Nullcom <- com
     Nullcom@data <- Nullcom@data[ccol]
+    if(!ba){
+      NullCWM <- aggregate(NullTrees, by = list(NullTrees$com), mean, na.rm = T)
+      names(NullCWM)[1] <- 'id'
+      NullCWM <- NullCWM[which(names(NullCWM)
+                               %in% c('id', 'Thick', 'LA', 'LDMC', 'SLA', 'WD', 'PCA1', 'PCA2', 'PCA3'))]
+    } else {
+      NullCWM <- ddply(NullTrees, .(com), function(x){weighted.mean(x$SLA, x$`2013_girth`/2*pi, na.rm = T)})
+      NullCWM <- data.frame(id = NullCWM$com,
+                        Thick = NullCWM$V1,
+                        LA = ddply(NullTrees, .(com), function(x){weighted.mean(x$LA, x$`2013_girth`/2*pi, na.rm = T)})[,2],
+                        LDMC = ddply(NullTrees, .(com), function(x){weighted.mean(x$SLA, x$`2013_girth`/2*pi, na.rm = T)})[,2],
+                        SLA = ddply(NullTrees, .(com), function(x){weighted.mean(x$SLA, x$`2013_girth`/2*pi, na.rm = T)})[,2],
+                        WD = ddply(NullTrees, .(com), function(x){weighted.mean(x$WD, x$`2013_girth`/2*pi, na.rm = T)})[,2],
+                        PCA1 = ddply(NullTrees, .(com), function(x){weighted.mean(x$PCA1, x$`2013_girth`/2*pi, na.rm = T)})[,2],
+                        PCA2 = ddply(NullTrees, .(com), function(x){weighted.mean(x$PCA2, x$`2013_girth`/2*pi, na.rm = T)})[,2],
+                        PCA3 = ddply(NullTrees, .(com), function(x){weighted.mean(x$PCA3, x$`2013_girth`/2*pi, na.rm = T)})[,2])
+    }
     Nullcom <- merge(Nullcom, NullCWM)
       if(test == 'Anova Fvalue'){
         stat[i,] <- unlist(lapply(formulas, function(x){summary(aov(x, Nullcom))[[1]][['F value']][1]}))
-      } else if(test == 'Anova lm Fvalue'){
-        stat[i,] <- unlist(lapply(formulas, function(x){summary(aov(lm(x, Nullcom)))[[1]][['F value']][1]}))
+      } else if(test == 'lm deviance'){
+        stat[i,] <- unlist(lapply(formulas, function(x){deviance(lm(x, Nullcom))}))
       }
     if(plot){
       plot(stack(raster(com, 'Comp.1'), raster(Nullcom, 'Comp.1')),
@@ -74,13 +93,13 @@ null_model = function(formulas,
   }
   if(test == 'Anova Fvalue'){
     stat.val <- lapply(formulas, function(x){summary(aov(x, com@data))[[1]][['F value']][1]})
-  } else if(test == 'Anova lm Fvalue'){
-    stat.val <- lapply(formulas, function(x){summary(aov(lm(x, com@data)))[[1]][['F value']][1]})
+  } else if(test == 'lm deviance'){
+    stat.val <- lapply(formulas, function(x){deviance(lm(x, Nullcom))})
   }
   ranks <- mapply(function(x,y){(rank(c(x, y))/n)}, x = stat.val, y = as.list(data.frame(stat)))
   pval <- ranks[1,]
   pval[pval > 0.5] <- 1 - pval[pval > 0.5] # Two sided
-  lim = unlist(mapply(function(X,Y,Z){c(X,Y)[which(abs(Z - 0.95) == min(abs(Z - 0.95)))]},
+  lim = unlist(mapply(function(X,Y,Z){c(X,Y)[which(abs(Z - 0.05) == min(abs(Z - 0.05)))]},
                       X = stat.val, Y = as.list(data.frame(stat)), Z = as.list(data.frame(ranks))))
   if(time){
     print(Sys.time() - t0)

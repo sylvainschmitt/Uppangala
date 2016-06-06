@@ -27,6 +27,6 @@ regression_table <- function(LM, model, reg){
     }
   }
   table <- cbind(table, var_table)
-  table$Null_model <- unlist(lapply(as.list(model$pvalue), stars))
+  table$Null_model <- paste(model$pvalue, unlist(lapply(as.list(model$pvalue), stars)))
   return(table)
 }
