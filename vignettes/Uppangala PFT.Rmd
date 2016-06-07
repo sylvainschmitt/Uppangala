@@ -101,9 +101,6 @@ PFT_ind$SP <- Sp[row.names(PFT_ind)]
 PFT_ind$Sp_Code <- SpCode[as.character(PFT_ind$SP)]
 PFT_ind$CE <- CE[row.names(PFT_ind)]
 PFT_ind <- PFT_ind[-c(1:2)]
-# cv$sp <- sd
-# mean(aggregate(PFT_ind, by = list(PFT_ind$SP), function(x){sd(x, na.rm = T) / mean(x, na.rm = T)})$Thick, na.rm = T)
-# sd(PFT_ind$Thick, na.rm = T) / mean(PFT_ind$Thick, na.rm = T)
 rm(SpT, Sp, SpCodeT, CET, CE)
 ```
 
@@ -372,7 +369,7 @@ baL <- list(F, F, T)
 model <- mapply(function(lm, trees, com, ba){
   null_model(formulas = lapply(lm, function(x){as.character(x$call)[2]}), 
              ba = ba, test = 'lm deviance', PFT_sp = PFT_sp, Trees = trees, 
-             com = com, SpCode = SpCode, n = 10, plot = F, count = F, time = T)},
+             com = com, SpCode = SpCode, n = 1000, plot = F, count = T, time = T)},
   LM, TreesL, comL, baL, SIMPLIFY = F)
 # lapply(model, function(x){
 #   par(mfrow = c(2,4))

@@ -1,0 +1,329 @@
+---
+title: Study of spatial structure of taxonomic and functional diversity in a tropical
+  forest tree community
+author: "Sylvain Schmitt"
+date: "June 7, 2016"
+output: 
+  ioslides_presentation: 
+    fig_caption: yes
+    fig_height: 5
+    fig_width: 8
+    smaller: yes
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Traits
+
+```{r Traits, echo=FALSE, message=FALSE, warning=FALSE}
+rm(list = ls()); invisible(gc())
+library(Uppangala)
+PFT <- genPFT()
+captions <- genCaptions()
+table <- data.frame(
+  traits = c('Thickness', 'Leaf area', 'Leaf dry matter content', 'Specific leaf area', 'Wood density'),
+  abbreviation = c('Thick', 'LA', 'LDMC', 'SLA', 'WD'),
+  range = c(paste(range(PFT$Thick, na.rm = T), collapse = '-'),
+            paste(round(range(PFT$LA, na.rm = T)), collapse = '-'),
+            paste(round(range(PFT$LDMC, na.rm = T)), collapse = '-'),
+            paste(round(range(PFT$SLA, na.rm = T), 2), collapse = '-'),
+            paste(round(range(PFT$WD, na.rm = T), 2), collapse = '-')),
+  `mean (sd)` = c(paste0(round(mean(PFT$Thick, na.rm = T)), ' (',
+                         round(sd(PFT$Thick, na.rm = T)), ')'),
+                  paste0(round(mean(PFT$LA, na.rm = T)), ' (',
+                         round(sd(PFT$LA, na.rm = T)), ')'),
+                  paste0(round(mean(PFT$LDMC, na.rm = T)), ' (',
+                         round(sd(PFT$LDMC, na.rm = T)), ')'),
+                  paste0(round(mean(PFT$SLA, na.rm = T),2), ' (',
+                         round(sd(PFT$SLA, na.rm = T),2), ')'),
+                  paste0(round(mean(PFT$WD, na.rm = T),2), ' (',
+                         round(sd(PFT$WD, na.rm = T),2), ')')),
+  unit = c('um', 'mm2', 'mg.g-1', 'm2.kg-1', 'g.cm-3'),
+  strategy = c('Leaf defense vs. investment',
+               'Leaf ressource capture vs.investment',
+               'Leaf defense vs. investment',
+               'Leaf ressource acquisiton vs. defense',
+               'Stem transport, structure and defense')
+  )
+names(table)[3] <- 'mean (sd)'
+library(knitr)
+kable(table)
+```
+
+Table 1: Functionnal traits measured
+
+## Traits distribution
+
+```{r Traits distribution, echo=FALSE, message=FALSE, warning=FALSE}
+inputPanel(
+  selectInput("var", label = "Trait:",
+              choices = c('Thick', 'LA', 'LDMC', 'SLA', 'WD'), selected = 'Thick')
+)
+
+renderPlot({
+  var.name <- input$var
+  Var <- PFT[,which(names(PFT) == var.name)]
+  bymedian <- with(PFT, reorder(Sp_Code, -Var,  mean, na.rm = T))
+  boxplot(Var ~ bymedian, data = PFT, las = 2, horizontal = F, main = captions[var.name])
+})
+```
+
+## Traits variation
+
+```{r Coefficients of variation, echo=FALSE, message=FALSE, warning=FALSE}
+PFT_ind <- aggregate(PFT, by = list(PFT$Tree), FUN = mean, na.rm = T)
+row.names(PFT_ind) <- PFT_ind$Group.1
+SpT <- unique(PFT[1:2])
+Sp <- SpT$SP
+names(Sp) <- SpT$Tree
+SpCodeT <- unique(PFT[2:3])
+SpCode <- SpCodeT$Sp_Code
+names(SpCode) <- SpCodeT$SP
+CET <- unique(PFT[c(1,4)])
+CE <- CET$CE
+names(CE) <- CET$Tree
+PFT_ind$SP <- Sp[row.names(PFT_ind)]
+PFT_ind$Sp_Code <- SpCode[as.character(PFT_ind$SP)]
+PFT_ind$CE <- CE[row.names(PFT_ind)]
+PFT_ind <- PFT_ind[-c(1:2)]
+cv <- data.frame(row.names = c('Thick', 'LA', 'LDMC', 'SLA', 'WD'))
+cv$Individual <- unlist(lapply(
+  as.list(row.names(cv)), 
+  function(y){mean(aggregate(PFT[which(names(PFT) ==  y)], by = list(PFT$Tree), function(x){sd(x, na.rm = T) / mean(x, na.rm = T)})[,2], na.rm = T)}))
+cv$Species <- unlist(lapply(
+  as.list(row.names(cv)), 
+  function(y){mean(aggregate(PFT_ind[which(names(PFT_ind) ==  y)], by = list(PFT_ind$SP), function(x){sd(x, na.rm = T) / mean(x, na.rm = T)})[,2], na.rm = T)}))
+cv$Community <- unlist(
+  lapply(as.list(row.names(cv)), 
+         function(y){sd(PFT[,which(names(PFT) ==  y)], na.rm = T) /
+             mean(PFT[,which(names(PFT) ==  y)], na.rm = T)}))                 
+cv <- round(cv, 2)
+cv['WD','Individual'] <- ''
+knitr::kable(cv)
+```
+
+Table 2: Coefficient of variation intra-individual, intra-specific and inter-specific
+
+## Pricnipal component analysis
+
+```{r PCA, echo=FALSE, message=FALSE, warning=FALSE, fig.cap='Principal component analysis (PCA) performed on individual trait means.'}
+library(vegan)
+pca <- princomp(~ LA + WD + Thick + LDMC + SLA, data = PFT_ind, cor = T)
+lambda <- pca$sdev * sqrt(nrow(pca$scores))
+plot(t(t(pca$scores)/lambda),pch=16, col = 'lightgrey',
+     xlab = paste('Axe 1 -', round(lambda[1]/sum(lambda)*100, 2), '%'),
+     ylab = paste('Axe 2 -', round(lambda[2]/sum(lambda)*100, 2), '%'))
+par(new=T)
+Rot <- t(t(pca$loadings)*lambda)
+XLIM <- c(-max(abs(Rot[,1])),max(abs(Rot[,1])))
+XLIM <- XLIM+(XLIM*0.2)
+plot(Rot,col=4,axes=FALSE,xlim=XLIM,ylim=XLIM,pch="",xlab = "", ylab = "")
+lines(XLIM, c(0,0), lty = 2, col = 'firebrick', lwd = 2)
+lines(c(0,0), XLIM, lty = 2, col = 'green', lwd = 2)
+legend('topright', c('Leaf economic spectrum', 'Wood economic spectrum'),
+       text.col = c("green", "firebrick"))
+
+arrows (rep(0,nrow(pca$loadings)),rep(0,nrow(pca$loadings)),Rot[,1],Rot[,2],lwd=2)
+text (Rot[,1:2], pos = c(4, 2, 4, 2, 3), rownames(Rot),cex=1.2)
+pca.var = apply(pca$score, 2, var)
+Hmisc::subplot(function(){
+  barplot((pca.var / sum(pca.var)), las = 2, ylim = c(0,range(bstick(7))[2]),
+          cex.names = 0.7, axes = T, names.arg = NA) ;
+  lines(bstick(6), col = 'red') ;
+  legend('topright', c('Eigen values', 'broken stick'), fill = c('grey', 'red'), cex = 0.6,
+         box.col = 'white')},
+  x=grconvertX(c(0.75,1), from='npc'),
+  y=grconvertY(c(0.05,0.30), from='npc')
+)
+axis (3) ; axis (4)
+PCAscores <- as.data.frame(pca$scores)[1:3] # Adding PCA axis in PFT values
+names(PCAscores) <- c('PCA1', 'PCA2', 'PCA3')
+PCAscores$ID <- row.names(PCAscores)
+PFT_ind$ID <- row.names(PFT_ind)
+PFT_ind <- merge(PFT_ind, PCAscores, all = T)
+row.names(PFT_ind) <- PFT_ind$ID
+PFT_ind <- PFT_ind[-which(names(PFT_ind) == 'ID')]
+
+```
+
+##  Traits relations
+
+```{r Traits relations, echo=FALSE, message=FALSE, warning=FALSE}
+inputPanel(
+  selectInput("var1", label = "Trait:",
+              choices = c('Thick', 'log(LA)', 'LDMC', 'log(SLA)', 'WD'), selected = 'WD'),
+  selectInput("var2", label = "Trait:",
+              choices = c('Thick', 'log(LA)', 'LDMC', 'log(SLA)', 'WD'), selected = 'log(LA)')
+)
+
+renderPlot({
+  PFTrel(input$var1, input$var2, PFT_ind, captions)
+})
+```
+
+## Uppangala plot trees
+
+```{r Traits and Trees, echo=FALSE, message=FALSE, warning=FALSE}
+library(raster)
+Env <- genEnv()
+Trees <- genTrees()
+Species <- genSpecies()
+hillshade <- DEMderiv(Env$DEM, c("slope", "aspect", "hillshade"))$Hillshade # For plotting purposes
+PFT_sp <- aggregate(PFT_ind, by = list(PFT_ind$SP), FUN = mean, na.rm = T)
+row.names(PFT_sp) <- PFT_sp$Group.1
+PFT_sp$Sp_Code <- SpCode[row.names(PFT_sp)]
+PFT_sp <- PFT_sp[-c(1:2,4)]
+Trees$SpCode <- tolower(Trees$SpCode)
+Trees$ID <- row.names(Trees)
+Trees <- merge(Trees, PFT_sp, by.x = 'SpCode', by.y = 'Sp_Code')
+row.names(Trees) <- Trees$ID
+Trees <- Trees[-which(names(Trees) == 'ID')]
+plot(hillshade, col=grey(0:100/100), main = 'Trees ~ Girth + WD')
+col = heat.colors(100)[as.numeric(cut(Trees$WD, breaks = 100))]
+points(Y ~ X, Trees, col = "black", cex = `2013_girth`/100, pch = 20)
+points(Y ~ X, Trees, cex = `2013_girth`/100, pch = 20, col = col)
+legend("bottomleft", legend = captions['WD'], fill = 'orange')
+```
+
+- 92 over 117 species (79%)
+- 98.8% tree individuals
+
+## Communities definition
+
+```{r Communities definition, echo=FALSE, message=FALSE, warning=FALSE}
+com <- quadrats()
+Trees$com <- NA
+XY <- data.frame(X = Trees$X, Y = Trees$Y)
+XY <- XY[-which(is.na(XY$X)),] # Removing NA
+coordinates(XY) <- ~ X + Y
+proj4string(XY) <- crs(com)
+Trees$com[which(!is.na(Trees$X))] <- (XY %over% com)[,1]
+Trees$com[which(!is.na(Trees$com))] <- paste0('C', Trees$com[which(!is.na(Trees$com))])
+plot(hillshade, col=grey(0:100/100), main = 'Communities 20*20m2')
+plot(as(com, "SpatialPolygons"), add = T)
+col =  sample(rainbow(length(levels(as.factor(Trees$com)))))[as.numeric(as.factor(Trees$com))]
+points(Y ~ X, Trees, cex = `2013_girth`/100, pch = 20, col = col)
+legend("bottomleft", legend = 'community', fill = 'grey')
+```
+
+## Communities distribution
+
+```{r Communities distribution, echo=FALSE, fig.cap='2 examples of community trait distribution for SLA and WD', message=FALSE, warning=FALSE}
+library(cati)
+par(mfrow = c(2,2), cex = 0.5)
+rows = which(Trees$com %in% sample(levels(as.factor(Trees$com)), 2))
+plotDistri(as.matrix(Trees$SLA[rows]), Trees$com[rows], Trees$SpCode[rows],
+           ylim.cex = 3, plot.ask = F, multipanel = F, leg = F, xlim = c(0, 35))
+plotDistri(as.matrix(Trees$WD[rows]), Trees$com[rows], Trees$SpCode[rows],
+             ylim.cex = 3, plot.ask = F, multipanel = F, leg = F, xlim = c(0.3, 0.85))
+par(mfrow = c(1,1), cex = 1)
+```
+
+## Topography - Conitnuous variable
+
+```{r Topography continous, echo=FALSE, fig.cap='Community topography', message=FALSE, warning=FALSE}
+com@data$id <- paste0('C', com@data$id)
+com@data$DEM <- extract(Env$DEM, as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
+Deriv <- DEMderiv(raster(com, 'DEM'), c('slope', 'curvature', 'plancurvature', 'profcurvature', 'aspect'))
+com@data <- cbind(com@data, extract(Deriv, as(com, "SpatialPolygons"), df = T, fun = mean)[-1])
+com@data$Wetness <- extract(DEMderiv(Env$DEM, 'wetness'), as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
+com@data$SouthWesterness <- sin((com@data$Aspect + 225) / 180 * pi)
+com@data$NorthEasterness <- cos((com@data$Aspect + 225) / 180 * pi)
+com@data$Rivers <- extract(Env$Rivers, as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
+
+inputPanel(
+  selectInput("topo", label = "Topographical variable:",
+              choices = c('DEM', 'Slope', 'Curvature', 'PlanCurvature', 'ProfileCurvature', 
+                          'Wetness', 'SouthWesterness', 'Rivers'), selected = 'Rivers')
+)
+
+renderPlot({plot(raster(com, input$topo))})
+```
+
+
+## Topography - Classes
+
+```{r Topgraphy clases, echo=FALSE, fig.cap='Topographical classes', message=FALSE, warning=FALSE}
+com@data$topo <- as.factor(with(com@data, topo_classes(Slope, Curvature, Aspect)))
+col <- c("#008B00", "#00CD00", "#009ACD", "#00BFFF", "#CD9B1D", "#FFC125")
+plot(raster(com, 'topo'), col = col, legend = F)
+contour(Env$DEM, add = T)
+legend('bottomleft', fill = col, legend = levels(com@data$topo), cex = 0.7)
+```
+
+## Community weighted means
+
+```{r CWM, echo=FALSE, message=FALSE, warning=FALSE}
+CWM <- aggregate(Trees, by = list(Trees$com), mean, na.rm = T) #CWM abundance
+names(CWM)[1] <- 'id'
+CWM <- CWM[which(names(CWM) %in% c('id', 'Thick', 'LA', 'LDMC', 'SLA', 'WD', 'PCA1', 'PCA2', 'PCA3'))]
+com_abund <- merge(com, CWM)
+Trees_bin <- Trees[-which(duplicated(cbind(Trees$SpCode, Trees$com))),] #CWM binary
+CWM <- aggregate(Trees_bin, by = list(Trees_bin$com), mean, na.rm = T)
+names(CWM)[1] <- 'id'
+CWM <- CWM[which(names(CWM) %in% c('id', 'Thick', 'LA', 'LDMC', 'SLA', 'WD', 'PCA1', 'PCA2', 'PCA3'))]
+com_bin <- merge(com, CWM)
+library(plyr)
+TreesBA <- Trees[-which(is.na(Trees$`2013_girth`)),] #CWM ba
+CWM <- ddply(TreesBA, .(com), function(x){
+  weighted.mean(x$SLA, x$`2013_girth`/2*pi, na.rm = T)})
+CWM <- data.frame(id = CWM$com,
+                  Thick = CWM$V1,
+                  LA = ddply(TreesBA, .(com), function(x){weighted.mean(x$LA, x$`2013_girth`/2*pi, na.rm = T)})[,2],
+                  LDMC = ddply(TreesBA, .(com), function(x){weighted.mean(x$SLA, x$`2013_girth`/2*pi, na.rm = T)})[,2],
+                  SLA = ddply(TreesBA, .(com), function(x){weighted.mean(x$SLA, x$`2013_girth`/2*pi, na.rm = T)})[,2],
+                  WD = ddply(TreesBA, .(com), function(x){weighted.mean(x$WD, x$`2013_girth`/2*pi, na.rm = T)})[,2],
+                  PCA1 = ddply(TreesBA, .(com), function(x){weighted.mean(x$PCA1, x$`2013_girth`/2*pi, na.rm = T)})[,2],
+                  PCA2 = ddply(TreesBA, .(com), function(x){weighted.mean(x$PCA2, x$`2013_girth`/2*pi, na.rm = T)})[,2],
+                  PCA3 = ddply(TreesBA, .(com), function(x){weighted.mean(x$PCA3, x$`2013_girth`/2*pi, na.rm = T)})[,2])
+com_ba <- merge(com, CWM)
+
+inputPanel(
+  selectInput("com", label = "Weight :",
+              choices = c('Abundance', 'Presence-Absence', 
+                          'Basal area'), selected = 'Abundance'),
+  selectInput("cwm", label = "Trait:",
+              choices = c('Thick', 'LA', 'LDMC', 'SLA', 'WD', 'PCA1', 'PCA2'), 
+              selected = 'WD')
+)
+
+renderPlot({
+  par(mfrow = c(2,2))
+  plot(raster(com_abund, input$cwm))
+  plot(gstat::variogram(WD~1, as(com_abund, 'SpatialPointsDataFrame')))
+})
+```
+
+## Continuous models
+
+|Trait  |CWM                | DEM |Slope         |Curvature    |PlCurvature   |PrCurvature   |Wetness    |Rivers       |SW           |Null model             |
+|:------|:------------------|:----|:-------------|:------------|:-------------|:-------------|:----------|:------------|:------------|:----------------------|
+|PCA1   |Abundance          |     |              |4.3e+00 *    |-2.4e+00 *    |-1.5e+01 *    |           |             |1.4e-01 **   |0.2855 n.s.            |
+|       |Presence / Absence |     |              |             |              |              |           |             |1.4e-01 ***  |0.00349999999999995 ** |
+|       |Basal area         |     |              |4.3e+00 *    |-3.1e+00 *    |-1.6e+01 *    |           |             |1.4e-01 **   |0.1755 n.s.            |
+|PCA2   |Abundance          |     |2.5e-03 .     |             |6.8e-01 .     |-5.9e+00 **   |           |-2.8e-03 **  |4.3e-02 .    |0.3025 n.s.            |
+|       |Presence / Absence |     |-2.5e-03 n.s. |             |              |-4.3e+00 .    |           |-1.6e-03 .   |4.3e-02 n.s. |0.00949999999999995 ** |
+|       |Basal area         |     |              |-1.7e+00 **  |1.4e+00 *     |              |           |-2.5e-03 *   |7.4e-02 *    |0.4025 n.s.            |
+|PCA3   |Abundance          |     |-4.8e-03 **   |-7.4e-01 .   |              |              |           |-2.5e-03 *   |9.4e-02 ***  |0.4175 n.s.            |
+|       |Presence / Absence |     |-3.7e-03 .    |-1.7e+00 *** |              |              |-6e-02 .   |-2.1e-03 .   |8.5e-02 **   |0.0305 *               |
+|       |Basal area         |     |              |             |-5.5e-01 n.s. |              |           |             |             |0.0425 *               |
+|logSLA |Abundance          |     |              |-4.6e-01 *** |3.9e-01 **    |              |-1.4e-02 * |-1.2e-03 *** |             |0.2705 n.s.            |
+|       |Presence / Absence |     |              |             |              |-1.4e+00 **   |-1.4e-02 * |-7.1e-04 *** |             |0.1615 n.s.            |
+|       |Basal area         |     |              |-4.9e-01 **  |3.8e-01 **    |              |-1.7e-02 * |-8.6e-04 **  |             |0.2605 n.s.            |
+|LDMC   |Abundance          |     |-2.9e-01 .    |-3.2e+02 **  |1.2e+02 .     |1.2e+03 ***   |-6.4e+00 * |             |             |0.4925 n.s.            |
+|       |Presence / Absence |     |              |-1.3e+02 **  |              |8.5e+02 **    |           |             |             |0.0675 .               |
+|       |Basal area         |     |              |-6.4e+00 **  |4.9e+00 *     |              |-2.3e-01 * |-1.1e-02 **  |             |0.1315 n.s.            |
+|logLA  |Abundance          |     |              |2.6e+00 *    |-1.2e+00 .    |-7.5e+00 *    |5.1e-02 *  |-2.6e-03 **  |             |0.2385 n.s.            |
+|       |Presence / Absence |     |              |             |              |-3.3e+00 n.s. |           |-2.2e-03 *   |3.9e-02 n.s. |0.2525 n.s.            |
+|       |Basal area         |     |-2.7e-03 .    |             |              |              |           |-1.4e-03 .   |             |0.0925 .               |
+|Thick  |Abundance          |     |2e-02 .       |1.9e+01 *    |-1.1e+01 *    |-6.3e+01 *    |           |1.5e-02 *    |             |0.3445 n.s.            |
+|       |Presence / Absence |     |              |             |              |              |           |1.6e-02 **   |3.4e-01 *    |0.2465 n.s.            |
+|       |Basal area         |     |              |-6.4e+00 **  |4.9e+00 *     |              |-2.3e-01 * |-1.1e-02 **  |             |0.1315 n.s.            |
+|WD     |Abundance          |     |4.1e-04 *     |1.6e-01 ***  |              |              |           |-1.9e-04 .   |-2.2e-02 *** |0.1585 n.s.            |
+|       |Presence / Absence |     |5e-04 **      |1.6e-01 ***  |              |              |7.3e-03 *  |             |-1.7e-02 *** |0.0105 *               |
+|       |Basal area         |     |              |9.2e-02 *    |              |              |           |             |-1.8e-02 *** |0.2905 n.s.            |
+
+## End
