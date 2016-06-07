@@ -1,4 +1,4 @@
-#' @importFrom RSAGA rsaga.env rsaga.slope rsaga.curvature rsaga.plan.curvature rsaga.profile.curvature rsaga.aspect rsaga.fill.sinks
+#' @importFrom RSAGA rsaga.env rsaga.slope rsaga.curvature rsaga.plan.curvature rsaga.profile.curvature rsaga.aspect rsaga.fill.sinks rsaga.wetness.index
 #' @importFrom raster writeRaster raster hillShade
 NULL
 
@@ -91,7 +91,9 @@ DEMderiv = function(DEM, choices = c('slope', 'curvature', 'plancurvature', 'pro
     rsaga.fill.sinks(in.dem="dem.sgrd",out.dem="demfilledsinks.sgrd",
                      method = "xxl.wang.liu.2006", minslope=0.5,
                      env=myenv, show.output.on.console = F)
-    Wetness <- raster(file.path(workspace, 'demfilledsinks.sdat'))
+    rsaga.wetness.index(in.dem="demfilledsinks.sgrd", out.wetness.index="wetness.sgrd",
+                        env=myenv, show.output.on.console = F)
+    Wetness <- raster(file.path(workspace, 'wetness.sdat'))
     names(Wetness) <- 'Wetness'
     Deriv <- stack(Deriv, Wetness)
   }

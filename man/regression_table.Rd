@@ -7,9 +7,9 @@
 regression_table(LM, model, reg)
 }
 \arguments{
-\item{LM}{list. Tested regressions}
+\item{LM}{list. List of tested regressions}
 
-\item{model}{list. Null models issued from null_model function}
+\item{model}{list. List of null models issued from null_model function}
 
 \item{reg}{char. Initial regression formula}
 }

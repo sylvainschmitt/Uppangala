@@ -1,8 +1,8 @@
 #' Regression table
 #'
-#' @param LM list. Tested regressions
+#' @param LM list. List of tested regressions
 #' @param reg char. Initial regression formula
-#' @param model list. Null models issued from null_model function
+#' @param model list. List of null models issued from null_model function
 #'
 #' @return A table summarizing all the regression
 #' @export
@@ -11,22 +11,35 @@
 #' # No example yet
 #'
 regression_table <- function(LM, model, reg){
-  table <- data.frame(row.names = names(LM),
-                      step_formula = unlist(lapply(strsplit(unlist(lapply(LM, function(x){as.character(x$call)[2]})), ' ~ '), function(x){x[2]})))
   var <- strsplit(substr(reg,2,nchar(reg)), ' + ', fixed = T)[[1]]
-  var_table <- data.frame(matrix(nrow = length(table[,1]), ncol = length(var)))
-  names(var_table) <- var
-  for(v in var){
-    for(i in 1:length(LM)){
-      if(v %in% row.names(summary(LM[[i]])$coefficients)){
-        var_table[i,v] <- paste(format(summary(LM[[i]])$coefficients[v,1], scientific = T, digits = 2),
-                                stars(summary(LM[[i]])$coefficients[v,4]))
-      } else {
-        var_table[i,v] <- ''
+  names(var) <- var
+  var_table <- data.frame(matrix(nrow = length(LM[[1]])*3, ncol = (length(var)+2)))
+  names(var_table) <- c('Trait', 'CWM', var)
+  var_table$Trait[c(1,((1:length(LM[[1]]))*3+1)[-length(LM[[1]])])] <- names(LM[[1]])
+  var_table$CWM <- rep(names(LM), length(LM[[1]]))
+  for(j in 1:length(LM)){
+    for(i in 1:length(LM[[1]])){
+      for(v in var){
+        row <- which(var_table$Trait == names(LM[[1]])[i]) + j - 1
+        if(v %in% row.names(summary(LM[[j]][[i]])$coefficients)){
+          var_table[row,v] <- paste(format(summary(LM[[j]][[i]])$coefficients[v,1],
+                                         scientific = T, digits = 2),
+                                  stars(summary(LM[[j]][[i]])$coefficients[v,4]))
+        } else {
+          var_table[row,v] <- ''
+        }
       }
     }
   }
-  table <- cbind(table, var_table)
-  table$Null_model <- paste(model$pvalue, unlist(lapply(as.list(model$pvalue), stars)))
-  return(table)
+  var["PlanCurvature"] <- 'PlCurvature'
+  var["ProfileCurvature"] <- 'PrCurvature'
+  var["SouthWesterness"] <- 'SW'
+  names(var_table) <- c('Trait', 'CWM', var)
+  nul_models <- lapply(model, function(x){paste(x$pvalue, unlist(lapply(as.list(x$pvalue), stars)))})
+  var_table$`Null model` <- NA
+  var_table$`Null model`[c(1,((1:length(LM[[1]]))*3+1)[-length(LM[[1]])])] <- nul_models[[1]]
+  var_table$`Null model`[c(2,((1:length(LM[[1]]))*3+2)[-length(LM[[1]])])] <- nul_models[[2]]
+  var_table$`Null model`[c(3,((1:length(LM[[1]]))*3+3)[-length(LM[[1]])])] <- nul_models[[3]]
+  var_table[is.na(var_table)] <- ''
+  return(var_table)
 }
