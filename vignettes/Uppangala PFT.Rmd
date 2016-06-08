@@ -328,7 +328,7 @@ CWM <- ddply(TreesBA, .(com), function(x){
 CWM <- data.frame(id = CWM$com,
                   Thick = CWM$V1,
                   LA = ddply(TreesBA, .(com), function(x){weighted.mean(x$LA, x$`2013_girth`/2*pi, na.rm = T)})[,2],
-                  LDMC = ddply(TreesBA, .(com), function(x){weighted.mean(x$SLA, x$`2013_girth`/2*pi, na.rm = T)})[,2],
+                  LDMC = ddply(TreesBA, .(com), function(x){weighted.mean(x$LDMC, x$`2013_girth`/2*pi, na.rm = T)})[,2],
                   SLA = ddply(TreesBA, .(com), function(x){weighted.mean(x$SLA, x$`2013_girth`/2*pi, na.rm = T)})[,2],
                   WD = ddply(TreesBA, .(com), function(x){weighted.mean(x$WD, x$`2013_girth`/2*pi, na.rm = T)})[,2],
                   PCA1 = ddply(TreesBA, .(com), function(x){weighted.mean(x$PCA1, x$`2013_girth`/2*pi, na.rm = T)})[,2],

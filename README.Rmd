@@ -1,10 +1,16 @@
-* Uppangala
+---
+title: "Uppangala"
+output: github_document
+---
 
-** Description
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Description
 
 Uppangala tree functionnal traits analysis package
 
-** Install
+## Installation
 
-Please check *?extdata* to correctly install the package
-
+Please check `?extdata` to correctly install the package
