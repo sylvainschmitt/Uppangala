@@ -69,3 +69,11 @@
 #           parameters =  list(elevation='val_srtm30@flood', threshold='2000',
 #                              drainage='wat30_drain', accumulation='wat30_accu', basin='wat30__basin',
 #                              stream='wat30__stream', memory='2000'))
+
+# StratInf <- merge(PFT_sp, Species)
+# AOV <- with(StratInf, list(Thick = aov(Thick ~ Strata),
+#                            LA = aov(LA ~ Strata),
+#                            LDMC = aov(LDMC ~ Strata),
+#                            SLA = aov(SLA ~ Strata),
+#                            WD = aov(WD ~ Strata)))
+# lapply(AOV, summary)

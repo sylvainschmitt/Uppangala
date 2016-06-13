@@ -31,7 +31,9 @@ regression_table <- function(LM, model, reg){
       }
     }
   }
-  var["SouthWesterness"] <- 'SW'
+  if("SouthWesterness" %in% names(var)){
+    var["SouthWesterness"] <- 'SW'
+  }
   names(var_table) <- c('Trait', 'CWM', var)
   var_table$`R-squared` <- NA
   var_table$`R-squared`[c(1,((1:length(LM[[1]]))*3+1)[-length(LM[[1]])])] <- lapply(LM[[1]], function(x){round(summary(x)$r.squared,2)})

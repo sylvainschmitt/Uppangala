@@ -13,6 +13,7 @@ opts_chunk$set(
   cache = T, cache.lazy = F)
 ```
 
+# Traits
 
 ## Measured traits
 
@@ -142,6 +143,8 @@ We realized a principal component analysis on individual trait means (see figure
 
 We can see that as wood density ans specific leaf area are orthogonal following the results of @baraloto_decoupled_2010 suggesting that the two economic spectrum were decoupled (Spearman's $rho = -0.04$, $p-value > 0.1$). Leaf area is almost opposed to wood density and is effectively negatively correlated to it (Spearman's $rho = -0.033$, $p-value < 0.001$) as found by @wright_relationships_2007. This relationship could be explained by an equilibrium in tree hydraulics (Coomes et al, 2008). Finally, we found the positive relation suggested by @diaz_global_2015 between leaf dry matter content and wood density (Spearman's $rho = 0.24$, $p-value < 0.001$).
 
+# Environmental filters
+
 ## Environment and trees
 
 We collected trait information on 92 over 117 (79%) species focusing in priority on abundant species with 5 replicates and we completed with less abundant and rare species with one to five replicates (*Warning : one of our 92 species is not referenced yet among currently known Uppangala species, Agrosystachis indica, one of 117 species is not removed yet, Toona ciliata.*). Thus we generated data for 98.8% of the tree individuals present in Uppangala plot.
@@ -178,18 +181,15 @@ com@data$SouthWesterness <- sin((com@data$Aspect + 225) / 180 * pi)
 com@data$NorthEasterness <- cos((com@data$Aspect + 225) / 180 * pi)
 com@data$Rivers <- extract(Env$Rivers, as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
 com@data$topo <- as.factor(with(com@data, topo_classes(Slope, Curvature, Aspect)))
+com@data$Canopy <- extract(Env$Canopy, as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
+com@data$BA <- aggregate(Trees$`2013_girth`, list(Trees$com), function(x){sum(x, na.rm = T)/2*pi})[,2]
+com@data$StD <- aggregate(rep(1, length(Trees$SpCode)), list(Trees$com), sum)[,2]
 rm(Deriv, XY)
-col <- c("#008B00", "#00CD00", "#009ACD", "#00BFFF", "#CD9B1D", "#FFC125")
-plot(raster(com, 'topo'), col = col, legend = F)
-contour(Env$DEM, add = T)
-legend('bottomleft', fill = col, legend = levels(com@data$topo), bg = 'white')
 ```
 
-Figure 2: Uppangala 10 hectares plot topographical classes.*6 classes were defined one slope, curvature, and south-westerness: concave plane surface (CvP) in dark green, convexe plane surface (CxP) in light green, north-east mean slope (NEMS) in dark blue, north-east steep slope (NESS) in light blue, south-west mean slope (SWMS) in dark orange, and south-west steep slope (SWSS) in ligh orange.*
+To study environment effect on our traits we choose 8 topographical variables representing abiotic factors: digital elevation model, slope, curvature, plan curvature, profile curvature, wetness, southwesterness (aspect in direction of south-west), and distance to the nearest potential river. Digital elevation model is issued from a LIDAR campaign on Uppangala plots with a resolution of $1*1 m^2$. Slope, curvature, plan curvature, profile curvature, wetness and southwesterness ($cos(aspect in degres + 225)$) are all derived from the digital elevation model with the RSAGA package [@brenning_statistical_2008]. Distance to the nearest potential river was caluclated under ArcGis (cite).
 
-To study environment effect on our traits we choose 8 topographical variables that we used for variable selection : digital elevation model, slope, curvature, plan curvature, profile curvature, wetness and southwesterness, and distance to the nearest potential river. Digital elevation model is issued from a LIDAR campaign on Uppangala plots with a resolution of $1*1m^2$. Slope, curvature, plan curvature, profile curvature, wetness and southwesterness are all derived from the digital elevation model with the RSAGA package [@brenning_statistical_2008]. Curvature, plan curvature, and profile curvature represents in different context fertility of one topographical area by is ability to stabilize soil and attract water flow. Wetness combine the information of slope, curvature and elevation by indicating areas where water will flow and accumulate. Finally south-westerness is the aspect in direction of south-west ($cos(aspect in degres + 225)$) representing areas orientation to the monsoon winds [@bunyan_effect_2015].
-
-In order to avoid multi-colinearity in future regressions, we reduced our explanatory variables via a principal component analysis, see figure 3. Curvature, profile curvature, plan curvature, and distance to potential reivers covary together and with the principal component analysis first axis (PCA1). Eleveation (DEM) and wetness are opposed in the principal component analysis and slope and south-westerness doesn't seem to covary much with other variables. As a conclusion, we choose to reduce our variable to 4: curvature to represent the water flow paths and soil stabilization areas, wetness to highlight water accumulation areas, southwesterness to represent monsoon winds and slope.
+In order to avoid multi-colinearity in future regressions, we reduced our explanatory variables via a principal component analysis, see figure 2. Curvature, profile curvature, plan curvature, and distance to potential rivers covary together and with the principal component analysis first axis (PCA1). Eleveation (DEM) and wetness are opposed in the principal component analysis and slope and south-westerness doesn't seem to covary much with other variables. As a conclusion, we choose to reduce our variable to 4: curvature to represent the water flow paths and soil stabilization areas, wetness to highlight water accumulation areas, southwesterness to represent monsoon winds [@bunyan_effect_2015] and slope.
 
 ```{r PCA Env}
 pca.env <- princomp(~ DEM + Slope + Curvature + PlanCurvature + ProfileCurvature + Wetness + Rivers + SouthWesterness, data = com@data, cor = T)
@@ -226,11 +226,35 @@ axis (3)
 axis (4)
 ```
 
-Figure 3: Principal component analysis (PCA) performed on topgraphical variables. *Left corner subplot represents the eigen values (grey bars) compare to a broken stick distribution for 8 components (red line).*
+Figure 2: Principal component analysis (PCA) performed on topgraphical variables. *Left corner subplot represents the eigen values (grey bars) compare to a broken stick distribution for 8 components (red line).*
 
 Among all topographical variables, slope, curvature and south-westerness were chosen to define 6 topographical classes. We rejected elevation because our plot is situated in a mountain slope and doesn't include valley. Consequently elevation mainly inform on the position in the mountain general slope. And because the elevation range between the top of the plot and the bottom is low (325-490), we assumed it won't affect directly tree ecology.
 
-Slope was separated in three categories: plane surface (below 20°), mean slope (between 20 and 30°) and steep slope (above 30°). Plane surface were then discriminated on curvature: concave (positive curvature) and convex (negative curvature). Whereas slopes where discriminated by their south-west or north east aspect. Finally, 6 topographical classes were defined: concave plane surface (CvP), convex plane surface (CxP), north-east mean slope (NEMS), north-east steep slope (NESS), south-west mean slope (SWMS), and south-west steep slope (SWSS), see figure 2. The predominance of north-east slope (62%) in our study site is noticeable and should be took into account.
+Slope was separated in three categories: plane surface (below 20 degrees), mean slope (between 20 and 30degrees) and steep slope (above 30 degrees). Plane surface were then discriminated on curvature: concave (positive curvature) and convex (negative curvature). Whereas slopes where discriminated by their south-west or north east aspect. Finally, 6 topographical classes were defined: concave plane surface (CvP), convex plane surface (CxP), north-east mean slope (NEMS), north-east steep slope (NESS), south-west mean slope (SWMS), and south-west steep slope (SWSS), see figure 3. The predominance of north-east slope (62%) in our study site is noticeable and should be took into account.
+
+```{r topo classes}
+col <- c("#008B00", "#00CD00", "#009ACD", "#00BFFF", "#CD9B1D", "#FFC125")
+plot(raster(com, 'topo'), col = col, legend = F)
+contour(Env$DEM, add = T)
+legend('bottomleft', fill = col, legend = levels(com@data$topo), bg = 'white')
+```
+
+Figure 3: Uppangala 10 hectares plot topographical classes.*6 classes were defined one slope, curvature, and south-westerness: concave plane surface (CvP) in dark green, convexe plane surface (CxP) in light green, north-east mean slope (NEMS) in dark blue, north-east steep slope (NESS) in light blue, south-west mean slope (SWMS) in dark orange, and south-west steep slope (SWSS) in ligh orange.*
+
+To study abiotic factors we choose 3 available variables: canopy height (canopy), basal area (BA), and stem density (StD) *(we may add growth in the future)*. Canopy height is issued from a digital canopy model built with a LIDAR campaign on Uppangala plots with a resolution $1*1 m^2$. Both basal area and stem density are calculated with 2013 Uppangala plots girth inventory only on stem with a diameter above 10 centimeters at breast height ($DBH>10$). Consequently basal area end stem density are highly correlated (Spearman's $rho = 0.84$, $p-value < 0.001$). So we removed stem density to avoid multicolinearity, and we kept canopy height that wasn't correlated to basal area (Spearman's $rho = -0.09$, $p-value > 0.1$).
+
+For each species the potential strata was defined. Because species were defined in several strata we kept the lowest strata as the species strata. We tested the strata effect on each trait with an anova combined to a tukey test, but no trait show a significant variation (all F values weren't significanlty different from 0, $p-values>0.1$).
+
+```{r strata effect, eval=FALSE, include=FALSE, cache=F}
+AOV <- list(SLA = aov(PFT_sp$SLA ~ Species[PFT_sp$Sp_Code,]$Strata), 
+            WD = aov(PFT_sp$WD ~ Species[PFT_sp$Sp_Code,]$Strata),
+            LDMC = aov(PFT_sp$LDMC ~ Species[PFT_sp$Sp_Code,]$Strata),
+            LA = aov(PFT_sp$LA ~ Species[PFT_sp$Sp_Code,]$Strata),
+            Thick = aov(PFT_sp$Thick ~ Species[PFT_sp$Sp_Code,]$Strata))
+lapply(AOV, summary)
+# lapply(AOV, TukeyHSD)
+```
+
 
 ## Communities
 
@@ -258,6 +282,11 @@ CWM <- data.frame(id = CWM$com,
                   LES = ddply(TreesBA, .(com), function(x){weighted.mean(x$LES, x$`2013_girth`/2*pi, na.rm = T)})[,2])
 com_ba <- merge(com, CWM)
 ```
+
+Among the whole 10 hectares plot from Uppangala, 240 spatial communities where defined with $20*20 m^2$ quadrats. For all those community, community weighted means [CWM, sensu @violle_let_2007] were computed for each functional traits and from the species scores obtained on the 2 first PCA axes representing the leaf and the wood economic spectrum (WES, LES). Weighted mean were realized by abundance, presence-absence, or basal area.
+
+Spatial variograms of community weighted means didn't show a clear plateau (see figure 4) but suggest a spatial organization at a scale of $70 m$.
+
 ```{r Variograms}
 library(gstat)
 dist <- variogram(WD~1, as(com_abund, 'SpatialPointsDataFrame'))$dist
@@ -278,22 +307,11 @@ legend('bottomright', names(var), fill = colramp)
 legend('bottomleft', names(com.L), lty = c(2:4))
 ```
 
-Figure 4: Trait variograms for all communities.*Variogram was initiated on $20x20m^2$ communities with the wood density weighted mean, and seems to reach a plateau around $70 m$*.
+Figure 4: Trait variograms for all communities.*Variogram was initiated on* $20*20 m^2$ *communities with the wood density weighted mean, and seems to reach a plateau around* $70 m$.
 
-Among the whole 10 hectares plot from Uppangala, 240 spatial communities where defined with $20*20 m^2$ quadrats. For all those community, community weighted means [CWM, sensu @violle_let_2007] were computed for each functional traits and from the species scores obtained on the 2 first PCA axes representing the leaf and the wood economic spectrum (WES, LES). Weighted mean were realized by abundance, presence-absence, or basal area.
-
-Spatial variograms of community weighted means didn't show a clear plateau (see figure 4) but suggest a spatial organization at a scale of $70 m$. **It could be interesting to investigate the spatial organization, in particular with topgraphy, with a covariogram between CWM and elevation.**
+Links between community weighted means and environment, for both abiotic and biotic factors, were studied by linear regression on continuous variables and anova with factors. Linear regression models were chosen by a step mesure (in both direction) on a first regression with selected variables (slope, curvature, wetness and southwesterness for abiotic factors, and canopy height and basal area for biotic one). A null model was built by randomizing traits among species (permuting raw in `Trait*Species` matrix). Deviance of models selected by the step mesure was calculated 999 times and compare to observed deviance. Results for abundance, presence-absence and basal area community weighted mean for all traits are presented in tables 3 and 4 (respectively for abiotic and biotic factors).
 
 ## Abiotic filters
-
-Links between community weighted means and environment were studied by both linear regression on continuous topographical variables and anova with topographical classes. Linear regression models were chosen by a step mesure (in both direction) on a first regression with all topographical variables. A null model was built by randomizing traits among species (permuting raw in `Trait*Species` matrix). Deviance of models selected by the step mesure was calculated 999 times and compare to observe deviance. Results for abundance, presence-absence and basal area community weighted mean for all traits are presented in tables 3.
-
-**As a conclusion, some question need to be discussed:**
-
-- **Inclusion or not of the Leaf Tissue Density (LTD) trait**
-- **Interpretation of our PCA axes**
-- **The study of covariogram between community weighted mean and topographical variables**
-- **And more generally, the way of building the analysis (is the present trajectory okay)**
 
 ```{r topo results}
 reg <- '~ Slope + Curvature + Wetness + SouthWesterness'
@@ -314,14 +332,59 @@ baL <- list(F, F, T)
 model <- mapply(function(lm, trees, com, ba){
   null_model(formulas = lapply(lm, function(x){as.character(x$call)[2]}),
              ba = ba, test = 'lm deviance', PFT_sp = PFT_sp, Trees = trees,
-             com = com, SpCode = SpCode, n = 1000, plot = F, count = F, time = T)},
+             com = com, SpCode = SpCode, n = 1000, plot = F, count = F, time = F)},
   LM, TreesL, comL, baL, SIMPLIFY = F)
 
 kable(regression_table(LM, model, reg))
 ```
 
-Table 3: Step mesure and null models summary for traits community weighted means. *Linear model results for each trait community weighted means (by abundance, presence-absence and basal area) after a variable selection by step mesure in both direction with slope, curvature, wetness, and southwesterness (SW). Model deviance was compared to 999 null models deviance in which traits were randomized among species.*
+Table 3: Step mesure on abiotic factors and null models summary for traits community weighted means. *Linear model results for each trait community weighted means (by abundance, presence-absence and basal area) after a variable selection by step mesure in both direction with slope, curvature, wetness, and southwesterness (SW). Model deviance was compared to 999 null models deviance in which traits were randomized among species.*
+
+First we can notice that, whereas the leaf economic spectrum shows significantly non-random links with abiotic factors, most of weighted means associated to the wood economic spectrum on our principal component analysis (see figure 1) didn't differ from null models. A spatial structure due to local individual history and dispersion is responsible for the observed links between abiotic factors and weighted mean associated to the wood economic spectrum. Outside from the leaf economic spectrum (LES), topography doesn't localy afect Uppangala plot trees as an environmental filter.
+
+Leaf economic spectrum (LES) and specific leaf area (SLA) is associated non-randomly with convex and dry surfaces, as the thickness for basal area community weighted mean. Trees will tend to increase their surface compare to their carbon investment in areas where the water will flow but not accumulate nor stay, and where the soil will tend to accumulate and be stabilized. In favourable water and soil conditions, trees will tend to invest more in leaf ressource capture at the expense of leaf defense, adopting the acquisitive [@sterck_functional_2011] our fast growing strategy [@reich_world-wide_2014]. 
+
+Wood density (WD) in presence absence shows a non-random association with southwest steep slope and concave surfaces with a relatively important explanation level ($R^2=0.23$). Trees will increase their wood density in thin soil and water and soil departure conditions under potential monsoon winds *(We need to decide or not if regarding the plot condition we can accept or not the southwest orientation as being linked to monsoon winds)*. In water stress and mechanical hazard conditions, trees will compensate by increasing their water transport safety and mechanical resistance and resilience with an increased wood density [@chave_towards_2009].
+
 
 ## Biotic filters
+
+```{r biotic results}
+reg <- '~ Canopy + BA'
+LM <- lapply(list(com_abund, com_bin, com_ba),
+             function(x) {with(x@data, list(LES = lm(formula(paste('LES', reg))),
+                                            logSLA = lm(formula(paste('log(SLA)', reg))),
+                                            WES = lm(formula(paste('WES', reg))),
+                                            WD = lm(formula(paste('WD', reg))),
+                                            LDMC = lm(formula(paste('LDMC', reg))),
+                                            logLA = lm(formula(paste('log(LA)', reg))),
+                                            Thick = lm(formula(paste('Thick', reg)))))})
+names(LM) <- c('Abundance', 'Presence/Absence', 'Basal area')
+LM <- lapply(LM, function(y){lapply(y, function(x){
+  step(x, direction = 'both', trace = 0)})})
+TreesL <- list(Trees, Trees_bin, TreesBA)
+comL <- list(com_abund, com_bin, com_ba)
+baL <- list(F, F, T)
+model <- mapply(function(lm, trees, com, ba){
+  null_model(formulas = lapply(lm, function(x){as.character(x$call)[2]}),
+             ba = ba, test = 'lm deviance', PFT_sp = PFT_sp, Trees = trees,
+             com = com, SpCode = SpCode, n = 1000, plot = F, count = F, time = F)},
+  LM, TreesL, comL, baL, SIMPLIFY = F)
+
+kable(regression_table(LM, model, reg))
+```
+
+Table 4: Step mesure on abiotic factors and null models summary for traits community weighted means. *Linear model results for each trait community weighted means (by abundance, presence-absence and basal area) after a variable selection by step mesure in both direction with canopy height (canopy), basal area (BA), and stem density (StD). Model deviance was compared to 999 null models deviance in which traits were randomized among species.*
+
+Most of community weighted means don't show association with biotic factors, and most of the rare association are not significantly different from null models randomly generated. Still leaf area (LA) in basal area is associated with high trees. Voluminous individuals tend to increase their leaf surface in heigher canopy condition to compensate understory shadow.
+
+# *Future directions*
+
+**As a conclusion, some question need to be discussed:**
+
+- **Inclusion or not of the Leaf Tissue Density (LTD) trait**
+- **Interpretation of our PCA axes**
+- **The study of covariogram between community weighted mean and topographical variables**
+- **And more generally, the way of building the analysis (is the present trajectory okay)**
 
 # References
