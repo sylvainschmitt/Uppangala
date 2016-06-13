@@ -13,3 +13,5 @@ vignettes/PreliminaryResults/*.bbl
 vignettes/PreliminaryResults/*.run.xml
 vignettes/*.csv
 vignettes/*.png
+vignettes/*.bib
+vignettes/*_cache/*

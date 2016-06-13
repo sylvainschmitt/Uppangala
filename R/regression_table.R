@@ -11,7 +11,7 @@
 #' # No example yet
 #'
 regression_table <- function(LM, model, reg){
-  var <- strsplit(substr(reg,2,nchar(reg)), ' + ', fixed = T)[[1]]
+  var <- strsplit(substr(reg,3,nchar(reg)), ' + ', fixed = T)[[1]]
   names(var) <- var
   var_table <- data.frame(matrix(nrow = length(LM[[1]])*3, ncol = (length(var)+2)))
   names(var_table) <- c('Trait', 'CWM', var)
@@ -31,10 +31,12 @@ regression_table <- function(LM, model, reg){
       }
     }
   }
-  var["PlanCurvature"] <- 'PlCurvature'
-  var["ProfileCurvature"] <- 'PrCurvature'
   var["SouthWesterness"] <- 'SW'
   names(var_table) <- c('Trait', 'CWM', var)
+  var_table$`R-squared` <- NA
+  var_table$`R-squared`[c(1,((1:length(LM[[1]]))*3+1)[-length(LM[[1]])])] <- lapply(LM[[1]], function(x){round(summary(x)$r.squared,2)})
+  var_table$`R-squared`[c(1,((1:length(LM[[1]]))*3+2)[-length(LM[[1]])])] <- lapply(LM[[2]], function(x){round(summary(x)$r.squared,2)})
+  var_table$`R-squared`[c(3,((1:length(LM[[1]]))*3+3)[-length(LM[[1]])])] <- lapply(LM[[3]], function(x){round(summary(x)$r.squared,2)})
   nul_models <- lapply(model, function(x){paste(x$pvalue, unlist(lapply(as.list(x$pvalue), stars)))})
   var_table$`Null model` <- NA
   var_table$`Null model`[c(1,((1:length(LM[[1]]))*3+1)[-length(LM[[1]])])] <- nul_models[[1]]

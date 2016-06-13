@@ -13,7 +13,7 @@ vignette: |
 
 ### Load data
 
-Data loading from gen functions, that open data from raw tables in *inst/extdata*
+Data loading from gen functions, that open data from raw tables in `inst/extdata`
 
 ```{r Load data, echo=TRUE, message=FALSE, warning=FALSE}
 rm(list = ls()); invisible(gc())
@@ -183,7 +183,6 @@ rm(c, X, Y)
 # rm(CEtest)
 ```
 
-
 # Environment
 
 ## Load data
@@ -244,7 +243,6 @@ legend("bottomleft", legend = captions['WD'], fill = 'orange')
 rm(col)
 ```
 
-
 # Null Models
 
 ## Communities
@@ -296,6 +294,43 @@ com@data$NorthEasterness <- cos((com@data$Aspect + 225) / 180 * pi)
 com@data$Rivers <- extract(Env$Rivers, as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
 rm(Deriv)
 ```
+
+PCA on topgraphical variables
+```{r topo pca, echo=FALSE, fig.height=8, fig.width=8, message=FALSE, warning=FALSE}
+pca <- princomp(~ DEM + Slope + Curvature + PlanCurvature + ProfileCurvature + Wetness + Rivers + SouthWesterness, data = com@data, cor = T)
+lambda <- pca$sdev * sqrt(nrow(pca$scores))
+plot(t(t(pca$scores)/lambda),pch=16, col = 'lightgrey',
+     xlab = paste('Axe 1 -', round(lambda[1]/sum(lambda)*100, 2), '%'),
+     ylab = paste('Axe 2 -', round(lambda[2]/sum(lambda)*100, 2), '%'))
+Hmisc::subplot(function(){
+  b <- barplot((pca.var / sum(pca.var)), las = 2,
+          cex.names = 0.7, axes = T, names.arg = NA) ;
+  lines(b, bstick(length(pca.var)), col = 'red') ;
+  legend('topright', c('Eigen values', 'broken stick'), fill = c('grey', 'red'), cex = 0.6,
+         box.col = 'white')},
+  x=grconvertX(c(0.05,0.35), from='npc'),
+  y=grconvertY(c(0.025,0.30), from='npc')
+)
+par(new=T)
+Rot <- t(t(pca$loadings)*lambda)
+XLIM <- c(-max(abs(Rot[,1])),max(abs(Rot[,1])))
+XLIM <- XLIM+(XLIM*0.2)
+plot(Rot,col=4,axes=FALSE,xlim=XLIM,ylim=XLIM,pch="",xlab = "", ylab = "")
+lines(XLIM, c(0,0), lty = 2, lwd = 2)
+lines(c(0,0), XLIM, lty = 2, lwd = 2)
+col <- c("#1874CD", "#008B00", "#CD3700", "#9400D3")[c(2, 3, 1, 1, 1,  2, 1, 4)]
+arrows (rep(0,nrow(pca$loadings)),rep(0,nrow(pca$loadings)),Rot[,1],Rot[,2],lwd=2,col=col)
+legend('topright', c('Elevation', 'Slope', 'Water flow', 'South-West'),
+       text.col = col, cex = 1.2)
+text (Rot[,1:2], pos = c(2, 2, 2, 1, 1, 3, 3, 1), rownames(Rot),cex=1.2,col=col)
+pca.var = apply(pca$score, 2, var)
+axis (3)
+axis (4)
+# PCAscores <- as.data.frame(pca$scores)[1:3] # Adding PCA axis in PFT values
+# names(PCAscores) <- c('PCA1', 'PCA2', 'PCA3')
+# PCAscores$ID <- row.names(PCAscores)
+```
+
 
 Topographical classes assignation and plot
 
@@ -369,7 +404,7 @@ baL <- list(F, F, T)
 model <- mapply(function(lm, trees, com, ba){
   null_model(formulas = lapply(lm, function(x){as.character(x$call)[2]}), 
              ba = ba, test = 'lm deviance', PFT_sp = PFT_sp, Trees = trees, 
-             com = com, SpCode = SpCode, n = 1000, plot = F, count = T, time = T)},
+             com = com, SpCode = SpCode, n = 1000, plot = F, count = F, time = T)},
   LM, TreesL, comL, baL, SIMPLIFY = F)
 # lapply(model, function(x){
 #   par(mfrow = c(2,4))

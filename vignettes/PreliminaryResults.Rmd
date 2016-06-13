@@ -1,0 +1,327 @@
+---
+title: 'Uppangala tree functionnal traits: Preliminray Results'
+author: "Sylvain Schmitt"
+date: '`r Sys.Date()`'
+output: pdf_document
+bibliography: refs.bib
+---
+
+```{r config, message=FALSE, warning=FALSE, include=FALSE}
+library(knitr)
+opts_chunk$set(
+  echo = F, message = F, warning = F, fig.height = 8, fig.width = 8,
+  cache = T, cache.lazy = F)
+```
+
+
+## Measured traits
+
+Table 1: Functional traits measured. *Traits with their abbreviation, range of values in the sampling, mean and standard deviation, standard unit, and associated trade-off in tree development.*
+
+```{r Traits, eval=T}
+rm(list = ls()); invisible(gc())
+library(Uppangala)
+PFT <- genPFT()
+captions <- genCaptions()
+table <- data.frame(
+  traits = c('Thickness', 'Leaf area', 'Leaf dry matter content', 'Specific leaf area', 'Wood density'),
+  abbreviation = c('Thick', 'LA', 'LDMC', 'SLA', 'WD'),
+  range = c(paste(range(PFT$Thick, na.rm = T), collapse = '-'),
+            paste(round(range(PFT$LA, na.rm = T)), collapse = '-'),
+            paste(round(range(PFT$LDMC, na.rm = T)), collapse = '-'),
+            paste(round(range(PFT$SLA, na.rm = T), 2), collapse = '-'),
+            paste(round(range(PFT$WD, na.rm = T), 2), collapse = '-')),
+  `mean (sd)` = c(paste0(round(mean(PFT$Thick, na.rm = T)), ' (',
+                         round(sd(PFT$Thick, na.rm = T)), ')'),
+                  paste0(round(mean(PFT$LA, na.rm = T)), ' (',
+                         round(sd(PFT$LA, na.rm = T)), ')'),
+                  paste0(round(mean(PFT$LDMC, na.rm = T)), ' (',
+                         round(sd(PFT$LDMC, na.rm = T)), ')'),
+                  paste0(round(mean(PFT$SLA, na.rm = T),2), ' (',
+                         round(sd(PFT$SLA, na.rm = T),2), ')'),
+                  paste0(round(mean(PFT$WD, na.rm = T),2), ' (',
+                         round(sd(PFT$WD, na.rm = T),2), ')')),
+  unit = c('um', 'mm2', 'mg.g-1', 'm2.kg-1', 'g.cm-3'),
+  strategy = c('Leaf defense vs. investment',
+               'Leaf ressource capture vs.investment',
+               'Leaf defense vs. investment',
+               'Leaf ressource acquisiton vs. defense',
+               'Stem transport, structure and defense')
+  )
+kable(table,  label="traits", row.names = F)
+```
+
+Uppangala measured functional traits vary in the ranges of tropical species values that we can find in literature. We can notice in table 1 that wood density has a relatively high mean as we could expect in an old untouched forest. Functional traits can be linked to trade-off in tree development strategy [@baraloto_decoupled_2010], and can be as well explained by environment condition. For instance, SLA is a soil fertility - shade index whereas LDMC will only be linked to soil fertility [@hodgson_is_2011]. We could also have added a sixth trait, called leaf tissue density (LTD) with the formula: $LTD=Leaf dry weight/Thickness*Leaf area$. LTD is highly correlated to LDMC [@hodgson_is_2011], but can still bring extra information **To be discussed**.
+
+## Traits distribution and variation
+
+Table 2: Coefficient of variation intra-individual, intra-specific and inter-specific. *Mean of coefficient of variation for leaves in all individual (intra-individual), for trees in all species (intra-specific), and coefficient of variation for trees for all species. See table 1 for abbreviation.*
+
+```{r CV}
+PFT_ind <- aggregate(PFT, by = list(PFT$Tree), FUN = mean, na.rm = T)
+row.names(PFT_ind) <- PFT_ind$Group.1
+SpT <- unique(PFT[1:2])
+Sp <- SpT$SP
+names(Sp) <- SpT$Tree
+SpCodeT <- unique(PFT[2:3])
+SpCode <- SpCodeT$Sp_Code
+names(SpCode) <- SpCodeT$SP
+CET <- unique(PFT[c(1,4)])
+CE <- CET$CE
+names(CE) <- CET$Tree
+PFT_ind$SP <- Sp[row.names(PFT_ind)]
+PFT_ind$Sp_Code <- SpCode[as.character(PFT_ind$SP)]
+PFT_ind$CE <- CE[row.names(PFT_ind)]
+PFT_ind <- PFT_ind[-c(1:2)]
+cv <- data.frame(row.names = c('Thick', 'LA', 'LDMC', 'SLA', 'WD'))
+cv$Individual <- unlist(lapply(
+  as.list(row.names(cv)),
+  function(y){mean(aggregate(PFT[which(names(PFT) ==  y)], by = list(PFT$Tree), function(x){sd(x, na.rm = T) / mean(x, na.rm = T)})[,2], na.rm = T)}))
+cv$Species <- unlist(lapply(
+  as.list(row.names(cv)),
+  function(y){mean(aggregate(PFT_ind[which(names(PFT_ind) ==  y)], by = list(PFT_ind$SP), function(x){sd(x, na.rm = T) / mean(x, na.rm = T)})[,2], na.rm = T)}))
+cv$Community <- unlist(
+  lapply(as.list(row.names(cv)),
+         function(y){sd(PFT[,which(names(PFT) ==  y)], na.rm = T) /
+             mean(PFT[,which(names(PFT) ==  y)], na.rm = T)}))
+cv <- round(cv, 2)
+cv['WD','Individual'] <- ''
+kable(cv)
+```
+
+Some outliers are still to be corrected in individual leaf trait value, but thickness outliers and extreme values are due to too close secondary veins. Table 2 shows a intra-individual variation lower than intra-specific and inter-specific variation, indicating that leaves are even in morphology inside an individual but can start to show some variation between trees of the same species. More specifically, whereas traits like thickness and wood density seems to stay stable in intra-individual and intra-specific, leaf area shows a high coefficient of variation for both intra-individual and intra-specific values.
+
+## Covariations in traits
+
+```{r PCA PFT}
+library(vegan)
+pca <- princomp(~ LA + WD + Thick + LDMC + SLA, data = PFT_ind, cor = T)
+lambda <- pca$sdev * sqrt(nrow(pca$scores))
+pca.var = apply(pca$score, 2, var)
+PCAscores <- as.data.frame(pca$scores)[1:2] # Adding PCA axis in PFT values
+names(PCAscores) <- c('WES', 'LES')
+PCAscores$ID <- row.names(PCAscores)
+plot(t(t(pca$scores)/lambda),pch=16, col = 'lightgrey',
+     # xlab = paste('Axe 1 -', round(lambda[1]/sum(lambda)*100, 2), '%'),
+     # ylab = paste('Axe 2 -', round(lambda[2]/sum(lambda)*100, 2), '%'))
+     xlab = paste('Axe 1 -', round(pca.var[1]/sum(pca.var)*100, 2), '%'),
+     ylab = paste('Axe 2 -', round(pca.var[2]/sum(pca.var)*100, 2), '%'))
+# as.factor(Species[PFT_ind[row.names(pca$scores),2],6])
+par(new=T)
+Rot <- t(t(pca$loadings)*lambda)
+XLIM <- c(-max(abs(Rot[,1])),max(abs(Rot[,1])))
+XLIM <- XLIM+(XLIM*0.2)
+plot(Rot,col=4,axes=FALSE,xlim=XLIM,ylim=XLIM,pch="",xlab = "", ylab = "")
+lines(XLIM, c(0,0), lty = 2, col = 'firebrick', lwd = 2)
+lines(c(0,0), XLIM, lty = 2, col = 'green', lwd = 2)
+legend('topright', c('Leaf economic spectrum', 'Wood economic spectrum'),
+       text.col = c("green", "firebrick"))
+
+arrows (rep(0,nrow(pca$loadings)),rep(0,nrow(pca$loadings)),Rot[,1],Rot[,2],lwd=2)
+text (Rot[,1:2], pos = c(4, 2, 4, 2, 3), rownames(Rot),cex=1.2)
+Hmisc::subplot(function(){
+  b <- barplot((pca.var / sum(pca.var)), las = 2, ylim = c(0,range(bstick(7))[2]),
+          cex.names = 0.7, axes = T, names.arg = NA) ;
+  lines(b, bstick(length(pca.var)), col = 'red') ;
+  legend('topright', c('Eigen values', 'broken stick'), fill = c('grey', 'red'), cex = 0.6,
+         box.col = 'white')},
+  x=grconvertX(c(0.75,1), from='npc'),
+  y=grconvertY(c(0.05,0.30), from='npc')
+)
+axis (3)
+axis (4)
+PFT_ind$ID <- row.names(PFT_ind)
+PFT_ind <- merge(PFT_ind, PCAscores, all = T)
+row.names(PFT_ind) <- PFT_ind$ID
+PFT_ind <- PFT_ind[-which(names(PFT_ind) == 'ID')]
+```
+
+Figure 1: Principal component analysis (PCA) performed on individual trait means. *Left corner subplot represents the eigen values (grey bars) compare to a broken stick distribution for 6 components (red line). See table 1 for abbreviation.*
+
+We realized a principal component analysis on individual trait means (see figure 1), where first axis (PCA1) covary mainly with leaf thickness, dry matter content and wood density. Whereas second axis (PCA2) covary mainly with specific leaf area representative of the leaf economic spectrum [LES, @wright_worldwide_2004]. PCA1 might be associated with the wood density covariation to the wood economic spectrum [WES, @chave_towards_2009]. Results are similar to the one found by @fortunel_leaf_2012 where PCA1 and PCA2 were respectively interpreted as leaf and wood economic spectrum (inverted compare to us). Our results integrate less traits (5/14), and less species (92/758), but still capture the same strategy axes.
+
+We can see that as wood density ans specific leaf area are orthogonal following the results of @baraloto_decoupled_2010 suggesting that the two economic spectrum were decoupled (Spearman's $rho = -0.04$, $p-value > 0.1$). Leaf area is almost opposed to wood density and is effectively negatively correlated to it (Spearman's $rho = -0.033$, $p-value < 0.001$) as found by @wright_relationships_2007. This relationship could be explained by an equilibrium in tree hydraulics (Coomes et al, 2008). Finally, we found the positive relation suggested by @diaz_global_2015 between leaf dry matter content and wood density (Spearman's $rho = 0.24$, $p-value < 0.001$).
+
+## Environment and trees
+
+We collected trait information on 92 over 117 (79%) species focusing in priority on abundant species with 5 replicates and we completed with less abundant and rare species with one to five replicates (*Warning : one of our 92 species is not referenced yet among currently known Uppangala species, Agrosystachis indica, one of 117 species is not removed yet, Toona ciliata.*). Thus we generated data for 98.8% of the tree individuals present in Uppangala plot.
+
+```{r env-com}
+library(raster)
+Env <- genEnv()
+Env$Rivers <- readAll(Env$Rivers)
+Trees <- genTrees()
+Species <- genSpecies()
+PFT_sp <- aggregate(PFT_ind, by = list(PFT_ind$SP), FUN = mean, na.rm = T)
+row.names(PFT_sp) <- PFT_sp$Group.1
+PFT_sp$Sp_Code <- SpCode[row.names(PFT_sp)]
+PFT_sp <- PFT_sp[-c(1:2,4)]
+Trees$SpCode <- tolower(Trees$SpCode)
+Trees$ID <- row.names(Trees)
+Trees <- merge(Trees, PFT_sp, by.x = 'SpCode', by.y = 'Sp_Code')
+row.names(Trees) <- Trees$ID
+Trees <- Trees[-which(names(Trees) == 'ID')]
+com <- quadrats()
+Trees$com <- NA
+XY <- data.frame(X = Trees$X, Y = Trees$Y)
+XY <- XY[-which(is.na(XY$X)),] # Removing NA
+coordinates(XY) <- ~ X + Y
+proj4string(XY) <- crs(com)
+Trees$com[which(!is.na(Trees$X))] <- (XY %over% com)[,1]
+Trees$com[which(!is.na(Trees$com))] <- paste0('C', Trees$com[which(!is.na(Trees$com))])
+com@data$id <- paste0('C', com@data$id)
+com@data$DEM <- extract(Env$DEM, as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
+Deriv <- DEMderiv(raster(com, 'DEM'), c('slope', 'curvature', 'plancurvature', 'profcurvature', 'aspect'))
+com@data <- cbind(com@data, extract(Deriv, as(com, "SpatialPolygons"), df = T, fun = mean)[-1])
+com@data$Wetness <- extract(DEMderiv(Env$DEM, 'wetness'), as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
+com@data$SouthWesterness <- sin((com@data$Aspect + 225) / 180 * pi)
+com@data$NorthEasterness <- cos((com@data$Aspect + 225) / 180 * pi)
+com@data$Rivers <- extract(Env$Rivers, as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
+com@data$topo <- as.factor(with(com@data, topo_classes(Slope, Curvature, Aspect)))
+rm(Deriv, XY)
+col <- c("#008B00", "#00CD00", "#009ACD", "#00BFFF", "#CD9B1D", "#FFC125")
+plot(raster(com, 'topo'), col = col, legend = F)
+contour(Env$DEM, add = T)
+legend('bottomleft', fill = col, legend = levels(com@data$topo), bg = 'white')
+```
+
+Figure 2: Uppangala 10 hectares plot topographical classes.*6 classes were defined one slope, curvature, and south-westerness: concave plane surface (CvP) in dark green, convexe plane surface (CxP) in light green, north-east mean slope (NEMS) in dark blue, north-east steep slope (NESS) in light blue, south-west mean slope (SWMS) in dark orange, and south-west steep slope (SWSS) in ligh orange.*
+
+To study environment effect on our traits we choose 8 topographical variables that we used for variable selection : digital elevation model, slope, curvature, plan curvature, profile curvature, wetness and southwesterness, and distance to the nearest potential river. Digital elevation model is issued from a LIDAR campaign on Uppangala plots with a resolution of $1*1m^2$. Slope, curvature, plan curvature, profile curvature, wetness and southwesterness are all derived from the digital elevation model with the RSAGA package [@brenning_statistical_2008]. Curvature, plan curvature, and profile curvature represents in different context fertility of one topographical area by is ability to stabilize soil and attract water flow. Wetness combine the information of slope, curvature and elevation by indicating areas where water will flow and accumulate. Finally south-westerness is the aspect in direction of south-west ($cos(aspect in degres + 225)$) representing areas orientation to the monsoon winds [@bunyan_effect_2015].
+
+In order to avoid multi-colinearity in future regressions, we reduced our explanatory variables via a principal component analysis, see figure 3. Curvature, profile curvature, plan curvature, and distance to potential reivers covary together and with the principal component analysis first axis (PCA1). Eleveation (DEM) and wetness are opposed in the principal component analysis and slope and south-westerness doesn't seem to covary much with other variables. As a conclusion, we choose to reduce our variable to 4: curvature to represent the water flow paths and soil stabilization areas, wetness to highlight water accumulation areas, southwesterness to represent monsoon winds and slope.
+
+```{r PCA Env}
+pca.env <- princomp(~ DEM + Slope + Curvature + PlanCurvature + ProfileCurvature + Wetness + Rivers + SouthWesterness, data = com@data, cor = T)
+lambda <- pca.env$sdev * sqrt(nrow(pca.env$scores))
+pca.env.var = apply(pca.env$score, 2, var)
+plot(t(t(pca.env$scores)/lambda),pch=16, col = 'lightgrey',
+     # xlab = paste('Axe 1 -', round(lambda[1]/sum(lambda)*100, 2), '%'),
+     # ylab = paste('Axe 2 -', round(lambda[2]/sum(lambda)*100, 2), '%'))
+     xlab = paste('Axe 1 -', round(pca.env.var[1]/sum(pca.env.var)*100, 2), '%'),
+     ylab = paste('Axe 2 -', round(pca.env.var[2]/sum(pca.env.var)*100, 2), '%'))
+Hmisc::subplot(function(){
+  b <- barplot((pca.env.var / sum(pca.env.var)), las = 2,
+          cex.names = 0.7, axes = T, names.arg = NA) ;
+  lines(b, bstick(length(pca.env.var)), col = 'red') ;
+  legend('topright', c('Eigen values', 'broken stick'), fill = c('grey', 'red'), cex = 0.6,
+         box.col = 'white')},
+  x=grconvertX(c(0.05,0.35), from='npc'),
+  y=grconvertY(c(0.025,0.30), from='npc')
+)
+par(new=T)
+Rot <- t(t(pca.env$loadings)*lambda)
+XLIM <- c(-max(abs(Rot[,1])),max(abs(Rot[,1])))
+XLIM <- XLIM+(XLIM*0.2)
+plot(Rot,col=4,axes=FALSE,xlim=XLIM,ylim=XLIM,pch="",xlab = "", ylab = "")
+lines(XLIM, c(0,0), lty = 2, lwd = 2)
+lines(c(0,0), XLIM, lty = 2, lwd = 2)
+col <- c("#1874CD", "#008B00", "#CD3700", "#9400D3")[c(2, 3, 1, 1, 1,  2, 1, 4)]
+arrows (rep(0,nrow(pca.env$loadings)),rep(0,nrow(pca.env$loadings)),
+        Rot[,1],Rot[,2],lwd=2,col=col)
+legend('topright', c('Elevation', 'Slope', 'Water flow', 'South-West'),
+       text.col = col, cex = 1.2)
+text (Rot[,1:2], pos = c(2, 2, 2, 1, 1, 3, 3, 1), rownames(Rot),cex=1.2,col=col)
+axis (3)
+axis (4)
+```
+
+Figure 3: Principal component analysis (PCA) performed on topgraphical variables. *Left corner subplot represents the eigen values (grey bars) compare to a broken stick distribution for 8 components (red line).*
+
+Among all topographical variables, slope, curvature and south-westerness were chosen to define 6 topographical classes. We rejected elevation because our plot is situated in a mountain slope and doesn't include valley. Consequently elevation mainly inform on the position in the mountain general slope. And because the elevation range between the top of the plot and the bottom is low (325-490), we assumed it won't affect directly tree ecology.
+
+Slope was separated in three categories: plane surface (below 20°), mean slope (between 20 and 30°) and steep slope (above 30°). Plane surface were then discriminated on curvature: concave (positive curvature) and convex (negative curvature). Whereas slopes where discriminated by their south-west or north east aspect. Finally, 6 topographical classes were defined: concave plane surface (CvP), convex plane surface (CxP), north-east mean slope (NEMS), north-east steep slope (NESS), south-west mean slope (SWMS), and south-west steep slope (SWSS), see figure 2. The predominance of north-east slope (62%) in our study site is noticeable and should be took into account.
+
+## Communities
+
+```{r Com}
+CWM <- aggregate(Trees, by = list(Trees$com), mean, na.rm = T) #CWM abundance
+names(CWM)[1] <- 'id'
+CWM <- CWM[which(names(CWM) %in% c('id', 'LES', 'SLA', 'WES', 'LDMC', 'WD', 'Thick', 'LA'))]
+com_abund <- merge(com, CWM)
+Trees_bin <- Trees[-which(duplicated(cbind(Trees$SpCode, Trees$com))),] #CWM binary
+CWM <- aggregate(Trees_bin, by = list(Trees_bin$com), mean, na.rm = T)
+names(CWM)[1] <- 'id'
+CWM <- CWM[which(names(CWM) %in% c('id', 'LES', 'SLA', 'WES', 'LDMC', 'WD', 'Thick', 'LA'))]
+com_bin <- merge(com, CWM)
+library(plyr)
+TreesBA <- Trees[-which(is.na(Trees$`2013_girth`)),] #CWM ba
+CWM <- ddply(TreesBA, .(com), function(x){
+  weighted.mean(x$SLA, x$`2013_girth`/2*pi, na.rm = T)})
+CWM <- data.frame(id = CWM$com,
+                  Thick = CWM$V1,
+                  LA = ddply(TreesBA, .(com), function(x){weighted.mean(x$LA, x$`2013_girth`/2*pi, na.rm = T)})[,2],
+                  LDMC = ddply(TreesBA, .(com), function(x){weighted.mean(x$LDMC, x$`2013_girth`/2*pi, na.rm = T)})[,2],
+                  SLA = ddply(TreesBA, .(com), function(x){weighted.mean(x$SLA, x$`2013_girth`/2*pi, na.rm = T)})[,2],
+                  WD = ddply(TreesBA, .(com), function(x){weighted.mean(x$WD, x$`2013_girth`/2*pi, na.rm = T)})[,2],
+                  WES = ddply(TreesBA, .(com), function(x){weighted.mean(x$WES, x$`2013_girth`/2*pi, na.rm = T)})[,2],
+                  LES = ddply(TreesBA, .(com), function(x){weighted.mean(x$LES, x$`2013_girth`/2*pi, na.rm = T)})[,2])
+com_ba <- merge(com, CWM)
+```
+```{r Variograms}
+library(gstat)
+dist <- variogram(WD~1, as(com_abund, 'SpatialPointsDataFrame'))$dist
+plot(c(1:length(dist)) ~ dist, xlim = c(0, max(dist)), ylim = c(0.5,1), pch = '', xlab = 'distance (m)', ylab = 'relative variance (%)')
+com.L <- list(Abundance = com_abund,
+              'Presence-absence' = com_bin,
+              'Basal area' = com_ba)
+for(j in 1:length(com.L)){
+  var <- data.frame(lapply(lapply(as.list(c('WD', 'Thick', 'LA', 'LDMC', 'SLA', 'WES', 'LES')), function(x){variogram(formula(paste(x, '~ 1')), as(com.L[[j]], 'SpatialPointsDataFrame'))}), function(x){x[3]}))
+  var <- data.frame(apply(var, 2, function(x){x/max(x)}))
+  names(var) <- c('WD', 'Thick', 'LA', 'LDMC', 'SLA', 'WES', 'LES')
+  colramp <- rainbow(length(var))
+  for(i in 1:length(var)){
+    lines(var[,i] ~ dist, col = colramp[i], lty = j + 1)
+  }
+}
+legend('bottomright', names(var), fill = colramp)
+legend('bottomleft', names(com.L), lty = c(2:4))
+```
+
+Figure 4: Trait variograms for all communities.*Variogram was initiated on $20x20m^2$ communities with the wood density weighted mean, and seems to reach a plateau around $70 m$*.
+
+Among the whole 10 hectares plot from Uppangala, 240 spatial communities where defined with $20*20 m^2$ quadrats. For all those community, community weighted means [CWM, sensu @violle_let_2007] were computed for each functional traits and from the species scores obtained on the 2 first PCA axes representing the leaf and the wood economic spectrum (WES, LES). Weighted mean were realized by abundance, presence-absence, or basal area.
+
+Spatial variograms of community weighted means didn't show a clear plateau (see figure 4) but suggest a spatial organization at a scale of $70 m$. **It could be interesting to investigate the spatial organization, in particular with topgraphy, with a covariogram between CWM and elevation.**
+
+## Abiotic filters
+
+Links between community weighted means and environment were studied by both linear regression on continuous topographical variables and anova with topographical classes. Linear regression models were chosen by a step mesure (in both direction) on a first regression with all topographical variables. A null model was built by randomizing traits among species (permuting raw in `Trait*Species` matrix). Deviance of models selected by the step mesure was calculated 999 times and compare to observe deviance. Results for abundance, presence-absence and basal area community weighted mean for all traits are presented in tables 3.
+
+**As a conclusion, some question need to be discussed:**
+
+- **Inclusion or not of the Leaf Tissue Density (LTD) trait**
+- **Interpretation of our PCA axes**
+- **The study of covariogram between community weighted mean and topographical variables**
+- **And more generally, the way of building the analysis (is the present trajectory okay)**
+
+```{r topo results}
+reg <- '~ Slope + Curvature + Wetness + SouthWesterness'
+LM <- lapply(list(com_abund, com_bin, com_ba),
+             function(x) {with(x@data, list(LES = lm(formula(paste('LES', reg))),
+                                            logSLA = lm(formula(paste('log(SLA)', reg))),
+                                            WES = lm(formula(paste('WES', reg))),
+                                            WD = lm(formula(paste('WD', reg))),
+                                            LDMC = lm(formula(paste('LDMC', reg))),
+                                            logLA = lm(formula(paste('log(LA)', reg))),
+                                            Thick = lm(formula(paste('Thick', reg)))))})
+names(LM) <- c('Abundance', 'Presence/Absence', 'Basal area')
+LM <- lapply(LM, function(y){lapply(y, function(x){
+  step(x, direction = 'both', trace = 0)})})
+TreesL <- list(Trees, Trees_bin, TreesBA)
+comL <- list(com_abund, com_bin, com_ba)
+baL <- list(F, F, T)
+model <- mapply(function(lm, trees, com, ba){
+  null_model(formulas = lapply(lm, function(x){as.character(x$call)[2]}),
+             ba = ba, test = 'lm deviance', PFT_sp = PFT_sp, Trees = trees,
+             com = com, SpCode = SpCode, n = 1000, plot = F, count = F, time = T)},
+  LM, TreesL, comL, baL, SIMPLIFY = F)
+
+kable(regression_table(LM, model, reg))
+```
+
+Table 3: Step mesure and null models summary for traits community weighted means. *Linear model results for each trait community weighted means (by abundance, presence-absence and basal area) after a variable selection by step mesure in both direction with slope, curvature, wetness, and southwesterness (SW). Model deviance was compared to 999 null models deviance in which traits were randomized among species.*
+
+## Biotic filters
+
+# References

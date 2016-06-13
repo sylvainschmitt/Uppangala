@@ -14,18 +14,31 @@ Trees <- genTrees()
 Species <- genSpecies()
 Trees$SpCode <- as.factor(tolower(as.character(Trees$SpCode))) # Should be treated in gen functions
 row.names(Species) <- tolower(row.names(Species))
+# Inconsistancies
+sort(Species$SpCode)[which(!(sort(Species$SpCode) %in% sort(levels(Trees$SpCode))))]
+sort(levels(Trees$SpCode))[which(!(sort(levels(Trees$SpCode)) %in% (sort(Species$SpCode))))]
 ```
 
 # Species plots
 ```{r Plot sp, echo=FALSE, fig.height=10, fig.width=10, message=FALSE, warning=FALSE}
-SpCode <- levels(Trees$SpCode)
-for(Sp in SpCode){
-  main <- Sp
-  if(Sp %in% row.names(Species)){
-    main <- paste(Species[as.character(Sp),2], Species[as.character(Sp),3], sep = ', ')
+SpCode <- sort(Species$SpCode)[which(sort(Species$SpCode) %in% sort(levels(Trees$SpCode)))] # Using only common SpCode
+Genus <- unlist(lapply(strsplit(Species[SpCode,2], ' ', fixed = T), function(x){x[[1]]}))
+for(Gen in unique(Genus)){
+  if(length(which(Genus == Gen)) > 1){
+    main <- paste(Gen, Species[which(Genus == Gen)[1],3], sep = ', ')
+    plot(Env$DEM, main = main, col = grey(100:-1:0/100), alpha = 0.8)
+    contour(Env$DEM, add = T)
+    col <- rainbow(length(which(Genus == Gen)))
+    j <-  1
+    Sp.l <- c()
+    for(i in which(Genus == Gen)){
+      Sp <-  SpCode[i]
+      Sp.l <- c(Sp.l, Sp)
+      points(Y ~ X, Trees[Trees$SpCode == Sp,], pch = 20, col = col[j])
+      j <-  j + 1
+    }
+    species.v <- unlist(lapply(strsplit(Species[Sp.l,2], ' ', fixed = T), function(x){x[[2]]}))
+    legend('bottomright', species.v, fill = col)
   }
-  plot(Env$DEM, main = main)
-  contour(Env$DEM, add = T)
-  points(Y ~ X, Trees[Trees$SpCode == Sp,], pch = 20)
 }
 ```

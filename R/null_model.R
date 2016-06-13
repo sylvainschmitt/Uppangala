@@ -64,18 +64,17 @@ null_model = function(formulas,
       NullCWM <- aggregate(NullTrees, by = list(NullTrees$com), mean, na.rm = T)
       names(NullCWM)[1] <- 'id'
       NullCWM <- NullCWM[which(names(NullCWM)
-                               %in% c('id', 'Thick', 'LA', 'LDMC', 'SLA', 'WD', 'PCA1', 'PCA2', 'PCA3'))]
+                               %in% c('id', 'Thick', 'LA', 'LDMC', 'SLA', 'WD', 'WES', 'LES'))]
     } else {
       NullCWM <- ddply(NullTrees, .(com), function(x){weighted.mean(x$SLA, x$`2013_girth`/2*pi, na.rm = T)})
       NullCWM <- data.frame(id = NullCWM$com,
                         Thick = NullCWM$V1,
                         LA = ddply(NullTrees, .(com), function(x){weighted.mean(x$LA, x$`2013_girth`/2*pi, na.rm = T)})[,2],
-                        LDMC = ddply(NullTrees, .(com), function(x){weighted.mean(x$SLA, x$`2013_girth`/2*pi, na.rm = T)})[,2],
+                        LDMC = ddply(NullTrees, .(com), function(x){weighted.mean(x$LDMC, x$`2013_girth`/2*pi, na.rm = T)})[,2],
                         SLA = ddply(NullTrees, .(com), function(x){weighted.mean(x$SLA, x$`2013_girth`/2*pi, na.rm = T)})[,2],
                         WD = ddply(NullTrees, .(com), function(x){weighted.mean(x$WD, x$`2013_girth`/2*pi, na.rm = T)})[,2],
-                        PCA1 = ddply(NullTrees, .(com), function(x){weighted.mean(x$PCA1, x$`2013_girth`/2*pi, na.rm = T)})[,2],
-                        PCA2 = ddply(NullTrees, .(com), function(x){weighted.mean(x$PCA2, x$`2013_girth`/2*pi, na.rm = T)})[,2],
-                        PCA3 = ddply(NullTrees, .(com), function(x){weighted.mean(x$PCA3, x$`2013_girth`/2*pi, na.rm = T)})[,2])
+                        WES = ddply(NullTrees, .(com), function(x){weighted.mean(x$WES, x$`2013_girth`/2*pi, na.rm = T)})[,2],
+                        LES = ddply(NullTrees, .(com), function(x){weighted.mean(x$LES, x$`2013_girth`/2*pi, na.rm = T)})[,2])
     }
     Nullcom <- merge(Nullcom, NullCWM)
       if(test == 'Anova Fvalue'){
@@ -94,7 +93,7 @@ null_model = function(formulas,
   if(test == 'Anova Fvalue'){
     stat.val <- lapply(formulas, function(x){summary(aov(x, com@data))[[1]][['F value']][1]})
   } else if(test == 'lm deviance'){
-    stat.val <- lapply(formulas, function(x){deviance(lm(x, Nullcom))})
+    stat.val <- lapply(formulas, function(x){deviance(lm(x, com))})
   }
   ranks <- mapply(function(x,y){(rank(c(x, y))/n)}, x = stat.val, y = as.list(data.frame(stat)))
   pval <- ranks[1,]
