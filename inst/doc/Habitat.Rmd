@@ -4,8 +4,16 @@ author: "Sylvain Schmitt"
 date: "May 26, 2016"
 output: html_document
 ---
+
+```{r config, message=FALSE, warning=FALSE, include=FALSE}
+library(knitr)
+opts_chunk$set(
+  echo = T, message = F, warning = F, fig.height = 8, fig.width = 8,
+  cache = T, cache.lazy = F)
+```
+
 # Data
-```{r Data, echo=TRUE, message=FALSE, warning=FALSE}
+```{r Data}
 rm(list = ls()); invisible(gc())
 library(Uppangala)
 library(raster)
@@ -30,7 +38,7 @@ Trees$com[which(!is.na(Trees$com))] <- paste0('C', Trees$com[which(!is.na(Trees$
 
 # Adding topo to communities
 
-```{r com topo, echo=TRUE, message=FALSE, warning=FALSE}
+```{r com topo}
 com@data$id <- paste0('C', com@data$id)
 com@data$DEM <- extract(Env$DEM, as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
 Deriv <- DEMderiv(raster(com, 2), c('slope', 'curvature', 'aspect'))
@@ -38,13 +46,13 @@ com@data <- cbind(com@data, extract(Deriv, as(com, "SpatialPolygons"), df = T, f
 ```
 
 # Classes assignation
-```{r Plot pop, echo=FALSE, fig.height=8, fig.width=9, message=FALSE, warning=FALSE}
+```{r Plot pop}
 com@data$topo <- as.factor(with(com@data, topo_classes(Slope, Curvature, Aspect)))
 Trees$topo <- (XY %over% com)[,6]
 ```
 
 # Species habitat association table
-```{r Sp habitat table}
+```{r Sp habitat table, echo = F}
 habitat_association <- data.frame(tapply(rep(1, length(Trees[,1])), list(Trees$SpCode, Trees$topo), sum))
 habitat_association <- round(habitat_association / rowSums(habitat_association, na.rm = T) * 100)
 habitat_association[is.na(habitat_association)] <- 0
@@ -53,7 +61,7 @@ knitr::kable(habitat_association)
 
 
 # Species - Habitats plots
-```{r Plot sp habitat, echo=FALSE, fig.height=10, fig.width=10, message=FALSE, warning=FALSE}
+```{r Plot sp habitat, echo = F}
 SpCode <- levels(Trees$SpCode)
 col <- c("#008B00", "#00CD00", "#009ACD", "#00BFFF", "#CD9B1D", "#FFC125")
 # col <- terrain.colors(7)[c(1,2,5,6,3,4)]

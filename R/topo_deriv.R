@@ -1,5 +1,5 @@
 #' @importFrom RSAGA rsaga.env rsaga.slope rsaga.curvature rsaga.plan.curvature rsaga.profile.curvature rsaga.aspect rsaga.fill.sinks rsaga.wetness.index
-#' @importFrom raster writeRaster raster hillShade
+#' @importFrom raster writeRaster raster hillShade readAll
 NULL
 
 #' Create DEM derivative

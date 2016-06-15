@@ -77,3 +77,96 @@
 #                            SLA = aov(SLA ~ Strata),
 #                            WD = aov(WD ~ Strata)))
 # lapply(AOV, summary)
+
+# # Data
+# library(Uppangala)
+# library(raster)
+# library(ade4)
+# Env <- genEnv()
+# Deriv <- DEMderiv(Env$DEM, c('slope', 'curvature', 'aspect', 'wetness'))
+# Deriv$SW <- cos(Deriv$Aspect + 220)
+# Deriv <- Deriv[[-3]]
+#
+# # Individuals
+# TreesXY <- Trees[-which(is.na(Trees$X)),]
+# TreesXY <- TreesXY[-which(is.na(TreesXY$`2013_girth`)),]
+# TreesXY <- TreesXY[-which(is.na(extract(Env$DEM, TreesXY[2:3], df = T)[2])),]
+# TreesXY <- TreesXY[-which(TreesXY$SpCode %in% levels(droplevels(PFT_sp[which(is.na(PFT_sp$WD)),1]))),]
+#
+# # Matrices
+# Lm <- TreesXY[1]
+# Lm <- data.frame(tapply(rep(1, length(Lm[,1])), list(row.names(Lm), Lm$SpCode), sum))
+# Lm[is.na(Lm)] <- 0
+# Qm <- PFT_sp[which(names(PFT_sp) %in% c('SLA', 'LDMC', 'WD', 'Thick', 'LA'))]
+# row.names(Qm) <- PFT_sp$Sp_Code
+# Qm <- Qm[-which(is.na(Qm$WD)),]
+# Qm <- Qm[names(Lm),]
+# Rm <- cbind(extract(Deriv, TreesXY[2:3], df = T)[-1], TreesXY$`2013_girth`)
+# names(Rm)[5] <- 'Girth'
+# row.names(Rm) <- row.names(Lm)
+#
+# # RLQ
+# L <- dudi.coa(Lm, scannf = FALSE)
+# R <- dudi.pca(Rm, scannf = FALSE, row.w = L$lw)
+# Q <- dudi.pca(Qm, scannf = FALSE, row.w = L$cw)
+# rlq <- rlq(R, L, Q, scannf = FALSE)
+# rd <- randtest(rlq)
+# fq <- fourthcorner.rlq(rlq, type = "Q.axes")
+# fr <- fourthcorner.rlq(rlq, type = "R.axes")
+# fqr <- fourthcorner(Rm, Lm, Qm)
+# fqr.adj <- p.adjust.4thcorner(fqr, p.adjust.method.G = "fdr", p.adjust.method.D = "fdr")
+#
+# # Results
+# summary(rlq)
+# plot(rlq)
+# s.arrow(rlq$l1)
+# s.arrow(rlq$c1)
+# s.label(rlq$lQ, boxes = FALSE)
+# plot(fqr.adj, alpha = 0.5, stat = "D2")
+# plot(fqr.adj, x.rlq = rlq, alpha = 0.5, stat = "D2", type = "biplot")
+# plot(fq, alpha = 0.1, stat = "D2")
+# plot(fr, alpha = 0.1, stat = "D2")
+# print(fq, stat = 'D')
+# print(fr, stat = 'D')
+
+# # Moran I {ape}
+# CWMab <- com_abund@data[c('LES', 'SLA', 'WES', 'WD', 'LDMC', 'Thick', 'LA')]
+# CWMab.dist <- as.matrix(dist(coordinates(com_abund)))
+# CWMab.dist.inv <- 1/CWMab.dist
+# diag(CWMab.dist.inv) <- 0
+# Moran.I(CWMab$LES, CWMab.dist.inv)
+# CWMab.Moran <- lapply(as.list(CWMab), Moran.I, weight = CWMab.dist.inv)
+# CWMab.Moran <- do.call(rbind.data.frame, CWMab.Moran)
+# CWMab.resid <- lapply(LM$Abundance, residuals)
+# CWMab.resid.Moran <- lapply(CWMab.resid, Moran.I, weight = CWMab.dist.inv)
+# CWMab.resid.Moran <- do.call(rbind.data.frame, CWMab.resid.Moran)
+
+# # Phylogenetic tree
+# library(phytools)
+# library(Uppangala)
+# path <- 'C:/Users/sylvain/Downloads/Phylogeny/'
+# source(file.path(path, 'R_codes for function S.PhyloMaker.txt'))
+# Species <- genSpecies()
+# phylo <- read.tree(file.path(path, 'PhytoPhylo.tre'))
+# nodes <- read.csv(file.path(path, 'nodes.csv'), h = T)
+# sp <- Species[PFT_sp$Sp_Code,2:3]
+# sp$genus <- unlist(lapply(strsplit(sp$LatinName, ' ', fixed = T), function(x){x[2]}))
+# sp$species <- sub(' ', '_', sp$LatinName, fixed = T)
+# sp$family <- sp$Family
+# sp <- sp[c('species', 'genus', 'family')]
+# sp[which(sp$family == 'Flacourtiaceae'),3] <- 'Salicaceae'
+# sp[which(sp$family == 'Steruliaceae'),3] <- 'Malvaceae'
+# sp[which(sp$family == 'Cesaliniaceae'),3] <- 'Fabaaceae'
+# sp['cato','family'] <- 'Lamiaceae'
+# sp['clvi',] <- c('Clerodendrum_infortunatum', 'Clerodendrum', 'Lamiaceae')
+# sp['glma','family'] <-'Phyllanthaceae'
+# sp['gote','family'] <- 'Stemonuraceae'
+# sp['goca','family'] <- 'Annonaceae'
+# sp['liol','family'] <- 'Lauraceae'
+# sp['mewi','family'] <- 'Melastomataceae'
+# results <- S.PhyloMaker(sp, phylo, nodes)
+# str(results)
+# par(mfrow=c(1,3),mar=c(0,0,1,0))
+# plot(results$Scenario.1,cex=1.1,main="Scenarion One")
+# plot(results$Scenario.2,cex=1.1,main="Scenarion Two")
+# plot(results$Scenario.3,cex=1.1,main="Scenarion Three")

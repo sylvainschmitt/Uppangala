@@ -13,8 +13,10 @@ output:
   slidy_presentation: default
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+```{r config, message=FALSE, warning=FALSE, include=FALSE}
+library(knitr)
+opts_chunk$set(
+  echo = F, message = F, warning = F, cache = T, cache.lazy = F)
 ```
 
 ## Sampling
@@ -25,7 +27,7 @@ knitr::opts_chunk$set(echo = FALSE)
 - 272 fresh leaves
 - 272 fresh branch wood sample
 
-## Direct measurements {.build}
+## Direct measurements
 
 - Tree crown exposure
 - Leaf fresh weight
@@ -299,8 +301,3 @@ plot(stack(com_ba[13:19]))
 ```{r Variogram, echo=FALSE, message=FALSE, warning=FALSE, fig.cap='Variogram example'}
 plot(gstat::variogram(WD~1, as(com_abund, 'SpatialPointsDataFrame')))
 ```
-
-## Continuous models {.smaller}
-
-<img src="table.png" width="700" height="500" />
-

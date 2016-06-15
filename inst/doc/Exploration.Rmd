@@ -1,5 +1,5 @@
 ---
-title: "Uppangala trees functionnal traits"
+title: "Uppangala trees functionnal traits : Exploration"
 author: "Sylvain Schmitt"
 date: '`r Sys.Date()`'
 output: html_document
@@ -7,6 +7,14 @@ fig_caption: yes
 vignette: |
   %\VignetteIndexEntry{Uppangala PFT} %\VignetteEngine{knitr::rmarkdown} %\VignetteEncoding{UTF-8}
 ---
+
+```{r config, message=FALSE, warning=FALSE, include=FALSE}
+library(knitr)
+opts_chunk$set(
+  echo = F, message = F, warning = F, fig.height = 8, fig.width = 8,
+  cache = T, cache.lazy = F)
+```
+
 # Traits
 
 ## Data cleaning
@@ -15,7 +23,7 @@ vignette: |
 
 Data loading from gen functions, that open data from raw tables in `inst/extdata`
 
-```{r Load data, echo=TRUE, message=FALSE, warning=FALSE}
+```{r Load data}
 rm(list = ls()); invisible(gc())
 library(Uppangala)
 PFT <- genPFT()
@@ -31,7 +39,7 @@ Errors in PFT values :
 
 ### Outlier research
 
-```{r variances, echo=FALSE, fig.height=8, fig.width=8, message=FALSE, warning=FALSE}
+```{r variances}
 par(mfrow = c(1,1))
 bymedian <- with(PFT, reorder(Sp_Code, -Thick,  mean, na.rm = T))
 boxplot(Thick ~ bymedian, data = PFT, las = 2, horizontal = F, main = captions['Thick'])
@@ -52,7 +60,7 @@ rm(bymedian)
 
 ### Leaf Principal component analysis
 
-```{r Leaf PCA, echo=FALSE, fig.height=6, fig.width=6, message=FALSE, warning=FALSE}
+```{r Leaf PCA}
 # pca <- princomp(~ LA + WD + Thick + LDMC + LTD + SLA + SHA, data = PFT, cor = T)
 pca <- princomp(~ LA + WD + Thick + LDMC + SLA + SHA, data = PFT, cor = T)
 par(mfrow = c(1,1))
@@ -65,7 +73,7 @@ rm(col, pca)
 
 #### Distributions
 
-```{r distributions, echo=FALSE, fig.height=8, fig.width=8}
+```{r distributions}
 par(mfrow = c(1,1))
 hist(PFT$Thick, prob = T)
 lines(density(PFT$Thick, na.rm = T), col = "red")
@@ -85,7 +93,7 @@ lines(density(PFT$WD, na.rm = T), col = "red")
 
 ### Individual aggregation and coefficient of variation
 
-```{r Individual aggragetion, message=FALSE, warning=FALSE}
+```{r Individual aggragetion, echo = T}
 PFT_ind <- aggregate(PFT, by = list(PFT$Tree), FUN = mean, na.rm = T)
 row.names(PFT_ind) <- PFT_ind$Group.1
 SpT <- unique(PFT[1:2])
@@ -105,7 +113,7 @@ rm(SpT, Sp, SpCodeT, CET, CE)
 ```
 
 ### Coefficient of variation
-```{r CV, message=FALSE, warning=FALSE}
+```{r CV}
 cv <- data.frame(row.names = c('Thick', 'LA', 'LDMC', 'SLA', 'WD'))
 cv$Individual <- unlist(lapply(
   as.list(row.names(cv)), 
@@ -125,7 +133,7 @@ rm(cv, PFT)
 
 ### Tree Principal component analysis
 
-```{r Tree PCA, echo=FALSE, fig.height=6, fig.width=6, message=FALSE, warning=FALSE}
+```{r Tree PCA}
 library(vegan)
 # pca <- princomp(~ LA + WD + Thick + LDMC + LTD + SLA, data = PFT_ind, cor = T)
 pca <- princomp(~ LA + WD + Thick + LDMC + SLA, data = PFT_ind, cor = T)
@@ -149,7 +157,7 @@ rm(pca.var, PCAscores)
 
 ### Traits relations
 
-```{r Traits relations, echo=FALSE, fig.height=8, fig.width=8, message=FALSE, warning=FALSE}
+```{r Traits relations}
 library(smatr)
 par(mfrow = c(2,2))
 PFTrel("LDMC", "Thick", PFT_ind, captions, cex = 0.7)
@@ -171,23 +179,23 @@ rm(c, X, Y)
 
 ### Crown exposure effect
 
-```{r CE, echo=FALSE, fig.height=8, fig.width=8, message=FALSE, warning=FALSE}
-# library(lme4)
-# CEtest <- data.frame(pca1 = pca$scores[,1],
-#                      CEs = PFT_ind[row.names(pca$scores),which(names(PFT) == 'CEs')],
-#                      Sp = PFT_ind[row.names(pca$scores),3])
-# CEtest <- CEtest[-which(is.na(CEtest$CEs)),]
-# m0 <- lmer(pca1 ~ CEs + (1 | CEs), CEtest)
-# m1 <- lmer(pca1 ~ CEs + (Sp | CEs), CEtest)
-# anova(m0, m1)
-# rm(CEtest)
+```{r CE, eval=FALSE, include=FALSE}
+library(lme4)
+CEtest <- data.frame(pca1 = pca$scores[,1],
+                     CEs = PFT_ind[row.names(pca$scores),which(names(PFT) == 'CEs')],
+                     Sp = PFT_ind[row.names(pca$scores),3])
+CEtest <- CEtest[-which(is.na(CEtest$CEs)),]
+m0 <- lmer(pca1 ~ CEs + (1 | CEs), CEtest)
+m1 <- lmer(pca1 ~ CEs + (Sp | CEs), CEtest)
+anova(m0, m1)
+rm(CEtest)
 ```
 
 # Environment
 
 ## Load data
 
-```{r Load env, echo=TRUE, message=FALSE, warning=FALSE}
+```{r Load env}
 library(raster)
 Env <- genEnv()
 Trees <- genTrees()
@@ -196,7 +204,7 @@ hillshade <- DEMderiv(Env$DEM, c("slope", "aspect", "hillshade"))$Hillshade # Fo
 ```
 
 ## Trees
-```{r Trees plot, echo=FALSE, fig.height=8, fig.width=8, message=FALSE, warning=FALSE}
+```{r Trees plot}
 par(mfrow = c(1,1))
 plot(hillshade, col = grey(0:100/100), main = 'Trees ~ Girth + Sp')
 points(Y ~ X, Trees, col = SpCode, cex = `2013_girth`/100, pch = 20)
@@ -205,7 +213,7 @@ legend("bottomleft", legend = 'Species', fill = 'lightgrey')
 
 ## Traits
 
-```{r Species aggregation, message=FALSE, warning=FALSE}
+```{r Species aggregation}
 PFT_sp <- aggregate(PFT_ind, by = list(PFT_ind$SP), FUN = mean, na.rm = T)
 row.names(PFT_sp) <- PFT_sp$Group.1
 PFT_sp$Sp_Code <- SpCode[row.names(PFT_sp)]
@@ -222,7 +230,7 @@ Difference between species
 * Toona ciliata (toci) is not yet removed from the database
 * We didn't collect 25 rare species from Uppangala plots
 
-```{r Merging Trees and traits}
+```{r Merging Trees and traits, echo = T}
 Trees$ID <- row.names(Trees)
 l <- length(row.names(Trees))
 Trees <- merge(Trees, PFT_sp, by.x = 'SpCode', by.y = 'Sp_Code')
@@ -234,7 +242,7 @@ rm(l)
 
 There is 91 trees in missing species of our PFT dataset.
 
-```{r Plot WD, echo=FALSE, fig.height=8, fig.width=8, message=FALSE, warning=FALSE}
+```{r Plot WD}
 plot(hillshade, col=grey(0:100/100), main = 'Trees ~ Girth + WD')
 col = heat.colors(100)[as.numeric(cut(Trees$WD, breaks = 100))]
 points(Y ~ X, Trees, col = "black", cex = `2013_girth`/100, pch = 20)
@@ -249,7 +257,7 @@ rm(col)
 
 Community definition by quadrat
 
-```{r Communities}
+```{r Communities, echo = T}
 com <- quadrats()
 Trees$com <- NA
 XY <- data.frame(X = Trees$X, Y = Trees$Y)
@@ -259,7 +267,7 @@ proj4string(XY) <- crs(com)
 Trees$com[which(!is.na(Trees$X))] <- (XY %over% com)[,1]
 Trees$com[which(!is.na(Trees$com))] <- paste0('C', Trees$com[which(!is.na(Trees$com))])
 ```
-```{r Plot com, echo=FALSE, fig.height=8, fig.width=8, message=FALSE, warning=FALSE}
+```{r Plot com}
 plot(hillshade, col=grey(0:100/100), main = 'Communities')
 plot(as(com, "SpatialPolygons"), add = T)
 col =  sample(rainbow(length(levels(as.factor(Trees$com)))))[as.numeric(as.factor(Trees$com))]
@@ -270,7 +278,7 @@ rm(col, XY, Trees_bin)
 
 Some species distribtuion for SLA and WD by community
 
-```{r dist com, echo=FALSE, fig.height=8, fig.width=8, message=FALSE, warning=FALSE}
+```{r dist com}
 library(cati)
 par(mfrow = c(4,4), cex = 0.5)
 rows = which(Trees$com %in% sample(levels(as.factor(Trees$com)), 8))
@@ -283,7 +291,7 @@ rm(rows)
 
 Adding topo to communities
 
-```{r com topo, echo=TRUE, message=FALSE, warning=FALSE}
+```{r com topo}
 com@data$id <- paste0('C', com@data$id)
 com@data$DEM <- extract(Env$DEM, as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
 Deriv <- DEMderiv(raster(com, 'DEM'), c('slope', 'curvature', 'plancurvature', 'profcurvature', 'aspect'))
@@ -296,9 +304,10 @@ rm(Deriv)
 ```
 
 PCA on topgraphical variables
-```{r topo pca, echo=FALSE, fig.height=8, fig.width=8, message=FALSE, warning=FALSE}
+```{r topo pca}
 pca <- princomp(~ DEM + Slope + Curvature + PlanCurvature + ProfileCurvature + Wetness + Rivers + SouthWesterness, data = com@data, cor = T)
 lambda <- pca$sdev * sqrt(nrow(pca$scores))
+pca.var = apply(pca$score, 2, var)
 plot(t(t(pca$scores)/lambda),pch=16, col = 'lightgrey',
      xlab = paste('Axe 1 -', round(lambda[1]/sum(lambda)*100, 2), '%'),
      ylab = paste('Axe 2 -', round(lambda[2]/sum(lambda)*100, 2), '%'))
@@ -323,18 +332,17 @@ arrows (rep(0,nrow(pca$loadings)),rep(0,nrow(pca$loadings)),Rot[,1],Rot[,2],lwd=
 legend('topright', c('Elevation', 'Slope', 'Water flow', 'South-West'),
        text.col = col, cex = 1.2)
 text (Rot[,1:2], pos = c(2, 2, 2, 1, 1, 3, 3, 1), rownames(Rot),cex=1.2,col=col)
-pca.var = apply(pca$score, 2, var)
 axis (3)
 axis (4)
-# PCAscores <- as.data.frame(pca$scores)[1:3] # Adding PCA axis in PFT values
-# names(PCAscores) <- c('PCA1', 'PCA2', 'PCA3')
-# PCAscores$ID <- row.names(PCAscores)
+PCAscores <- as.data.frame(pca$scores)[1:3] # Adding PCA axis in PFT values
+names(PCAscores) <- c('PCA1', 'PCA2', 'PCA3')
+PCAscores$ID <- row.names(PCAscores)
 ```
 
 
 Topographical classes assignation and plot
 
-```{r Plot topo, echo=FALSE, fig.height=8, fig.width=9, message=FALSE, warning=FALSE}
+```{r Plot topo}
 com@data$topo <- as.factor(with(com@data, topo_classes(Slope, Curvature, Aspect)))
 par(mfrow = c(1,1))
 col <- c("#008B00", "#00CD00", "#009ACD", "#00BFFF", "#CD9B1D", "#FFC125")
@@ -346,7 +354,7 @@ rm(col)
 ```
 
 Adding CWM to communities
-```{r CWM, message=FALSE, warning=FALSE}
+```{r CWM}
 CWM <- aggregate(Trees, by = list(Trees$com), mean, na.rm = T) #CWM abundance
 names(CWM)[1] <- 'id'
 CWM <- CWM[which(names(CWM) %in% c('id', 'Thick', 'LA', 'LDMC', 'SLA', 'WD', 'PCA1', 'PCA2', 'PCA3'))]
@@ -377,7 +385,7 @@ plot(gstat::variogram(WD~1, as(com_abund, 'SpatialPointsDataFrame'))) # 1 variog
 
 Linear regression & Null models on all variables
 
-```{r lm, echo=FALSE, message=FALSE, warning=FALSE}
+```{r lm}
 reg <- '~ DEM + Slope + Curvature + PlanCurvature + ProfileCurvature + Wetness + Rivers + SouthWesterness'
 LM <- lapply(list(com_abund, com_bin, com_ba), 
              function(x) {with(x@data, list(PCA1 = lm(formula(paste('PCA1', reg))),
@@ -397,7 +405,7 @@ LM <- lapply(LM, function(y){lapply(y, function(x){step(x, direction = 'both', t
 
 Null models
 
-```{r Model, echo=FALSE, fig.height=9, fig.width=9, message=FALSE, warning=FALSE} 
+```{r Model, eval=FALSE, include=FALSE}
 TreesL <- list(Trees, Trees_bin, TreesBA)
 comL <- list(com_abund, com_bin, com_ba)
 baL <- list(F, F, T)
@@ -419,18 +427,18 @@ knitr::kable(res)
 
 Anova with topographical classes
 
-```{r anova, echo=FALSE, message=FALSE, warning=FALSE}
-# ANOVA <- with(com@data, list(PCA1 = aov(PCA1 ~ topo),
-#                              PCA2 = aov(PCA2 ~ topo),
-#                              PCA3 = aov(PCA3 ~ topo),
-#                              SLA = aov(SLA ~ topo),
-#                              LDMC = aov(LDMC ~ topo),
-#                              # LTD = aov(LTD ~ topo),
-#                              LA = aov(LA ~ topo),
-#                              Thick = aov(Thick ~ topo),
-#                              WD = aov(WD ~ topo)))
-# cat('ANOVA p-values :\n') ; unlist(lapply(ANOVA, function(x){stars(summary(x)[[1]][['Pr(>F)']][1])}))
-# ANOVA <- ANOVA[which(lapply(ANOVA, function(x){summary(x)[[1]][['Pr(>F)']][1]}) < 0.05)]
-# lapply(ANOVA, TukeyHSD)
-# rm(ANOVA)
+```{r anova, eval=FALSE, include=FALSE}
+ANOVA <- with(com@data, list(PCA1 = aov(PCA1 ~ topo),
+                             PCA2 = aov(PCA2 ~ topo),
+                             PCA3 = aov(PCA3 ~ topo),
+                             SLA = aov(SLA ~ topo),
+                             LDMC = aov(LDMC ~ topo),
+                             # LTD = aov(LTD ~ topo),
+                             LA = aov(LA ~ topo),
+                             Thick = aov(Thick ~ topo),
+                             WD = aov(WD ~ topo)))
+cat('ANOVA p-values :\n') ; unlist(lapply(ANOVA, function(x){stars(summary(x)[[1]][['Pr(>F)']][1])}))
+ANOVA <- ANOVA[which(lapply(ANOVA, function(x){summary(x)[[1]][['Pr(>F)']][1]}) < 0.05)]
+lapply(ANOVA, TukeyHSD)
+rm(ANOVA)
 ```

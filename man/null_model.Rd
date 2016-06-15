@@ -5,7 +5,7 @@
 \title{Null model}
 \usage{
 null_model(formulas, test, ba = F, PFT_sp, Trees, com, SpCode, tcol = NULL,
-  cwmcol = c(1:1), ccol = c(1:12), n = 1000, plot = F, count = F,
+  cwmcol = c(1:1), ccol = c(1:15), n = 1000, plot = F, count = F,
   time = T)
 }
 \arguments{

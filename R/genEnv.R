@@ -1,5 +1,5 @@
 #' @include genTrees.R
-#' @importFrom raster shapefile raster crop resample hillShade stack
+#' @importFrom raster shapefile raster crop resample hillShade stack extent
 NULL
 
 #' Environmental data generation

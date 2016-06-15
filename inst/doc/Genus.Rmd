@@ -1,11 +1,19 @@
 ---
-title: "TopoSpecies"
+title: "Genus"
 author: "Sylvain Schmitt"
 date: "May 26, 2016"
 output: html_document
 ---
+
+```{r config, message=FALSE, warning=FALSE, include=FALSE}
+library(knitr)
+opts_chunk$set(
+  echo = F, message = F, warning = F, fig.height = 10, fig.width = 10,
+  cache = T, cache.lazy = F)
+```
+
 # Data
-```{r Data, echo=TRUE, message=FALSE, warning=FALSE}
+```{r Data, echo=TRUE}
 rm(list = ls()); invisible(gc())
 library(Uppangala)
 library(raster)
@@ -20,7 +28,7 @@ sort(levels(Trees$SpCode))[which(!(sort(levels(Trees$SpCode)) %in% (sort(Species
 ```
 
 # Species plots
-```{r Plot sp, echo=FALSE, fig.height=10, fig.width=10, message=FALSE, warning=FALSE}
+```{r Plot sp, echo=FALSE}
 SpCode <- sort(Species$SpCode)[which(sort(Species$SpCode) %in% sort(levels(Trees$SpCode)))] # Using only common SpCode
 Genus <- unlist(lapply(strsplit(Species[SpCode,2], ' ', fixed = T), function(x){x[[1]]}))
 for(Gen in unique(Genus)){
