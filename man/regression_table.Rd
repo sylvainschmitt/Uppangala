@@ -4,7 +4,7 @@
 \alias{regression_table}
 \title{Regression table}
 \usage{
-regression_table(LM, model, reg)
+regression_table(LM, model, reg, select = ".abiot.cwm")
 }
 \arguments{
 \item{LM}{list. List of tested regressions}
@@ -12,6 +12,8 @@ regression_table(LM, model, reg)
 \item{model}{list. List of null models issued from null_model function}
 
 \item{reg}{char. Initial regression formula}
+
+\item{select}{char. subset of models to summarize}
 }
 \value{
 A table summarizing all the regression

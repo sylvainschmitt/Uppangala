@@ -4,43 +4,39 @@
 \alias{null_model}
 \title{Null model}
 \usage{
-null_model(formulas, test, ba = F, PFT_sp, Trees, com, SpCode, tcol = NULL,
-  cwmcol = c(1:1), ccol = c(1:15), n = 1000, plot = F, count = F,
-  time = T)
+null_model(com, Trees, PFT, formulas, SpCode, traits = c("LES", "SLA", "WES",
+  "WD", "LDMC", "Thick", "LA"), env = c("Slope", "Curvature", "Wetness",
+  "SouthWesterness", "Canopy", "BA"), type = c("CWM", "CWV"), n = 999,
+  time = T, verbose = T)
 }
 \arguments{
-\item{test}{char. name of the used test (Anova Fvalue or lm R2)}
+\item{com}{list. List of communities}
 
-\item{ba}{logical. True if basal area wighted mean}
+\item{PFT}{data.frame. PFT values by species}
 
-\item{PFT_sp}{data.frame. PFT values by species}
+\item{formulas}{list. Model formulas}
 
-\item{Trees}{data.frame. trees table}
+\item{SpCode}{dta.frame. Link between species nd they're code}
 
-\item{com}{SpatialGridDataFrame. communities}
+\item{traits}{char. Choosen traits and strategy axes}
 
-\item{tcol}{int. column to keep in trees table}
+\item{env}{char. Choosen environmental variables}
 
-\item{ccol}{int. communities column to keep}
+\item{type}{char. Communti weighted trait metric}
 
 \item{n}{int. number of repetitions}
 
-\item{plot}{logical. do all null communitier need to be plot}
+\item{time}{logical. Use a timer}
 
-\item{count}{logical. do the number of the realized null model need to be counted}
-
-\item{time}{logical. do the time of the operation need to be measured}
-
-\item{formula}{char. test formula}
+\item{verbose}{logical. Use a counter}
 }
 \value{
-a list with the formula, the test, the null values, and the community value
+List of communities null models
 }
 \description{
-Function to compute null model
+Function to compute null models
 }
 \examples{
-# No example yet see Uppangala_PFT vignette
 
 }
 

@@ -9,4 +9,4 @@ Uppangala tree functionnal traits analysis package
 Installation
 ------------
 
-Please check `?extdata` to correctly install the package
+Please check `?extdata` and `?phylogeny` to correctly install the package

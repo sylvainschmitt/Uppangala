@@ -1,19 +1,24 @@
 Package: Uppangala
 Type: Package
 Title: Uppangala tree functionnal traits analysis
-Version: 0.1.9011
+Version: 0.1.9012
 Author: Sylvain Schmitt
 Description: Uppangala tree functionnal traits analysis
 License: GPL (>=3)
 LazyData: TRUE
 Imports:
-    raster (>= 2.5-2)
+    raster (>= 2.5-2),
+    plyr,
+    sp,
+    Hmisc,
+    RSAGA
 RoxygenNote: 5.0.1
 Suggests:
     knitr,
     rmarkdown
 VignetteBuilder: knitr
 Collate:
+    'CWT.R'
     'PFTrel.R'
     'draft.R'
     'extdata.R'
@@ -23,7 +28,7 @@ Collate:
     'genPFT.R'
     'genSpecies.R'
     'null_model.R'
-    'plot.null_model.R'
+    'phylogeny.R'
     'quadrats.R'
     'regression_table.R'
     'stars.R'
