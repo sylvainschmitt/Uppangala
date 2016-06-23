@@ -170,3 +170,40 @@
 # plot(results$Scenario.1,cex=1.1,main="Scenarion One")
 # plot(results$Scenario.2,cex=1.1,main="Scenarion Two")
 # plot(results$Scenario.3,cex=1.1,main="Scenarion Three")
+
+# ## FD
+#
+# # Building
+# x <- data.frame(PFT_sp[-1], row.names = PFT_sp$Sp_Code)
+# a <- data.frame(tapply(rep(1, length(Trees[,1])), list(Trees$com, Trees$SpCode), sum))
+# a[is.na(a)] <- 0
+# x <- x[names(a),]
+# FD <- as.data.frame(dbFD(x, a, corr = 'cailliez', calc.CWM = F, print.pco = F, messages = F))[-c(1:2,4)]
+# FD$id <- row.names(FD)
+# com_FD <- merge(com$abundance, FD)
+# plot(stack(com_FD)[[22:26]])
+#
+# # Variogram
+# library(gstat)
+# dist <- variogram(FRic~1, as(com_FD, 'SpatialPointsDataFrame'))$dist
+# traits <- c('FRic', 'FEve', 'FDiv', 'FDis', 'RaoQ')
+# plot(c(1:length(dist)) ~ dist, xlim = c(0, max(dist)), ylim = c(0.5,1), pch = '', xlab = 'distance (m)', ylab = 'relative variance (%)')
+# var <- data.frame(lapply(lapply(as.list(traits), function(x){variogram(formula(paste(x, '~ 1')), as(com_FD, 'SpatialPointsDataFrame'))}), function(x){x[3]}))
+# var <- data.frame(apply(var, 2, function(x){x/max(x)}))
+# names(var) <- traits
+# # colramp <- rainbow(length(var))
+# # for(i in 1:length(var)){
+# #   lines(var[,i] ~ dist, col = colramp[i])
+# # }
+# # legend('bottomright', names(var), fill = colramp, cex = 0.7)
+#
+# # SAC
+# library(ape)
+# traits <- c('FRic', 'FEve', 'FDiv', 'FDis', 'RaoQ')
+# weights <- 1 / as.matrix(dist(coordinates(com$abundance)))
+# diag(weights) <- 0
+# SAC <- do.call(rbind.data.frame, lapply(as.list(com_FD@data[traits]), Moran.I, weights))
+# SAC <- paste(round(SAC$observed, 2), unlist(lapply(as.list(SAC$p.value), stars)))
+# names(SAC) <- c('Abundance', 'Presence-absence', 'Basal area')
+# names(SAC) <- traits
+# # kable(as.data.frame(SAC))

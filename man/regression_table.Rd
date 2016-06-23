@@ -4,7 +4,7 @@
 \alias{regression_table}
 \title{Regression table}
 \usage{
-regression_table(LM, model, reg, select = ".abiot.cwm")
+regression_table(LM, model, reg, select = ".cwm")
 }
 \arguments{
 \item{LM}{list. List of tested regressions}

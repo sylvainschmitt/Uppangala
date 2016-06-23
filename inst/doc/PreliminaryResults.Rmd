@@ -14,13 +14,15 @@ opts_chunk$set(
 ```
 
 # *News*
-Add from the june 20th version :
+Add from the `r Sys.Date()` version :
 
 - RLQ to investigate individuals filters
 - Spatial autocorrelation for CWM and models residuals with Moran's I
 - Phylosignal
 - CWV
 - Structural Equation Modelling (SEM)
+- Species growth too much unprecised for analysis
+- Eveness and other FD package metrics
 
 # Traits
 
@@ -146,11 +148,11 @@ row.names(PFT_ind) <- PFT_ind$ID
 PFT_ind <- PFT_ind[-which(names(PFT_ind) == 'ID')]
 ```
 
-Figure 1: Principal component analysis (PCA) performed on individual trait means. *Left corner subplot represents the eigen values (grey bars) compare to a broken stick distribution for 6 components (red line). See table 1 for abbreviation.*
+Figure 1: Principal component analysis (PCA) performed on individual trait means. *Bottom right corner subplot represents the eigen values (grey bars) compare to a broken stick distribution for 6 components (red line). See table 1 for abbreviation.*
 
 We realized a principal component analysis on individual trait means (see figure 1), where first axis (PCA1) covary mainly with leaf thickness, dry matter content and wood density. Whereas second axis (PCA2) covary mainly with specific leaf area representative of the leaf economic spectrum [LES, @wright_worldwide_2004]. PCA1 might be associated with the wood density covariation to the wood economic spectrum [WES, @chave_towards_2009]. Results are similar to the one found by @fortunel_leaf_2012 where PCA1 and PCA2 were respectively interpreted as leaf and wood economic spectrum (inverted compare to us). Our results integrate less traits (5/14), and less species (92/758), but still capture the same strategy axes.
 
-We can see that as wood density ans specific leaf area are orthogonal following the results of @baraloto_decoupled_2010 suggesting that the two economic spectrum were decoupled (Spearman's $rho = -0.04$, $p-value > 0.1$). Leaf area is almost opposed to wood density and is effectively negatively correlated to it (Spearman's $rho = -0.033$, $p-value < 0.001$) as found by @wright_relationships_2007. This relationship could be explained by an equilibrium in tree hydraulics (Coomes et al, 2008). Finally, we found the positive relation suggested by @diaz_global_2015 between leaf dry matter content and wood density (Spearman's $rho = 0.24$, $p-value < 0.001$).
+We can see that as wood density and specific leaf area are orthogonal following the results of @baraloto_decoupled_2010 suggesting that the two economic spectrum were decoupled (Spearman's $rho = -0.04$, $p-value > 0.1$). Leaf area is almost opposed to wood density and is effectively negatively correlated to it (Spearman's $rho = -0.033$, $p-value < 0.001$) as found by @wright_relationships_2007. This relationship could be explained by an equilibrium in tree hydraulics (Coomes et al, 2008). Finally, we found the positive relation suggested by @diaz_global_2015 between leaf dry matter content and wood density (Spearman's $rho = 0.24$, $p-value < 0.001$).
 
 # Environmental filters
 
@@ -186,22 +188,23 @@ com@data$DEM <- extract(Env$DEM, as(com, "SpatialPolygons"), df = T, fun = mean)
 Deriv <- DEMderiv(raster(com, 'DEM'), c('slope', 'curvature', 'plancurvature', 'profcurvature', 'aspect'))
 com@data <- cbind(com@data, extract(Deriv, as(com, "SpatialPolygons"), df = T, fun = mean)[-1])
 com@data$Wetness <- extract(DEMderiv(Env$DEM, 'wetness'), as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
-com@data$SouthWesterness <- sin((com@data$Aspect + 225) / 180 * pi)
-com@data$NorthEasterness <- cos((com@data$Aspect + 225) / 180 * pi)
+com@data$SW <- sin((com@data$Aspect + 225) / 180 * pi)
+com@data$NE <- cos((com@data$Aspect + 225) / 180 * pi)
 com@data$Rivers <- extract(Env$Rivers, as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
 com@data$topo <- as.factor(with(com@data, topo_classes(Slope, Curvature, Aspect)))
 com@data$Canopy <- extract(Env$Canopy, as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
 com@data$BA <- aggregate(Trees$`2013_girth`, list(Trees$com), function(x){sum(x, na.rm = T)/2*pi})[,2]
 com@data$StD <- aggregate(rep(1, length(Trees$SpCode)), list(Trees$com), sum)[,2]
+# com@data$Height <- aggregate(Trees$height, list(Trees$com), mean, na.rm = T)[,2]
 rm(Deriv, XY)
 ```
 
-To study environment effect on our traits we choose 8 topographical variables representing abiotic factors: digital elevation model, slope, curvature, plan curvature, profile curvature, wetness, southwesterness (aspect in direction of south-west), and distance to the nearest potential river. Digital elevation model is issued from a LIDAR campaign on Uppangala plots with a resolution of $1*1 m^2$. Slope, curvature, plan curvature, profile curvature, wetness and southwesterness ($cos(aspect in degres + 225)$) are all derived from the digital elevation model with the RSAGA package [@brenning_statistical_2008]. Distance to the nearest potential river was caluclated under ArcGis (cite).
+To study environment effect on our traits we choose 8 topographical variables representing abiotic factors: digital elevation model, slope, curvature, plan curvature, profile curvature, wetness, southwesterness (SW, aspect in direction of south-west), and distance to the nearest potential river. Digital elevation model is issued from a LIDAR campaign on Uppangala plots with a resolution of $1*1 m^2$. Slope, curvature, plan curvature, profile curvature, wetness and southwesterness ($cos(aspect in degres + 225)$) are all derived from the digital elevation model with the RSAGA package [@brenning_statistical_2008]. Distance to the nearest potential river was caluclated under ArcGis (cite).
 
-In order to avoid multi-colinearity in future regressions, we reduced our explanatory variables via a principal component analysis, see figure 2. Curvature, profile curvature, plan curvature, and distance to potential rivers covary together and with the principal component analysis first axis (PCA1). Eleveation (DEM) and wetness are opposed in the principal component analysis and slope and south-westerness doesn't seem to covary much with other variables. As a conclusion, we choose to reduce our variable to 4: curvature to represent the water flow paths and soil stabilization areas, wetness to highlight water accumulation areas, southwesterness to represent monsoon winds [@bunyan_effect_2015] and slope.
+In order to avoid multi-colinearity in future regressions, we reduced our explanatory variables via a principal component analysis, see figure 2. Curvature, profile curvature, plan curvature, and distance to potential rivers covary together and with the principal component analysis first axis (PCA1). Eleveation (DEM) and wetness are opposed in the principal component analysis and slope and south-westerness doesn't seem to covary much with other variables. As a conclusion, we choose to reduce our variable to 4: curvature to represent the water flow paths and soil stabilization areas, wetness to highlight water accumulation areas, southwesterness (SW) to represent monsoon winds [@bunyan_effect_2015] and slope.
 
 ```{r PCA Env}
-pca.env <- princomp(~ DEM + Slope + Curvature + PlanCurvature + ProfileCurvature + Wetness + Rivers + SouthWesterness, data = com@data, cor = T)
+pca.env <- princomp(~ DEM + Slope + Curvature + PlanCurvature + ProfileCurvature + Wetness + Rivers + SW, data = com@data, cor = T)
 lambda <- pca.env$sdev * sqrt(nrow(pca.env$scores))
 pca.env.var = apply(pca.env$score, 2, var)
 plot(t(t(pca.env$scores)/lambda),pch=16, col = 'lightgrey',
@@ -235,7 +238,7 @@ axis (3)
 axis (4)
 ```
 
-Figure 2: Principal component analysis (PCA) performed on topgraphical variables. *Left corner subplot represents the eigen values (grey bars) compare to a broken stick distribution for 8 components (red line).*
+Figure 2: Principal component analysis (PCA) performed on topgraphical variables. *Bootom left corner subplot represents the eigen values (grey bars) compare to a broken stick distribution for 8 components (red line). SW stand for southwesterness.*
 
 Among all topographical variables, slope, curvature and south-westerness were chosen to define 6 topographical classes. We rejected elevation because our plot is situated in a mountain slope and doesn't include valley. Consequently elevation mainly inform on the position in the mountain general slope. And because the elevation range between the top of the plot and the bottom is low (325-490), we assumed it won't affect directly tree ecology.
 
@@ -250,7 +253,7 @@ legend('bottomleft', fill = col, legend = levels(com@data$topo), bg = 'white')
 
 Figure 3: Uppangala 10 hectares plot topographical classes.*6 classes were defined one slope, curvature, and south-westerness: concave plane surface (CvP) in dark green, convexe plane surface (CxP) in light green, north-east mean slope (NEMS) in dark blue, north-east steep slope (NESS) in light blue, south-west mean slope (SWMS) in dark orange, and south-west steep slope (SWSS) in ligh orange.*
 
-To study biotic factors we choose 3 available variables: canopy height (canopy), basal area (BA), and stem density (StD) *(we may add tree height and growth in the future)*. Canopy height is issued from a digital canopy model built with a LIDAR campaign on Uppangala plots with a resolution $1*1 m^2$. Both basal area and stem density are calculated with 2013 Uppangala plots girth inventory only on stem with a diameter above 10 centimeters at breast height ($DBH>10$). Consequently basal area end stem density are highly correlated (Spearman's $rho = 0.84$, $p-value < 0.001$). So we removed stem density to avoid multicolinearity, and we kept canopy height that wasn't correlated to basal area (Spearman's $rho = -0.09$, $p-value > 0.1$).
+To study biotic factors we choose 3 available variables: canopy height (canopy), basal area (BA), and stem density *(we may add tree height and growth in the future)*. Canopy height is issued from a digital canopy model built with a LIDAR campaign on Uppangala plots with a resolution $1*1 m^2$. Both basal area and stem density are calculated with 2013 Uppangala plots girth inventory only on stem with a diameter above 10 centimeters at breast height ($DBH>10$). Consequently basal area end stem density are highly correlated (Spearman's $rho = 0.84$, $p-value < 0.001$). So we removed stem density to avoid multicolinearity, and we kept canopy height that wasn't correlated to basal area (Spearman's $rho = -0.09$, $p-value > 0.1$).
 
 For each species the potential strata was defined. Because species were defined in several strata, we kept the lowest strata as the species strata. We tested the strata effect on each trait with an anova combined to a tukey test, but no trait show a significant variation (all F values weren't significanlty different from 0, $p-values>0.1$).
 
@@ -268,12 +271,21 @@ AOV <- list(SLA = aov(PFT_sp$SLA ~ Species[PFT_sp$Sp_Code,]$Strata),
 ## Communities
 
 ```{r 5 Com}
+library(FD)
 com <- CWT(Trees, com)
+x <- data.frame(PFT_sp[-1], row.names = PFT_sp$Sp_Code)
+a <- data.frame(tapply(rep(1, length(Trees[,1])), list(Trees$com, Trees$SpCode), sum))
+a[is.na(a)] <- 0
+x <- x[names(a),]
+FD <- as.data.frame(dbFD(x, a, corr = 'cailliez', calc.CWM = F, print.pco = F, messages = F))[-c(1:2,4)]
+names(FD) <- paste0(names(FD), '.fd')
+FD$id <- row.names(FD)
+com$abundance <- merge(com$abundance, FD)
 ```
 
-Among the whole 10 hectares plot from Uppangala, 240 spatial communities where defined with $20*20 m^2$ quadrats. For all those community, community weighted means and variances [CWM and CWV, sensu @violle_let_2007] were computed for each functional traits and from the species scores obtained on the 2 first PCA axes representing the leaf and the wood economic spectrum (WES, LES). Weighted mean and variances were realized by abundance, presence-absence, or basal area.
+Among the whole 10 hectares plot from Uppangala, 240 spatial communities where defined with $20*20 m^2$ quadrats. For all those community, community weighted means and variances [CWM and CWV, sensu @violle_let_2007] were computed for each functional traits and from the species scores obtained on the 2 first PCA axes representing the leaf and the wood economic spectrum (WES, LES). Weighted mean and variances were realized by abundance, presence-absence, or basal area. In addition functionnal diversity indices weighted by abundances were computed with the `FD` package [@laliberte_distance-based_2010] for our communities: functional richness (FRic), functional evenness (FEve), and functional divergence (FDiv) and Rao's quadratic entropy (Q) (cite Villéger et al. (2008) et Botta-Dukát 2005).
 
-Spatial variograms of community weighted means and variances didn't show a clear plateau (see figure 4) but suggest a spatial organization at a scale of $70 m$.
+Spatial variograms of community weighted means and variances didn't show a clear plateau (see figure 4) but suggest a spatial organization at a scale of $70 m$. Functionnal diversity indices show also a plateau around $70 m$.
 
 ```{r Variograms}
 library(gstat)
@@ -303,15 +315,15 @@ In order to see if environmental biotic factors were influencing functionnal tra
 ```{r SEM}
 library(lavaan)
 m1 <- '
-Abiotic =~ Slope+Curvature+Wetness+SouthWesterness
-Traits =~ WD.cwm+Thick.cwm+LA.cwm+LDMC.cwm+SLA.cwm
-Biotic =~ BA+Canopy
-Traits ~ Abiotic+Biotic
+Abiotic =~ Slope + Curvature + Wetness + SW
+Traits =~ WD.cwm + Thick.cwm + LA.cwm + LDMC.cwm + SLA.cwm
+Biotic =~ BA + Canopy
+Traits ~ Abiotic + Biotic
 '
 m2 <- '
-Abiotic =~ Slope+Curvature+Wetness+SouthWesterness
-Traits =~ WD.cwm+Thick.cwm+LA.cwm+LDMC.cwm+SLA.cwm
-Biotic =~ BA+Canopy
+Abiotic =~ Slope + Curvature + Wetness + SW
+Traits =~ WD.cwm + Thick.cwm + LA.cwm + LDMC.cwm + SLA.cwm
+Biotic =~ BA + Canopy
 Biotic ~ Traits +Abiotic
 '
 fit1 <- sem(m1, data = com$abundance@data)
@@ -319,75 +331,101 @@ fit2 <- sem(m2, data = com$abundance@data)
 semPlot::semPaths(fit1,what='path',whatLabels='std',intercept=FALSE,residuals=FALSE,thresholds=FALSE,nCharNodes=0,nCharEdges=0,groups='manlat',pastel=TRUE,title=TRUE,curveAdjacent=TRUE,ask=FALSE)
 ```
 
-Figure 5: Path diagram for structural equation modelling. *Path diagram of the structural equation model* **m1** *Traits ~ Abiotic + Biotic*.
+Figure 5: Path diagram for structural equation modelling. *Path diagram of the structural equation model* **m1** *Traits ~ Abiotic + Biotic. Arrow values are indicating standardized parameter estimates*.
 
-Links between both community weighted means and variances with their environment, for both abiotic and biotic factors, were studied by linear regressions on continuous variables. Linear regression models were chosen by a step mesure (in both direction) on a first regression with selected variables (slope, curvature, wetness and southwesterness for abiotic factors, and canopy height and basal area for biotic one). A null model was built by randomizing traits among species (permuting raw in `Trait*Species` matrix). Deviance of models selected by the step mesure was calculated 999 times and compare to observed deviance. Results for abundance, presence-absence and basal area community weighted mean for all traits are presented in tables 4 and 5 (respectively for community weighted means and variances).
+Links between both community weighted means and variances with their environment, for both abiotic and biotic factors, were studied by linear regressions on continuous variables. Linear regression models were chosen by a step mesure (in both direction) on a first regression with selected variables (slope, curvature, wetness and southwesterness for abiotic factors, and canopy height and basal area for biotic one). A null model was built by randomizing traits among species (permuting raw in `Trait*Species` matrix). Deviance of models selected by the step mesure was calculated 999 times and compare to observed deviance. Results for abundance, presence-absence and basal area community weighted mean for all traits are presented in tables 4 and 5 (respectively for community weighted means and variances). Same procedure was also applied to functionnal diversity indices (FD) from our ocmmunities, results are presented in table 6.
 
-An assessment of spatial autocorrelation (SAC) of the community weighted means was conducted using Moran's I statistic. Most of community weighed means, especially in abundance, were significantly positively spatially autocorrelated (see table 3). But half of presence-absence and basal area community weighted means spatial autocrorrelation didn't significantly differ from 0 and the other were all low (Moran's I from 0.01 to 0.03). Specific leaf area and wood density are slightly spatially correlated suggesting a spatial filter due to environment or local history pressure (as dispersion limitation). Leaf dry mater content and more generally the wood economic spectrum possess a stochastic spatial distribution implying that they're not shaped by factors with a spatial organization. Finally the leaf economic spectrum, thickness and area are spatially organized for abundant species and voluminous individual but not in presence absence, suggesting that the filter is linked to abundant species pressure as dispersion filter.
+An assessment of spatial autocorrelation (SAC) of the community weighted means and variances and functionnal diversity indices was conducted using Moran's I statistic. Only half of community weighted means and variances were significantly positively spatially autocorrelated (see table 3) with low values (Moran's I from 0.01 to 0.04). Leaf economic spectrum and dry matter content weighted means as wood density weighted variances are slightly spatially correlated suggesting a spatial filter due to environment or local history pressure (as dispersion limitation). On the opposite, wood density and thickness community weighted means as wood economic spectrum community weighted variances possess a stochastic spatial distribution implying that they're not shaped by factors with a spatial organization. Finally remaining traits community weighted means and variances are spatially organized for abundant species and voluminous individual but not in presence absence, suggesting that the filter is linked to abundant species pressure as dispersion filter. As a conclusion both community weighted means and variances are most of the time stochastic or driven by dispersion. Moreover all functionnal diversity indices (FD) are spatially correlated. 
+
+Table 3: Spatial autocorrelation measured by Moran's I for community weighted means and variances. *Spatial autocorrelation for each trait community weighted means and variances (by abundance, presence-absence and basal area), see table 1 for abbreviations.*
 
 ```{r SAC}
 library(ape)
 traits <- c('WD', 'Thick', 'LA', 'LDMC', 'SLA', 'WES', 'LES')
 traits <- c(paste0(traits, '.cwm'), paste0(traits, '.cwv'))
+traits <- list(c(traits, 'FRic.fd', 'FEve.fd', 'FDiv.fd', 'FDis.fd', 'RaoQ.fd'), traits, traits)
 weights <- 1 / as.matrix(dist(coordinates(com$abundance)))
 diag(weights) <- 0
-SAC <- lapply(com, function(x){lapply(as.list(x@data[traits]), Moran.I, weights)})
+SAC <- mapply(function(x,y){lapply(as.list(x@data[y]), Moran.I, weights)}, x =com, y = traits)
 SAC <- lapply(SAC, function(x){do.call(rbind.data.frame, x)})
-SAC <- data.frame(lapply(SAC, function(x){paste(round(x$observed, 2), unlist(lapply(as.list(x$p.value), stars)))}))
+SAC <- lapply(SAC, function(x){paste(round(x$observed, 2), unlist(lapply(as.list(x$p.value), stars)))})
+SAC[[2]] <- c(SAC[[2]], rep('', 5)) ; SAC[[3]] <- c(SAC[[3]], rep('', 5))
+SAC <- data.frame(SAC)
 names(SAC) <- c('Abundance', 'Presence-absence', 'Basal area')
-SAC$Trait <- c('LES', 'SLA', 'WES', 'WD', 'LDMC', 'Thick', 'LA')
+SAC$Indice <- c(rep(c('LES', 'SLA', 'WES', 'WD', 'LDMC', 'Thick', 'LA'), 2), c('FRic', 'FEve', 'FDiv', 'FDis', 'RaoQ'))
 SAC$Type <- ''
-SAC$Type[c(1,8)] <- c('CWM', 'CWV')
-SAC <- SAC[c('Type', 'Trait', 'Abundance', 'Presence-absence', 'Basal area')]
+SAC$Type[c(1,8,15)] <- c('CWM', 'CWV','FD')
+SAC <- SAC[c('Type', 'Indice', 'Abundance', 'Presence-absence', 'Basal area')]
 kable(SAC, row.names = F)
 ```
 
-Table 3: Spatial autocorrelation measured by Moran's I for community weighted means and variances. *Spatial autocorrelation for each trait community weighted means and variances (by abundance, presence-absence and basal area), see table 1 for abbreviations.*
 
-```{r 11 lm & null models}
-reg.abiot <- '~ Slope + Curvature + Wetness + SouthWesterness'
-reg.biot <- '~ Canopy + BA'
+```{r 6 lm & null models}
+reg <- '~ Slope + Curvature + Wetness + SW + Canopy + BA'
 # LM to simplify with loop or lapply
-LM <- lapply(com, function(x) {with(x@data, list(LES.abiot.cwm = lm(formula(paste('LES.cwm', reg.abiot))), # Abiotic CWM
-                                                 logSLA.abiot.cwm = lm(formula(paste('log(SLA.cwm)', reg.abiot))), 
-                                                 WES.abiot.cwm = lm(formula(paste('WES.cwm', reg.abiot))),
-                                                 WD.abiot.cwm = lm(formula(paste('WD.cwm', reg.abiot))),
-                                                 LDMC.abiot.cwm = lm(formula(paste('LDMC.cwm', reg.abiot))),
-                                                 logLA.abiot.cwm = lm(formula(paste('log(LA.cwm)', reg.abiot))),
-                                                 Thick.abiot.cwm = lm(formula(paste('Thick.cwm', reg.abiot))),
-                                                 LES.abiot.cwv = lm(formula(paste('LES.cwv', reg.abiot))), # Abiotic CWV
-                                                 logSLA.abiot.cwv = lm(formula(paste('log(SLA.cwv)', reg.abiot))), 
-                                                 WES.abiot.cwv = lm(formula(paste('WES.cwv', reg.abiot))),
-                                                 WD.abiot.cwv = lm(formula(paste('WD.cwv', reg.abiot))),
-                                                 LDMC.abiot.cwv = lm(formula(paste('LDMC.cwv', reg.abiot))),
-                                                 logLA.abiot.cwv = lm(formula(paste('log(LA.cwv)', reg.abiot))),
-                                                 Thick.abiot.cwv = lm(formula(paste('Thick.cwv', reg.abiot))),
-                                                 LES.biot.cwm = lm(formula(paste('LES.cwm', reg.biot))), # Biotic CWM
-                                                 logSLA.biot.cwm = lm(formula(paste('log(SLA.cwm)', reg.biot))),
-                                                 WES.biot.cwm = lm(formula(paste('WES.cwm', reg.biot))),
-                                                 WD.biot.cwm = lm(formula(paste('WD.cwm', reg.biot))),
-                                                 LDMC.biot.cwm = lm(formula(paste('LDMC.cwm', reg.biot))),
-                                                 logLA.biot.cwm = lm(formula(paste('log(LA.cwm)', reg.biot))),
-                                                 Thick.biot.cwm = lm(formula(paste('Thick.cwm', reg.biot)))
-                                                 ))})
+LM <- lapply(com, function(x) {with(x@data, list(LES.cwm = lm(formula(paste('LES.cwm', reg))), # CWM
+                                                 logSLA.cwm = lm(formula(paste('log(SLA.cwm)', reg))), 
+                                                 WES.cwm = lm(formula(paste('WES.cwm', reg))),
+                                                 WD.cwm = lm(formula(paste('WD.cwm', reg))),
+                                                 LDMC.cwm = lm(formula(paste('LDMC.cwm', reg))),
+                                                 logLA.cwm = lm(formula(paste('log(LA.cwm)', reg))),
+                                                 Thick.cwm = lm(formula(paste('Thick.cwm', reg))),
+                                                 LES.cwv = lm(formula(paste('LES.cwv', reg))), # CWV
+                                                 logSLA.cwv = lm(formula(paste('log(SLA.cwv)', reg))), 
+                                                 WES.cwv = lm(formula(paste('WES.cwv', reg))),
+                                                 WD.cwv = lm(formula(paste('WD.cwv', reg))),
+                                                 LDMC.cwv = lm(formula(paste('LDMC.cwv', reg))),
+                                                 logLA.cwv = lm(formula(paste('log(LA.cwv)', reg))),
+                                                 Thick.cwv = lm(formula(paste('Thick.cwv', reg)))))})
+LM$abundance <- c(LM$abundance, with(com$abundance@data, list(FRic.fd = lm(formula(paste('FRic.fd', reg))),
+                                                              FEve.fd = lm(formula(paste('FEve.fd', reg))),
+                                                              FDiv.fd = lm(formula(paste('FDiv.fd', reg))),
+                                                              FDis.fd = lm(formula(paste('FDis.fd', reg))),
+                                                              RaoQ.fd = lm(formula(paste('RaoQ.fd', reg))))))
 LM <- lapply(LM, function(y){lapply(y, function(x){step(x, direction = 'both', trace = 0)})})
 model <- null_model(com, Trees, PFT_sp, lapply(LM, function(y){lapply(y, function(x){x$call})}), SpCode, n = 999, verbose = F, time = T)
 ```
 
 
-## Abiotic filters
+## Community weighted means
 
-```{r CWM abiotic results}
-kable(regression_table(LM, model, reg.abiot, select = '.abiot.cwm'))
+Table 4: Summary for linear models and null models for traits community weighted means. *Linear model results for each trait community weighted means (by abundance, presence-absence and basal area) after a variable selection by step mesure in both direction with slope, curvature, wetness, and southwesterness (SW), canopy height (Canopy) and basal area (BA). Model deviance was compared to 999 null model deviances in which traits were randomized among species. See table 1 for abbreviations.*
+
+```{r CWM}
+kable(regression_table(LM, model, reg, select = '.cwm'))
 ```
 
-Table 4: Step mesure on abiotic factors and null models summary for traits community weighted means. *Linear model results for each trait community weighted means (by abundance, presence-absence and basal area) after a variable selection by step mesure in both direction with slope, curvature, wetness, and southwesterness (SW). Model deviance was compared to 999 null models deviance in which traits were randomized among species.*
+### Abiotic factors
 
 First we can notice that, whereas the leaf economic spectrum shows significantly non-random links with abiotic factors, most of weighted means associated to the wood economic spectrum on our principal component analysis (see figure 1) didn't differ from null models. A spatial structure due to local individual history and dispersion is responsible for the observed links between abiotic factors and weighted mean associated to the wood economic spectrum. Outside from the leaf economic spectrum (LES), topography doesn't localy afect Uppangala plot trees as an environmental filter.
 
-Leaf economic spectrum (LES) and specific leaf area (SLA) is associated non-randomly with convex and dry surfaces, as the thickness for basal area community weighted mean. Trees will tend to increase their surface compare to their carbon investment in areas where the water will flow but not accumulate nor stay, and where the soil will tend to accumulate and be stabilized. In favourable water and soil conditions, trees will tend to invest more in leaf ressource capture at the expense of leaf defense, adopting the acquisitive [@sterck_functional_2011] our fast growing strategy [@reich_world-wide_2014]. 
+Leaf economic spectrum (LES) and specific leaf area (SLA) is associated non-randomly with convex and dry surfaces, as the thickness for basal area community weighted mean. Trees will tend to increase their surface compare to their carbon invest ment in areas where the water will flow but not accumulate nor stay, and where the soil will tend to accumulate and be stabilized. In favourable water and soil conditions, trees will tend to invest more in leaf ressource capture at the expense of leaf defense, adopting the acquisitive [@sterck_functional_2011] our fast growing strategy [@reich_world-wide_2014]. 
 
-Wood density (WD) in presence absence shows a non-random association with southwest steep slope and concave surfaces with a relatively important explanation level ($R^2=0.23$). Trees will increase their wood density in thin soil and water and soil departure conditions under potential monsoon winds *(We need to decide or not if regarding the plot condition we can accept or not the southwest orientation as being linked to monsoon winds)*. In water stress and mechanical hazard conditions, trees will compensate by increasing their water transport safety and mechanical resistance and resilience with an increased wood density [@chave_towards_2009].
+Wood density (WD) in presence absence shows a non-random association with southwest steep slope and concave surfaces with a relatively important explanation level ($R^2=0.25$). Trees will increase their wood density in thin soil and water and soil departure conditions under potential monsoon winds *(We need to decide or not if regarding the plot condition we can accept or not the southwest orientation as being linked to monsoon winds)*. In water stress and mechanical hazard conditions, trees will compensate by increasing their water transport safety and mechanical resistance and resilience with an increased wood density [@chave_towards_2009].
+
+### Biotic factors
+
+Most of community weighted means don't show association with biotic factors, and most of the rare association are not significantly different from null models randomly generated. Still leaf area (LA) in basal area is associated with high trees. Voluminous individuals tend to increase their leaf surface in heigher canopy condition to compensate understory shadow. And wood density tends also to increase with tree height for rare species, suggesting that with higher canopy denser wood species will tend to grow in a community, as shade species.
+
+## Community weighted variances
+
+Table 5: Summary for linear models and null models for traits community weighted variances. *Linear model results for each trait community weighted variances (by abundance, presence-absence and basal area) after a variable selection by step mesure in both direction with slope, curvature, wetness, and southwesterness (SW), canopy height (Canopy) and basal area (BA). Model deviance was compared to 999 null model deviances in which traits were randomized among species. See table 1 for abbreviations.* 
+
+```{r CWV}
+kable(regression_table(LM, model, reg, select = '.cwv'))
+```
+
+## Functionnal diversity
+
+Table 6: Summary for linear models and null models for functionnal diversity indices (FD). *Linear model results for each community functionnal indices weighted by abundances after a variable selection by step mesure in both direction with slope, curvature, wetness, and southwesterness (SW), canopy height (Canopy) and basal area (BA). Model deviance was compared to 999 null model deviances in which traits were randomized among species.* 
+
+```{r FD}
+kable(regression_table(LM, model, reg, select = '.fd'))
+```
+
+## Models residuals
+
+Table 6: Spatial autocorrelation measured by Moran's I for linear regression model residuals from community weighted means (CWM) and variances (CWV) and functionnal diversity indices (FD). *Spatial autocorrelation for residuals from each trait community weighted means and variances (by abundance, presence-absence and basal area) linear models and for functionnal diversity (FD) linear models, see table 1 for abbreviations.*
 
 ```{r SAC residuals}
 library(ape)
@@ -395,41 +433,22 @@ weights <- 1 / as.matrix(dist(coordinates(com$abundance)))
 diag(weights) <- 0
 SAC <- lapply(LM, function(x){lapply(x, function(y){Moran.I(residuals(y), weights)})})
 SAC <- lapply(SAC, function(x){do.call(rbind.data.frame, x)})
-SAC <- data.frame(lapply(SAC, function(x){paste(round(x$observed, 2), unlist(lapply(as.list(x$p.value), stars)))}))
+SAC <- lapply(SAC, function(x){paste(round(x$observed, 2), unlist(lapply(as.list(x$p.value), stars)))})
+SAC[[2]] <- c(SAC[[2]], rep('', 5)) ; SAC[[3]] <- c(SAC[[3]], rep('', 5))
+SAC <- data.frame(SAC)
 names(SAC) <- c('Abundance', 'Presence-absence', 'Basal area')
-row.names(SAC) <- row.names(model$p.value)
-# kable(SAC)
+SAC$Indice <- c(rep(c('LES', 'SLA', 'WES', 'WD', 'LDMC', 'Thick', 'LA'), 2), c('FRic', 'FEve', 'FDiv', 'FDis', 'RaoQ'))
+SAC$Type <- ''
+SAC$Type[c(1,8,15)] <- c('CWM', 'CWV','FD')
+SAC <- SAC[c('Type', 'Indice', 'Abundance', 'Presence-absence', 'Basal area')]
+kable(SAC, row.names = F)
 ```
 
-Model residuals spatial autocorrelation (SAC) is null confirming that our models explain fully the spatial structur of our 5 traits and 2 strategy axes (compare to table 3). At the exception of thickness that still shows a significant spatial autocorrelation, suggesting that our model missed spatially structured factors in this case.
-
-```{r CWV abiotic results}
-kable(regression_table(LM, model, reg.abiot, select = '.abiot.cwv'))
-```
-
-Table X: Abiotic CWV
-
-## Biotic filters
-
-```{r CWM biotic results}
-kable(regression_table(LM, model, reg.biot, select = '.biot.cwm'))
-```
-
-Table 5: Step mesure on abiotic factors and null models summary for traits community weighted means. *Linear model results for each trait community weighted means (by abundance, presence-absence and basal area) after a variable selection by step mesure in both direction with canopy height (canopy), basal area (BA), and stem density (StD). Model deviance was compared to 999 null models deviance in which traits were randomized among species.*
-
-Most of community weighted means don't show association with biotic factors, and most of the rare association are not significantly different from null models randomly generated. Still leaf area (LA) in basal area is associated with high trees. Voluminous individuals tend to increase their leaf surface in heigher canopy condition to compensate understory shadow.
-
-An assessment of spatial autocorrelation (SAC) of model residuals confirm that most of the spatial structure of our traits is not explained by our models because the spatial organization stay the same as the one found on the community weighted mean shown in table 3.
-
-```{r CWV biotic results}
-kable(regression_table(LM, model, reg.abiot, select = '.abiot.cwv'))
-```
-
-Table X: Abiotic CWV
+Model residuals spatial autocorrelation (SAC)  for our community weighted means (CWM) is null confirming that our models explain fully the spatial structure of our 5 traits and 2 strategy axes (compare to table 3). At the exception of thickness that still shows a significant spatial autocorrelation, suggesting that our model missed spatially structured factors in this case. For models residuals from community weighted variances, specific leaf area, wood economic spectrum and leaf dry matter content still show a spatial structure. This spatial structure in local trait variances linked to alpha diversity may be explained by local history and stochasticty associated with a null distribution of individuals not directly shaped by their environment. Finally we find back this unexplained by model spatial structure for functionnal diversity indices.
 
 ## Individual filters
 
-Absence of significant results with biotic factors and null results with abiotic factors on communities weighted mean brought us to study environmental filtering to the individual level. To do so we realized a fourthcorner (our RLQ) analysis with three matrices: *L*, the $Individuals*Species$ matrix linking the two other matrices, *Q*, the $Trait*Species$ matrix representing our functionnal traits, and *R* the $Environment*Individuals$ matrix representing both biotic and abiotic filtering. As a result, fourthcorner analysis brought no significant adjusted p-values between our functionnal traits and biotic and abiotic filters at the individual levels. Whereas communities show environmental filtering on tree functionnal traits and strategies, environmental filtering doesn't strongly affect trees on the individual level.
+Absence of significant results with biotic factors and null results with abiotic factors on communities weighted mean brought us to study environmental filtering at the individual level. To do so we realized a fourthcorner (our RLQ) analysis with three matrices: *L*, the $Individuals*Species$ matrix linking the two other matrices, *Q*, the $Trait*Species$ matrix representing our functionnal traits, and *R* the $Environment*Individuals$ matrix representing both biotic and abiotic filtering. As a result, fourthcorner analysis brought no significant adjusted p-values between our functionnal traits and biotic and abiotic filters at the individual levels. Whereas communities show environmental filtering on tree functionnal traits and strategies, environmental filtering doesn't strongly affect trees on the individual level.
 
 ```{r RLQ}
 library(ade4)
@@ -473,7 +492,7 @@ fqr.adj <- p.adjust.4thcorner(fqr, p.adjust.method.G = "fdr", p.adjust.method.D 
 # s.arrow(rlq$c1)
 # s.label(rlq$lQ, boxes = FALSE)
 # plot(fqr.adj, alpha = 0.5, stat = "D2")
-# plot(fqr.adj, x.rlq = rlq, alpha = 0.5, stat = "D2", type = "biplot")
+# plot(fqr.adj, x.rlq = rlq, alpha = 0.05, stat = "D2", type = "biplot")
 # plot(fq, alpha = 0.1, stat = "D2")
 # plot(fr, alpha = 0.1, stat = "D2")
 # print(fq, stat = 'D')
@@ -482,7 +501,7 @@ fqr.adj <- p.adjust.4thcorner(fqr, p.adjust.method.G = "fdr", p.adjust.method.D 
 
 ## Phylogenetic signal
 
-Phylogenetic autocorrelation was investigated with Morans'I indice on 60 species that had information for all 5 measured traits and the two strategy axes and by looking at the phylogenetic correlogram wiht the `phylosignal` R package (cite). Thickness, leaf dry matter content, and wood economic spectrum were the only one to be significantly non null with a positive correlation for all of theim (between 0.01 and 0.03) in a short phylogenetic distance between 0 and approximatively 100. 
+Phylogenetic autocorrelation was investigated with Morans'I indice on 60 species that had information for all 5 measured traits and the two strategy axes and by looking at the phylogenetic correlogram wiht the `phylosignal` R package [@keck_phylosignal:_2016]. Thickness, leaf dry matter content, and wood economic spectrum were the only one to be significantly non null with a positive correlation for all of theim (between 0.01 and 0.03) in a short phylogenetic distance between 0 and approximatively 100. 
 
 ```{r phylosignal, include=FALSE}
 library(phylosignal)
@@ -538,8 +557,6 @@ lipa <- lipaMoran(p4d)
 
 # *Future directions*
 
-- Add tree estimated height as biotic factors
-- Add species growth as biotic factors
-- Eveness and other FD package metrics
+- Tree estimated height with `BIOMASS`
 
 # References

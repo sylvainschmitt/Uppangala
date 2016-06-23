@@ -27,7 +27,7 @@ CWT <- function(Trees, com,
                 traits = c('LES', 'SLA', 'WES', 'LDMC', 'WD', 'Thick', 'LA'),
                 metric = c('mean', 'variance'),
                 weights = c('abundance', 'presence-absence', 'basal area'),
-                env = c('Slope', 'Curvature', 'Wetness', 'SouthWesterness', 'Canopy', 'BA')){
+                env = c('Slope', 'Curvature', 'Wetness', 'SW', 'Canopy', 'BA')){
 
   weights <- unlist(lapply(as.list(weights), function(x){switch (x,
                                                                  'abundance' = 'ab',

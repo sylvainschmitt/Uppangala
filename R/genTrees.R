@@ -1,3 +1,6 @@
+#' @importFrom BIOMASS modelHD predictHeight
+NULL
+
 #' Trees data generation
 #'
 #' Generates Trees data set from external data extracted from the database
@@ -40,6 +43,29 @@ genTrees <- function(){
   # Opening girth 5 ha plots
   path <- system.file('extdata', 'Girth_5Ha.csv', package = 'Uppangala')
   girth5 <- read.table(path, header = T, sep = ",", dec = ".")
+  girth5$ID.date <- paste(girth5$Tree_5Ha_ID,
+                          substr(as.character(girth5$Census_date), start = 7, stop = 11),
+                          substr(as.character(girth5$Census_date), start = 4, stop = 5),
+                          sep = '_')
+  # Opening height 5 ha plots
+  path <- system.file('extdata', 'Height_5Ha.csv', package = 'Uppangala')
+  height5 <- read.table(path, header = T, sep = ",", dec = ".")
+  height5$ID.date <- paste(height5$Tree_5Ha_ID,
+                          substr(as.character(height5$Census_date), start = 7, stop = 11),
+                          substr(as.character(height5$Census_date), start = 4, stop = 5),
+                          sep = '_')
+  # Modelling height girth relation
+  IDs <- intersect(height5$ID.date, girth5$ID.date)
+  H <- data.frame(H = height5$Total_height, row.names = height5$ID.date)
+  H[H == -999] <- NA
+  H <- H[IDs,]
+  D <- data.frame(D = girth5$Girth/2*pi, ID = girth5$ID.date)
+  D <- D[which(!duplicated(D$ID)),]
+  row.names(D) <- D$ID
+  D[D == -999] <- NA
+  D <- D[IDs,1]
+  m <- modelHD(D, H, method = 'michaelis')
+  # Preparing girth
   girth5$ID <- girth5$Tree_5Ha_ID
   girth5$Date <- paste(substr(as.character(girth5$Census_date), start = 7, stop = 11),
                        substr(as.character(girth5$Census_date), start = 4, stop = 5),
@@ -71,6 +97,7 @@ genTrees <- function(){
   tree <- tree[-which(is.na(tree$SpCode)),]
   row.names(tree) <- tree$ID
   tree <- tree[-1]
+  tree$height <- predictHeight(tree$`2013_girth`, m)
   summary(tree)
 
   return(tree)

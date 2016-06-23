@@ -5,9 +5,9 @@
 \title{Null model}
 \usage{
 null_model(com, Trees, PFT, formulas, SpCode, traits = c("LES", "SLA", "WES",
-  "WD", "LDMC", "Thick", "LA"), env = c("Slope", "Curvature", "Wetness",
-  "SouthWesterness", "Canopy", "BA"), type = c("CWM", "CWV"), n = 999,
-  time = T, verbose = T)
+  "WD", "LDMC", "Thick", "LA"), env = c("Slope", "Curvature", "Wetness", "SW",
+  "Canopy", "BA"), type = c("CWM", "CWV"), n = 999, time = T,
+  verbose = T)
 }
 \arguments{
 \item{com}{list. List of communities}

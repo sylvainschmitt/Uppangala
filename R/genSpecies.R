@@ -9,12 +9,13 @@
 #' summary(genSpecies())
 #'
 genSpecies <- function(){
+
   # Opening
-  path <- system.file('extdata', 'Species.txt', package = 'Uppangala')
-  species <- read.table(path,sep=",",dec=".", stringsAsFactors =F) # Dans BDD Uppangala
+  path <- system.file('extdata', 'Species.csv', package = 'Uppangala')
+  species <- read.table(path,sep=",",dec=".", stringsAsFactors =F, h = T) # Dans BDD Uppangala
   # Formatting table
-  species <- species[-1,c(3,4,10,5,9,11:13)]
-  colnames(species) <- c("SpCode","LatinName","Family","Authority","VoucherRef","PotStrata","SpError","SpNote")
+  species <- species[c('spco', 'Latin_name', 'Family', 'PotStrata')]
+  colnames(species) <- c("SpCode","LatinName","Family","PotStrata")
   species <- species[-which(is.na(species$LatinName)),]
   species$SpCode <- tolower(species$SpCode)
   rownames(species) <- species$SpCode
@@ -36,5 +37,6 @@ genSpecies <- function(){
   species$Strata[species$ESIV==1] <- 'ESIV'
   species$Strata <- as.factor(species$Strata)
   species <- species[-which(names(species) %in% levels(species$Strata))]
+
   return(species)
 }

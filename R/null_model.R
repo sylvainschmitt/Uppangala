@@ -1,3 +1,6 @@
+#' @importFrom FD dbFD
+NULL
+
 #' Null model
 #'
 #' Function to compute null models
@@ -19,21 +22,21 @@
 #' @examples
 #'
 null_model <- function(com,
-                        Trees,
-                        PFT,
-                        formulas,
-                        SpCode,
-                        traits = c('LES', 'SLA', 'WES','WD', 'LDMC', 'Thick', 'LA'),
-                        env = c('Slope', 'Curvature', 'Wetness', 'SouthWesterness', 'Canopy', 'BA'),
-                        type = c('CWM', 'CWV'),
-                        n = 999,
-                        time = T,
-                        verbose = T){
+                       Trees,
+                       PFT,
+                       formulas,
+                       SpCode,
+                       traits = c('LES', 'SLA', 'WES','WD', 'LDMC', 'Thick', 'LA'),
+                       env = c('Slope', 'Curvature', 'Wetness', 'SW', 'Canopy', 'BA'),
+                       type = c('CWM', 'CWV'),
+                       n = 999,
+                       time = T,
+                       verbose = T){
 
   t0 <- Sys.time()
   nstat <- list(abundance = matrix(ncol = length(formulas[[1]]), nrow = n, dimnames = list(1:n, names(formulas[[1]]))),
-                `presence-absence` = matrix(ncol = length(formulas[[1]]), nrow = n, dimnames = list(1:n, names(formulas[[1]]))),
-                `basal area` = matrix(ncol = length(formulas[[1]]), nrow = n, dimnames = list(1:n, names(formulas[[1]])))
+                `presence-absence` = matrix(ncol = length(formulas[[2]]), nrow = n, dimnames = list(1:n, names(formulas[[2]]))),
+                `basal area` = matrix(ncol = length(formulas[[3]]), nrow = n, dimnames = list(1:n, names(formulas[[3]])))
                 )
 
   # Null Communities
@@ -54,6 +57,15 @@ null_model <- function(com,
                                                         'CWV' = 'variance'
     )})
     ncom <- CWT(nTrees, com[[1]], traits = traits, metric = metric, weights = names(com), env = env)
+    # Addind FD values
+    x <- data.frame(nPFT[-1], row.names = nPFT$Sp_Code)
+    a <- data.frame(tapply(rep(1, length(nTrees[,1])), list(nTrees$com, nTrees$SpCode), sum))
+    a[is.na(a)] <- 0
+    x <- x[names(a),]
+    FD <- as.data.frame(dbFD(x, a, corr = 'cailliez', calc.CWM = F, print.pco = F, messages = F))[-c(1:2,4)]
+    names(FD) <- paste0(names(FD), '.fd')
+    FD$id <- row.names(FD)
+    ncom$abundance <- merge(ncom$abundance, FD)
     # Getting model deviance
     nrow <-  mapply(function(c, f){unlist(lapply(f, function(x){deviance(lm(x, c))}))}, c = ncom, f = formulas, SIMPLIFY = F)
     for (j in names(nrow)) {
@@ -66,12 +78,12 @@ null_model <- function(com,
   }
 
   # Model deviance and p.value
-  stat <- data.frame(mapply(function(c, f){unlist(lapply(f, function(x){deviance(lm(x, c))}))}, c = com, f = formulas))
+  stat <- mapply(function(c, f){unlist(lapply(f, function(x){deviance(lm(x, c))}))}, c = com, f = formulas)
   pval <- mapply(function(s,z){
     mapply(function(x,y){
       (rank(c(x,y))/(n+1))[1]
     }, x = as.list(s), y = as.list(data.frame(z)))
-  }, s = as.list(stat), z = nstat)
+  }, s = stat, z = nstat)
   row.names(pval) <- row.names(stat)
 
   # Timer
