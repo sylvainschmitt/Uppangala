@@ -1,0 +1,88 @@
+---
+title: "Uppangala tree functionnal traits: Draft"
+author: "Sylvain Schmitt"
+date: "`r Sys.Date()`"
+output: pdf_document
+bibliography: refs.bib
+---
+
+```{r config, message=FALSE, warning=FALSE, include=FALSE}
+library(knitr)
+opts_chunk$set(
+  echo = F, message = F, warning = F, fig.height = 8, fig.width = 8,
+  cache = T, cache.lazy = F)
+```
+
+# Abstract
+
+Keywords: functionnal trait, tropical evergreen forest, Western Ghats, India...
+
+# Introduction
+
+# Material and methods
+
+## Study site
+
+The study was carried out in the Kadamakal Reserve Forest (Kodagu District, Karnataka State, India), in the 10-ha "Uppangala plot" named after the nearest village. The permanent plot was established in 1990 by the French Institute of Pondicherry and described by Pascal and Pelissier [@pascal_structure_1996]. The Uppangala plot vegetation was assigned to low elevation *Dipterocarpus indicus - Kingiodendron pinnatum - Humboldtia brunonis* dense moist evergree forest type [@pascal_wet_1988]. Climate and geology of the 10-ha plot can be considered as homogeneous. General topagraphy of the site shows a regular east-west alternation between thalwegs and ridges separated by relatively steep slopes, so that topography can be assumed as the main local abiotic factor which varies inside the plot [@gimaret-carpentier_sampling_1998].
+
+*Grith monitoring design ?*
+
+## Sampling
+
+We collected trait information on 92 over 117 (79%) species focusing in priority on most abundant species with 5 replicates and we completed with less abundant and rare species with one to five replicates. Most abundant species were defined as the 32 species respresenting more than 80% of Uppangala tree individuals. Thus we generated data for 98.8% of the tree individuals present in the Uppangala plot. For each individual we collected 6 mature shadow dry leaves and one branch sample with a diameter close to 1cm following recommendation from @perez-harguindeguy_new_2013. Individuals and leaves were selected regarding their light condition, development stage and sanitary state for consistancy. Dawkins crown exposure index [@dawkins_management_1958] was registered to check the validity of the sampling. 
+
+- Unsampled species beanch wood 
+- Leaves manipulation conditions.
+
+Among leaves, 5 were weighted fresh, scanned [cite scan], and their thickness were measured with a microgauge [cite]. Those leaves were kept in herbarium and then dried in an oven for at least 72 hours at 60 degrees celsisus, the drying processed was stopped after dry leaf weights were stable in time. Once dried the leaves were weighted directly after been removed from the oven to avoid humidity bias. Branch samples bark and pit were removed in order to keep only branch wood with no soft tissues. Branch wood samples were then sink in water to evaluate their volume by water displacement. Samples were after dried for 48 hours at 80 degrees celsius and weighted. 
+
+## Traits
+
+- Traits measurement (handbook)
+- 5 Basic traits description
+- Associated strategies axes with PCA (+ fortunel)
+- Associated covariation (following litterature)
+- Diversity indices (FD)
+
+## Environmental variables
+
+- Abitoic factors
+- PCA reduction
+- Biotic factors
+- Bitoic uncorrelation
+- Performance variables
+- Linking traits, biotic, abiotic factors and performance variables with sem
+
+## Analyses
+
+- Community defintions
+- Community spatial organization investigation (variorgam + SAC)
+- Link with environment: step measure, linear regression, null model, residuals SAC
+- Individual filtering (RLQ)
+- Phylogenetic signal
+
+# Results
+
+## Community weighted means
+
+### Abiotic filtering
+
+### Biotic filtering
+
+## Community weighted variances
+
+### Abiotic filtering
+
+### Biotic filtering
+
+## Functionnal diversity
+
+## Individual filtering
+
+## Phylogenetic signal
+
+# Discussion
+
+# *Acknowledgement*
+
+# References

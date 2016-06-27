@@ -324,7 +324,7 @@ m2 <- '
 Abiotic =~ Slope + Curvature + Wetness + SW
 Traits =~ WD.cwm + Thick.cwm + LA.cwm + LDMC.cwm + SLA.cwm
 Biotic =~ BA + Canopy
-Biotic ~ Traits +Abiotic
+Biotic ~ Traits + Abiotic
 '
 fit1 <- sem(m1, data = com$abundance@data)
 fit2 <- sem(m2, data = com$abundance@data)
@@ -337,7 +337,7 @@ Links between both community weighted means and variances with their environment
 
 An assessment of spatial autocorrelation (SAC) of the community weighted means and variances and functionnal diversity indices was conducted using Moran's I statistic. Only half of community weighted means and variances were significantly positively spatially autocorrelated (see table 3) with low values (Moran's I from 0.01 to 0.04). Leaf economic spectrum and dry matter content weighted means as wood density weighted variances are slightly spatially correlated suggesting a spatial filter due to environment or local history pressure (as dispersion limitation). On the opposite, wood density and thickness community weighted means as wood economic spectrum community weighted variances possess a stochastic spatial distribution implying that they're not shaped by factors with a spatial organization. Finally remaining traits community weighted means and variances are spatially organized for abundant species and voluminous individual but not in presence absence, suggesting that the filter is linked to abundant species pressure as dispersion filter. As a conclusion both community weighted means and variances are most of the time stochastic or driven by dispersion. Moreover all functionnal diversity indices (FD) are spatially correlated. 
 
-Table 3: Spatial autocorrelation measured by Moran's I for community weighted means and variances. *Spatial autocorrelation for each trait community weighted means and variances (by abundance, presence-absence and basal area), see table 1 for abbreviations.*
+Table 3: Spatial autocorrelation measured by Moran's I for community weighted means and variances. _Spatial autocorrelation for each trait community weighted means and variances (by abundance, presence-absence and basal area), see table 1 for abbreviations. FRic, FEve, FDiv, FDis  and RaoQ stand respectively for functionnal richness, eveness, diversity dispersion and  Rao's quadratic entropy. The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
 
 ```{r SAC}
 library(ape)
@@ -389,7 +389,7 @@ model <- null_model(com, Trees, PFT_sp, lapply(LM, function(y){lapply(y, functio
 
 ## Community weighted means
 
-Table 4: Summary for linear models and null models for traits community weighted means. *Linear model results for each trait community weighted means (by abundance, presence-absence and basal area) after a variable selection by step mesure in both direction with slope, curvature, wetness, and southwesterness (SW), canopy height (Canopy) and basal area (BA). Model deviance was compared to 999 null model deviances in which traits were randomized among species. See table 1 for abbreviations.*
+Table 4: Summary for linear models and null models for traits community weighted means. _Linear model results for each trait community weighted means (by abundance (AB), presence-absence (PA) and basal area (BA)) after a variable selection by step mesure in both direction with slope, curvature, wetness, and southwesterness (SW), canopy height (Canopy) and basal area (BA). Model deviance was compared to 999 null model deviances in which traits were randomized among species. See table 1 for abbreviations. The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
 
 ```{r CWM}
 kable(regression_table(LM, model, reg, select = '.cwm'))
@@ -409,23 +409,32 @@ Most of community weighted means don't show association with biotic factors, and
 
 ## Community weighted variances
 
-Table 5: Summary for linear models and null models for traits community weighted variances. *Linear model results for each trait community weighted variances (by abundance, presence-absence and basal area) after a variable selection by step mesure in both direction with slope, curvature, wetness, and southwesterness (SW), canopy height (Canopy) and basal area (BA). Model deviance was compared to 999 null model deviances in which traits were randomized among species. See table 1 for abbreviations.* 
+Table 5: Summary for linear models and null models for traits community weighted variances. _Linear model results for each trait community weighted variances (by abundance (AB), presence-absence (PA) and basal area (BA)) after a variable selection by step mesure in both direction with slope, curvature, wetness, and southwesterness (SW), canopy height (Canopy) and basal area (BA). Model deviance was compared to 999 null model deviances in which traits were randomized among species. See table 1 for abbreviations. The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
 
 ```{r CWV}
 kable(regression_table(LM, model, reg, select = '.cwv'))
 ```
 
+Most of traits and tree strategy axes didn't show linear models for community weighted variances (CWV) significantyl differently affected by both abiotic and biotic environment compare to null models. Only the leaf economic spectrum (LES) and wood density (WD) showed linear models significantly different from null models for their community weighted variances (CWV) for all wieghts (abundance, presence-absence, and basal area). Leaf area community weighted variance by basal area showed also a significantly positive linear model with slope compare to null models.
+
+Leaf economic spectra (LES) converge with better soil and water conditions in convex situations, and for abundant species oriented under monsoon wind LES diverge suggesting different adaptive strategies from species. Whereas wood density from abundant and rare species also diverged with the southwest orientation to monsoon winds, wood density from voluminous species converge with slope and diverge with the canopy height. Effectively under high canopy trees will be under a lot of shade situation, implying differing growth strategies and further more different wood densities. Leaf area also converge for voluminous species with slope.
+
 ## Functionnal diversity
 
-Table 6: Summary for linear models and null models for functionnal diversity indices (FD). *Linear model results for each community functionnal indices weighted by abundances after a variable selection by step mesure in both direction with slope, curvature, wetness, and southwesterness (SW), canopy height (Canopy) and basal area (BA). Model deviance was compared to 999 null model deviances in which traits were randomized among species.* 
+Whereas functionnal richness (FRic) standardized by the *'global FRic'* that include all species is low and relatively stable (mean = 0.05, sd = 0.04);
+functionnal eveness is high and relatively stable (mean = `r round(mean(com$abundance@data$FEve.fd), 2)`, sd = `r round(sd(com$abundance@data$FEve.fd), 2)`) in our communities as the functionnal diversity (mean = `r round(mean(com$abundance@data$FDiv.fd), 2)`, sd = `r round(sd(com$abundance@data$FDiv.fd), 2)`). Our communties are relatively poor in functionnal values but with an even and diverse trait distribution.
+
+Table 6: Summary for linear models and null models for functionnal diversity indices (FD). _Linear model results for each community functionnal indices weighted by abundances after a variable selection by step mesure in both direction with slope, curvature, wetness, and southwesterness (SW), canopy height (Canopy) and basal area (BA). Model deviance was compared to 999 null model deviances in which traits were randomized among species. FRic, FEve, FDiv, FDis  and RaoQ stand respectively for functionnal richness, eveness, diversity dispersion and  Rao's quadratic entropy. The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._ 
 
 ```{r FD}
-kable(regression_table(LM, model, reg, select = '.fd'))
+kable(regression_table(LM, model, reg, select = '.fd')[-2], row.names = F)
 ```
+
+At the exception of the functionnal richness (FRic), all linear models for functionnal diversity indices didn't differ from null models suggesting that our bioctic and abitotic factors are not responsible for their distribution in our communities. Still functionnal richness increases with slope, suggesting as commmunity weighted variances (CWV) that our traits diverge in different adaptive strategies in steeper slopes.
 
 ## Models residuals
 
-Table 6: Spatial autocorrelation measured by Moran's I for linear regression model residuals from community weighted means (CWM) and variances (CWV) and functionnal diversity indices (FD). *Spatial autocorrelation for residuals from each trait community weighted means and variances (by abundance, presence-absence and basal area) linear models and for functionnal diversity (FD) linear models, see table 1 for abbreviations.*
+Table 6: Spatial autocorrelation measured by Moran's I for linear regression model residuals from community weighted means (CWM) and variances (CWV) and functionnal diversity indices (FD). _Spatial autocorrelation for residuals from each trait community weighted means and variances (by abundance, presence-absence and basal area) linear models and for functionnal diversity (FD) linear models, see table 1 for abbreviations. FRic, FEve, FDiv, FDis  and RaoQ stand respectively for functionnal richness, eveness, diversity dispersion and  Rao's quadratic entropy. The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
 
 ```{r SAC residuals}
 library(ape)
@@ -444,7 +453,7 @@ SAC <- SAC[c('Type', 'Indice', 'Abundance', 'Presence-absence', 'Basal area')]
 kable(SAC, row.names = F)
 ```
 
-Model residuals spatial autocorrelation (SAC)  for our community weighted means (CWM) is null confirming that our models explain fully the spatial structure of our 5 traits and 2 strategy axes (compare to table 3). At the exception of thickness that still shows a significant spatial autocorrelation, suggesting that our model missed spatially structured factors in this case. For models residuals from community weighted variances, specific leaf area, wood economic spectrum and leaf dry matter content still show a spatial structure. This spatial structure in local trait variances linked to alpha diversity may be explained by local history and stochasticty associated with a null distribution of individuals not directly shaped by their environment. Finally we find back this unexplained by model spatial structure for functionnal diversity indices.
+Model residuals spatial autocorrelation (SAC)  for our community weighted means (CWM) is null confirming that our models explain fully the spatial structure of our 5 traits and 2 strategy axes (compare to table 3). At the exception of thickness that still shows a significant spatial autocorrelation, suggesting that our model missed spatially structured factors in this case. For models residuals from community weighted variances, specific leaf area, wood economic spectrum and leaf dry matter content still show a spatial structure. This spatial structure in local trait variances linked to alpha diversity may be explained by local history and stochasticty associated with a null distribution of individuals not directly shaped by their environment. Finally we find back this spatial structure unexplained by model for functionnal diversity indices.
 
 ## Individual filters
 
