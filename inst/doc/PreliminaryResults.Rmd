@@ -268,6 +268,59 @@ AOV <- list(SLA = aov(PFT_sp$SLA ~ Species[PFT_sp$Sp_Code,]$Strata),
 ```
 
 
+```{r RLQ2, eval=FALSE, include=FALSE}
+library(ade4)
+
+# Matrices
+Lm <- data.frame(tapply(rep(1, length(Trees[,1])), list(Trees$com, Trees$SpCode), sum))
+# Lm <- data.frame(tapply(Trees$`2013_girth`/2*pi, list(Trees$com, Trees$SpCode), sum)) #BA
+Lm[is.na(Lm)] <- 0
+Qm <- PFT_sp[c('SLA', 'LDMC', 'WD', 'Thick', 'LA')]
+row.names(Qm) <- PFT_sp$Sp_Code
+Qm <- Qm[-which(is.na(Qm$WD)),]
+Qm <- Qm[names(Lm),]
+Rm <- com@data[c('Slope', 'Curvature', 'Wetness', 'SW', 'Canopy', 'BA')]
+row.names(Rm) <- com@data$id
+
+# Consistency
+all(row.names(Lm) == row.names(Rm))
+all(row.names(Lm) %in% row.names(Rm))
+Lm <- Lm[row.names(Rm),]
+all(names(Lm) == row.names(Qm))
+Qm <- Qm[names(Lm),]
+Qm <- Qm[-which(is.na(Qm$WD)),]
+Lm <- Lm[row.names(Qm)]
+Lm[Lm > 0] <-  1 #Presence-absence
+Lm <- Lm / rowSums(Lm)
+
+# RLQ
+L <- dudi.coa(Lm, scannf = F)
+R <- dudi.pca(Rm, scannf = F, row.w = L$lw)
+Q <- dudi.pca(Qm, scannf = F, row.w = L$cw)
+rlq <- rlq(R, L, Q, scannf = F)
+model = 6
+rd <- randtest(rlq, modeltype = model)
+fq <- fourthcorner.rlq(rlq, type = "Q.axes", modeltype = model)
+fr <- fourthcorner.rlq(rlq, type = "R.axes", modeltype = model)
+fqr <- fourthcorner(Rm, Lm, Qm, modeltype = model)
+fqr.adj <- p.adjust.4thcorner(fqr, p.adjust.method.G = "fdr", p.adjust.method.D = "fdr")
+
+# Results
+summary(rlq)
+plot(rlq)
+s.arrow(rlq$l1)
+s.arrow(rlq$c1)
+s.label(rlq$lQ, boxes = FALSE)
+rd
+plot(rd)
+alpha = 0.5
+plot(fq, alpha = alpha, stat = "D2")
+plot(fr, alpha = alpha, stat = "D2")
+plot(fqr.adj, alpha = alpha, stat = "D2")
+plot(fqr.adj, x.rlq = rlq, alpha = alpha, stat = "D2", type = "biplot")
+```
+
+
 ## Communities
 
 ```{r 5 Com}
@@ -328,7 +381,16 @@ Biotic ~ Traits + Abiotic
 '
 fit1 <- sem(m1, data = com$abundance@data)
 fit2 <- sem(m2, data = com$abundance@data)
-semPlot::semPaths(fit1,what='path',whatLabels='std',intercept=FALSE,residuals=FALSE,thresholds=FALSE,nCharNodes=0,nCharEdges=0,groups='manlat',pastel=TRUE,title=TRUE,curveAdjacent=TRUE,ask=FALSE)
+semPlot::semPaths(fit1,
+                  what = 'col',
+                  whatLabels = 'std',
+                  style = 'lisrel',
+                  residuals = T,
+                  nCharNodes = 0,
+                  nCharEdges = 0,
+                  groups='manlat',
+                  pastel = T,
+                  ask = F)
 ```
 
 Figure 5: Path diagram for structural equation modelling. *Path diagram of the structural equation model* **m1** *Traits ~ Abiotic + Biotic. Arrow values are indicating standardized parameter estimates*.

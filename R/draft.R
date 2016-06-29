@@ -207,3 +207,9 @@
 # names(SAC) <- c('Abundance', 'Presence-absence', 'Basal area')
 # names(SAC) <- traits
 # # kable(as.data.frame(SAC))
+
+# trt <- Qm
+# spl <- TreesNA
+# spl <- tapply(rep(1, length(spl[,1])), list(spl$SpCode, spl$com), sum)
+# spl[is.na(spl)] <- 0
+# phy <- tree

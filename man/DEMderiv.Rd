@@ -5,10 +5,10 @@
 \title{Create DEM derivative}
 \usage{
 DEMderiv(DEM, choices = c("slope", "curvature", "plancurvature",
-  "profcurvature", "aspect", "wetness", "flowdir", "hillshade"),
-  minslope = 0.5, workspace = NULL,
-  path = "C:/Program Files/QGIS Essen/apps/saga",
-  method = "poly2zevenbergen")
+  "profcurvature", "aspect", "cosaspect", "wetness", "flowdir", "hillshade"),
+  minslope = 0.5, dir = 225, workspace = NULL,
+  method = "poly2zevenbergen",
+  path = "C:/Program Files/QGIS Essen/apps/saga")
 }
 \arguments{
 \item{DEM}{raster. digital elevation model}
@@ -17,11 +17,13 @@ DEMderiv(DEM, choices = c("slope", "curvature", "plancurvature",
 
 \item{minslope}{num. for minslope, see help(rsaga.fill.sinks)}
 
+\item{dir}{int. Direction for cosapspect computation in degree}
+
 \item{workspace}{char. current workspace}
 
-\item{path}{char. path is the folder of the SAGA software}
-
 \item{method}{char. for methods see help(rsaga.curvature)}
+
+\item{path}{char. path is the folder of the SAGA software}
 }
 \value{
 Raster stack with chosen DEM derivative

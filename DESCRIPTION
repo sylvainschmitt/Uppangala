@@ -1,7 +1,7 @@
 Package: Uppangala
 Type: Package
 Title: Uppangala tree functionnal traits analysis
-Version: 0.1.9014
+Version: 0.1.9015
 Author: Sylvain Schmitt
 Description: Uppangala tree functionnal traits analysis
 License: GPL (>=3)
@@ -11,7 +11,7 @@ Imports:
     plyr,
     sp,
     Hmisc,
-    RSAGA,
+    RSAGA
 RoxygenNote: 5.0.1
 Suggests:
     knitr,

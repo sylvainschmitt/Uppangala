@@ -7,6 +7,7 @@ NULL
 #' @param DEM raster. digital elevation model
 #' @param choices char. choices of DEM derivative to compute
 #' @param minslope num. for minslope, see help(rsaga.fill.sinks)
+#' @param dir int. Direction for cosapspect computation in degree
 #' @param workspace char. current workspace
 #' @param path char. path is the folder of the SAGA software
 #' @param method char. for methods see help(rsaga.curvature)
@@ -22,9 +23,9 @@ NULL
 #' DEMderiv(DEM)
 #'
 DEMderiv = function(DEM, choices = c('slope', 'curvature', 'plancurvature', 'profcurvature', 'aspect',
-                                     'wetness', 'flowdir', 'hillshade'),
-                    minslope = 0.5, workspace = NULL, path = "C:/Program Files/QGIS Essen/apps/saga",
-                     method = "poly2zevenbergen") {
+                                     'cosaspect', 'wetness', 'flowdir', 'hillshade'),
+                    minslope = 0.5, dir = 225, workspace = NULL, method = "poly2zevenbergen",
+                    path = "C:/Program Files/QGIS Essen/apps/saga") {
 
   if(is.null(workspace)){
     dir.create('.tmp')
@@ -75,18 +76,25 @@ DEMderiv = function(DEM, choices = c('slope', 'curvature', 'plancurvature', 'pro
   }
 
   ##########################
-  ##### Aspect
-  if('aspect' %in% choices){
+  ##### Aspect & Cosaspect
+  if('aspect' %in% choices || 'cosaspect' %in% choices){
     rsaga.aspect(in.dem="dem.sgrd", out.aspect="aspect.sgrd",env=myenv,
                  method=method, show.output.on.console = F)
     Aspect <- raster(file.path(workspace, 'aspect.sdat'))
     Aspect <- Aspect / pi * 180
     names(Aspect) <- 'Aspect'
-    Deriv <- stack(Deriv, Aspect)
+    if('aspect' %in% choices){
+      Deriv <- stack(Deriv, Aspect)
+    }
+    if('coaspect' %in% choices){
+      Cosaspect <- cos((Aspect + dir) / 180 * pi)
+      names(Aspect) <- 'Cosaspect'
+      Deriv <- stack(Deriv, Cosaspect)
+    }
   }
 
   ##########################
-  ##### wetness
+  ##### Wetness
   if('wetness' %in% choices){
     rsaga.fill.sinks(in.dem="dem.sgrd",out.dem="demfilledsinks.sgrd",
                      method = "xxl.wang.liu.2006", minslope=0.5,

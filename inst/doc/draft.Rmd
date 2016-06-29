@@ -1,7 +1,7 @@
 ---
-title: "Uppangala tree functionnal traits: Draft"
+title: 'Uppangala tree functionnal traits: Draft'
 author: "Sylvain Schmitt"
-date: "`r Sys.Date()`"
+date: '`r Sys.Date()`'
 output: pdf_document
 bibliography: refs.bib
 ---
