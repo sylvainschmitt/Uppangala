@@ -208,8 +208,21 @@
 # names(SAC) <- traits
 # # kable(as.data.frame(SAC))
 
+# library(spacodiR)
 # trt <- Qm
 # spl <- TreesNA
 # spl <- tapply(rep(1, length(spl[,1])), list(spl$SpCode, spl$com), sum)
 # spl[is.na(spl)] <- 0
 # phy <- tree
+# phy$tip.label <- gsub('_', ' ', phy$tip.label, fixed = T)
+# phy$tip.label <- as.character(SpCode[phy$tip.label])
+# spafun <- spacodi.calc(sp.plot = spl, sp.traits = trt)
+# spaphy <- spacodi.calc(sp.plot = spl, phy = phy)
+# permut <- lapply(as.list(names(spaphy[1:4])), function(x){spacodi.by.nodes(spl, phy, sp.parm = x, n.rep = 100, method = "1s")})
+# names(permut) <- names(spaphy[1:4])
+# par(mfrow=c(2,1))
+# spacodi.permutplot(permut$Bst)
+# spacodi.permutplot(permut$PIst)
+
+# plot(dist(coordinates(com)), betapart::beta.pair(Lm)$beta.sor, xlab = 'distance (m)', ylab = 'fraction species shared', main = 'Sørensen similarity index between pairs of 20*20 m2 communities')
+
