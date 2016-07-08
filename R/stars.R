@@ -1,6 +1,7 @@
 #' Stars
 #'
 #' @param val num. p-value to convert in stars
+#' @param ns char. non significant character
 #'
 #' @return char. Number of stars corresponding to the p-value
 #' @export
@@ -8,7 +9,7 @@
 #' @examples
 #' stars(0.049)
 #'
-stars = function(val){
+stars = function(val, ns = 'n.s.'){
   if(val < 0.001){
     s = '*** '
   } else if (val < 0.01) {
@@ -18,7 +19,7 @@ stars = function(val){
   } else if (val < 0.1) {
     s = '.   '
   } else {
-    s = 'n.s.'
+    s = ns
   }
   return(s)
 }

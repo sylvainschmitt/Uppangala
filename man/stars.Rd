@@ -4,10 +4,12 @@
 \alias{stars}
 \title{Stars}
 \usage{
-stars(val)
+stars(val, ns = "n.s.")
 }
 \arguments{
 \item{val}{num. p-value to convert in stars}
+
+\item{ns}{char. non significant character}
 }
 \value{
 char. Number of stars corresponding to the p-value

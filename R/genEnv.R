@@ -31,5 +31,7 @@ genEnv <- function(area = data.frame(x = c(571675.8, 572011.3),
   Rivers <- crop(Rivers, extent)
   Canopy <- raster(system.file('extdata', 'Canopy.tif', package = 'Uppangala'))
   Canopy <- crop(Canopy, extent)
-  return(list(DEM = DEM, Rivers = Rivers, Canopy = Canopy))
+  return(list(DEM = DEM,
+              Rivers = Rivers,
+              Canopy = Canopy))
 }
