@@ -305,10 +305,13 @@ LM <- lapply(com, function(x) {with(x@data, list(LES.cwm = lm(formula(paste('LES
                                                  LA.cwv = lm(formula(paste('LA.cwv', reg))),
                                                  Thick.cwv = lm(formula(paste('Thick.cwv', reg)))))})
 LM <- lapply(LM, function(y){lapply(y, function(x){step(x, direction = 'both', trace = 0)})})
+# Global F
 Fval <- lapply(LM, function(y){lapply(y, function(x){summary(x)$fstatistic['value']})})
 Fval <- lapply(Fval, function(x){do.call('rbind.data.frame', x)})
 Fval <- data.frame(Fval)
 names(Fval) <- names(LM)
+# Partial F
+# pFval <- lapply(LM, function(y){lapply(y, function(x){car::Anova(x)['F value']})})
 
 n = 999
 nPFT <- rep(list(PFT_sp), n)
@@ -317,9 +320,11 @@ nPFT <- lapply(nPFT, function(x){x$Sp_Code <- SpCode[row.names(x)] ; return(x)})
 nTrees <- rep(list(Trees[which(names(Trees) %in% c('SpCode', 'com', '2013_girth'))]), n)
 nTrees <- lapply(nTrees, function(x){x$ID <- row.names(x) ; return(x)})
 nTrees <- mapply(function(x,y){merge(x, y, by.x = 'SpCode', by.y = 'Sp_Code')}, x = nTrees, y = nPFT, SIMPLIFY = F)
+rm(nPFT)
 nTrees <- lapply(nTrees, function(x){row.names(x) <- x$ID ; return(x)})
 nTrees <- lapply(nTrees, function(x){x <- x[-which(names(x) == 'ID')] ; return(x)})
 ncom <- lapply(nTrees, function(x){CWT(x, com[[1]])})
+rm(nTrees)
 ncom <- lapply(ncom, `[`, names(ncom[[1]]))
 ncom <- apply(do.call(rbind, ncom), 2, as.list) 
 nLM <- rep(list(LM), n)
@@ -333,11 +338,23 @@ nLM <- mapply(function(x,y){
     }, p = r, q = s, SIMPLIFY = F)
   }, r = x, s = y, SIMPLIFY = F)
 }, x = nLM, y = ncom, SIMPLIFY = F)
+rm(ncom) ; gc()
+
+# Global model
 nFval <- lapply(nLM, function(lm){lapply(lm, function(y){lapply(y, function(x){summary(x)$fstatistic['value']})})})
 nFval <- lapply(nFval, function(x){lapply(x, `[`, names(x[[1]])) ; apply(do.call(rbind, x), 2, as.list)})
 nFval <- lapply(nFval, function(f){lapply(f, unlist)})
+
+# nDev <- lapply(nLM, function(lm){lapply(lm, function(y){lapply(y, function(x){deviance(x)})})})
+# nDev <- lapply(nDev, function(x){lapply(x, `[`, names(x[[1]])) ; apply(do.call(rbind, x), 2, as.list)})
+# nDev <- lapply(nDev, function(f){lapply(f, unlist)})
+# invisible(mapply(function(x,y,z){plot(x, y, xlab = 'Fval', ylab = 'Dev', main = z)}, x = nFval$abundance, y = nDev$abundance, z = as.list(names(nFval$abundance))))
+
 pval <- 1 - mapply(function(x,y){mapply(function(r,s){rank(c(r,s))[1]/(n+1)}, r = x, s= y)}, x = lapply(as.list(Fval), as.list), y = nFval)
 row.names(pval) <- row.names(Fval)
+
+# Partial contribution
+
 ```
 
 Table 4: Summary for linear models and null models for traits community weighted means. _Linear model results for each trait community weighted means (by abundance (AB), presence-absence (PA) and basal area (BA)) after a variable selection by step mesure in both direction with slope, curvature, wetness, and southwesterness (SW), canopy height (Canopy) and basal area (BA). Model deviance was compared to 999 null model deviances in which traits were randomized among species. See table 1 for abbreviations. The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
