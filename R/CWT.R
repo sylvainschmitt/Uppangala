@@ -26,13 +26,12 @@ NULL
 CWT <- function(Trees, com,
                 traits = c('LES', 'SLA', 'WES', 'LDMC', 'WD', 'Thick', 'LA'),
                 metric = c('mean', 'variance'),
-                weights = c('abundance', 'presence-absence', 'basal area'),
+                weights = c('abundance', 'presence-absence'),
                 env = c('Slope', 'Curvature', 'Wetness', 'SW', 'Canopy', 'BA')){
 
   weights <- unlist(lapply(as.list(weights), function(x){switch (x,
                                                                  'abundance' = 'ab',
-                                                                 'presence-absence' = 'pa',
-                                                                 'basal area' = 'ba')}))
+                                                                 'presence-absence' = 'pa')}))
   com <- com[c('id', env)]
   cwt.l <- list()
 
@@ -43,44 +42,21 @@ CWT <- function(Trees, com,
     cwt.l[[i]] <- com
     names(cwt.l)[i] <- switch (wgt,
                                  'ab' = 'abundance',
-                                 'pa' = 'presence-absence',
-                                 'ba' = 'basal area'
-    )
+                                 'pa' = 'presence-absence')
 
     # Trees table
     trees <- switch (wgt,
                      'ab' = Trees,
-                     'pa' = Trees[-which(duplicated(cbind(Trees$SpCode, Trees$com))),],
-                     'ba' = TreesBA <- Trees[-which(is.na(Trees$`2013_girth`)),]
-    )
+                     'pa' = Trees[-which(duplicated(cbind(Trees$SpCode, Trees$com))),])
 
     for (m in metric) {
 
-      # Computing CWT
-      if(wgt %in% c('ab', 'pa')){
-
-        fun <- switch (m,
-                       'mean' = base::mean,
-                       'variance' = stats::var
-        )
-        cwt <- aggregate(trees, by = list(trees$com), fun, na.rm = T)
-        names(cwt)[1] <- 'id'
-        cwt <- cwt[which(names(cwt) %in% c('id', traits))]
-
-      } else if (wgt == 'ba'){
-
-        cwt <- switch (m,
-                       'mean' = data.frame(lapply(as.list(traits),
-                                                  function(t){ddply(trees, ~ com,
-                                                                    function(x){Hmisc::wtd.mean(x[,which(names(x) == t)], x$`2013_girth`/2*pi, na.rm = T)})[,2]})),
-                       'variance' = data.frame(lapply(as.list(traits),
-                                                      function(t){ddply(trees, ~ com,
-                                                                        function(x){Hmisc::wtd.var(x[,which(names(x) == t)], x$`2013_girth`/2*pi, na.rm = T)})[,2]}))
-        )
-        cwt <- cbind(ddply(trees, ~ com, mean)[,1], cwt)
-        names(cwt) <- c('id', traits)
-
-      }
+      fun <- switch (m,
+                     'mean' = base::mean,
+                     'variance' = stats::var)
+      cwt <- aggregate(trees, by = list(trees$com), fun, na.rm = T)
+      names(cwt)[1] <- 'id'
+      cwt <- cwt[which(names(cwt) %in% c('id', traits))]
 
       # Adding result
       end <- switch (m,

@@ -10,6 +10,8 @@
 #' \item{DEM.tif}{Digital elevation model}
 #' \item{Girth_10Ha.csv}{DB extraction for 10 ha plots girth}
 #' \item{Girth_5Ha.csv}{DB extraction for 5 ha plots girth}
+#' \item{Height_5Ha.csv}{DB extraction for 5 ha plots height}
+#' \item{Rivers.tif}{Distance to the nearest potential river model}
 #' \item{Sp_trees_allPlot.csv}{DB extraction for tree species}
 #' \item{Species.txt}{DB extraction for species data}
 #' }

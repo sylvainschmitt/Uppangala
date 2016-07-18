@@ -6,8 +6,8 @@
 \usage{
 CWT(Trees, com, traits = c("LES", "SLA", "WES", "LDMC", "WD", "Thick", "LA"),
   metric = c("mean", "variance"), weights = c("abundance",
-  "presence-absence", "basal area"), env = c("Slope", "Curvature", "Wetness",
-  "SW", "Canopy", "BA"))
+  "presence-absence"), env = c("Slope", "Curvature", "Wetness", "SW",
+  "Canopy", "BA"))
 }
 \arguments{
 \item{Trees}{data.frame. Trees data frame}

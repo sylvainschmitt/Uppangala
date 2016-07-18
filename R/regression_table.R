@@ -11,63 +11,39 @@
 #' @examples
 #' # No example yet
 #'
-regression_table <- function(LM, model, reg, select = '.cwm'){
+regression_table <- function(LM, reg, pval, weight = 'abundance', metric = '.cwm'){
 
   # Results subsetting
-  LM <- lapply(LM, function(x){x[grep(select, names(x), fixed = T)]})
-  model$formula <- lapply(model$formula, function(x){x[grep(select, names(x), fixed = T)]})
-  model$nstat <- lapply(model$nstat, function(x){x[,grep(select, colnames(x), fixed = T)]})
-  model$stat <- lapply(model$stat, function(x){x[grep(select, names(x), fixed = T)]})
-  model$p.value <- lapply(model$p.value, function(x){x[grep(select, names(x), fixed = T)]})
+  LM <- LM[[weight]]
+  LM <- LM[grep(metric, names(LM), fixed = T)]
+  pval <- as.data.frame(pval)[weight]
+  pval <- pval[grep(metric, row.names(pval), fixed = T),]
 
   # Regression coefficients
   var <- strsplit(substr(reg,3,nchar(reg)), ' + ', fixed = T)[[1]]
   names(var) <- var
-  var_table <- data.frame(matrix(nrow = length(LM[[1]])*3, ncol = (length(var)+2)))
-  names(var_table) <- c('Trait', toupper(substr(select,2,4)), var)
-  var_table$Trait[c(1,((1:length(LM[[1]]))*3+1)[-length(LM[[1]])])] <- names(LM[[1]])
-  var_table[,2] <- rep(c('AB', 'PA', 'BA'), length(LM[[1]]))
-  for(j in 1:length(LM)){
-    if(select == '.fd'){
-      j <-  1
-    }
-    for(i in 1:length(LM[[1]])){
-      for(v in var){
-        row <- which(var_table$Trait == names(LM[[1]])[i]) + j - 1
-        if(v %in% row.names(summary(LM[[j]][[i]])$coefficients)){
-          var_table[row,v] <- paste(format(summary(LM[[j]][[i]])$coefficients[v,1],
-                                           scientific = T, digits = 2),
-                                    stars(summary(LM[[j]][[i]])$coefficients[v,4]))
-        } else {
-          var_table[row,v] <- ''
-        }
+  var_table <- data.frame(matrix(nrow = length(LM), ncol = (length(var)+1)))
+  names(var_table) <- c('Trait', var)
+  var_table$Trait <- names(LM)
+  for(i in 1:length(LM)){
+    for(v in var){
+      if(v %in% row.names(summary(LM[[i]])$coefficients)){
+        var_table[i,v] <- paste(format(summary(LM[[i]])$coefficients[v,1], scientific = T, digits = 2),
+                                  stars(summary(LM[[i]])$coefficients[v,4]))
+      } else {
+        var_table[i,v] <- ''
       }
     }
   }
-  if(select == '.fd'){
-    var_table <- var_table[!is.na(var_table$Trait),]
-  }
-  names(var_table) <- c('Trait', toupper(substr(select,2,4)), var)
-  var_table$Trait <- sub(select, '', var_table$Trait)
+  var_table$Trait <- gsub(metric, '', var_table$Trait, fixed = T)[1:7]
 
-  if(select == '.fd'){
-    var_table$R2 <- lapply(LM[[1]], function(x){round(summary(x)$r.squared,2)})
-    var_table$`Null model` <- paste(round(model$p.value[[1]],3), lapply(model$p.value[[1]], stars))
-  } else {
+  # LM R squarred
+  var_table$R2 <- unlist(lapply(LM, function(x){round(summary(x)$r.squared,2)}))
 
-    # LM R squarred
-    var_table$R2 <- NA
-    var_table$R2[c(1,((1:length(LM[[1]]))*3+1)[-length(LM[[1]])])] <- lapply(LM[[1]], function(x){round(summary(x)$r.squared,2)})
-    var_table$R2[c(1,((1:length(LM[[1]]))*3+2)[-length(LM[[1]])])] <- lapply(LM[[2]], function(x){round(summary(x)$r.squared,2)})
-    var_table$R2[c(3,((1:length(LM[[1]]))*3+3)[-length(LM[[1]])])] <- lapply(LM[[3]], function(x){round(summary(x)$r.squared,2)})
-
-    # Null models
-    var_table$`Null model` <- NA
-    var_table$`Null model`[c(1,((1:length(LM[[1]]))*3+1)[-length(LM[[1]])])] <- paste(round(model$p.value[[1]],3), lapply(model$p.value[[1]], stars))
-    var_table$`Null model`[c(2,((1:length(LM[[1]]))*3+2)[-length(LM[[1]])])] <- paste(round(model$p.value[[2]],3), lapply(model$p.value[[2]], stars))
-    var_table$`Null model`[c(3,((1:length(LM[[1]]))*3+3)[-length(LM[[1]])])] <- paste(round(model$p.value[[3]],3), lapply(model$p.value[[3]], stars))
-    var_table[is.na(var_table)] <- ''
-  }
+  # Null models
+  var_table$`Null model` <- round(pval,3)
+  var_table$` ` <- unlist(lapply(pval, stars, ns = ' '))
+  # var_table[which(var_table$` ` == ' '),2:7] <- ' '
 
   return(var_table)
 }

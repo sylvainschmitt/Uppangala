@@ -1,0 +1,559 @@
+---
+title: 'Uppangala tree functionnal: Article draft'
+author: Sylvain Schmitt sylvain.schmitt@agroparistech.fr
+output: pdf_document
+bibliography: refs.bib
+---
+
+```{r config, message=FALSE, warning=FALSE, include=FALSE}
+library(knitr)
+opts_chunk$set(
+  echo = F, message = F, warning = F, fig.height = 8, fig.width = 8,
+  cache = T, cache.lazy = F)
+```
+
+# Abstract
+
+Keywords: functionnal trait, tropical evergreen forest, Western Ghats, India...
+
+# Introduction
+
+# Material and methods
+
+## Study site
+
+The study was carried out in the Kadamakal Reserve Forest (Kodagu District, Karnataka State, India), in the 10-ha "Uppangala plot" named after the nearest village. The permanent plot was established in 1990 by the French Institute of Pondicherry and described by @pascal_structure_1996. The Uppangala plot vegetation was assigned to low elevation *Dipterocarpus indicus - Kingiodendron pinnatum - Humboldtia brunonis* dense moist evergreen forest type [@pascal_wet_1988]. Climate and geology of the 10-ha plot can be considered as homogeneous. General topagraphy of the site shows a regular east-west alternation between thalwegs and ridges separated by relatively steep slopes, so that topography can be assumed as the main local abiotic factor which varies inside the plot [@gimaret-carpentier_sampling_1998]. Each tree girth is monitored by a two-year census.
+
+## Sampling
+
+We collected trait information on 92 over 117 (79%) species focusing in priority on most abundant species with 5 replicates and we completed with less abundant and rare species with one to five replicates. Most abundant species were defined as the 32 species respresenting more than 80% of Uppangala tree individuals. Thus we generated data for 98.8% of the tree individuals present in the Uppangala plot. For each individual we collected 6 mature shadow dry leaves and one branch sample with a diameter close to 1cm following recommendation from @perez-harguindeguy_new_2013. Individuals and leaves were selected regarding their light condition, development stage and sanitary state for consistancy. Dawkins crown exposure index [@dawkins_management_1958] was registered to check the validity of the sampling. Leaf and branch samples were kept in humidified ziplock filled with enriched CO2 air inside a black bag untill their measurement in the following 24 hours. For some individuals we were unable to collect a correct branch sample (58 over 267 individuals representing 12 species over 91).
+
+Leaf petioles, rachis and petiolules were removed for all measurements. Leaf fresh weights, area and thickness were measured, using a scanner [cite] and a microgauge [cite]. Leaves were first kept in herbarium and then dried in an oven for at least 72 hours at 60 degrees celsisus, the drying process was stopped after dry leaf weights were stable in time. Once dried the leaves were weighted directly after been removed from the oven to avoid humidity bias. Branch samples bark and pit were removed in order to keep only branch wood with no soft tissues. Branch wood samples were sink in water to evaluate their volume by water displacement. Samples were then dried for 48 hours at 80 degrees celsius and weighted. 
+
+## Traits
+
+With leaf and branch wood samples we calculated five functionnal traits: leaf thickness (Thick) measured in micrometer, leaf area (LA) measured from scans in $mm^2$, leaf dry matter content (LDMC) as the leaf dry weight in $mg$ divided by the leaf fresh weight in $g$,  specific leaf area (SLA) as the leaf area in $m^2$ divided by the leaf dry mass in $kg$, and branch wood density (WD) as the wood sample volume in $cm^3$ divided by the wood sample dry weight in $g$ (see table 1). Functional traits can be linked to trade-off in tree development strategy [@baraloto_decoupled_2010, and see table 1], and can be as well explained by environment condition. For instance, SLA is a soil fertility - shade index whereas LDMC will only be linked to soil fertility [@hodgson_is_2011].
+
+Table 1: Functional traits measured. *Traits with their abbreviation, range of values in the sampling, mean and standard deviation, standard unit, and associated trade-off in tree development from @baraloto_decoupled_2010.*
+
+```{r 1 Traits}
+rm(list = ls()); invisible(gc())
+library(Uppangala)
+PFT <- genPFT()
+captions <- genCaptions()
+table <- data.frame(
+  traits = c('Thickness', 'Leaf area', 'Leaf dry matter content', 'Specific leaf area', 'Wood density'),
+  abbreviation = c('Thick', 'LA', 'LDMC', 'SLA', 'WD'),
+  range = c(paste(range(PFT$Thick, na.rm = T), collapse = '-'),
+            paste(round(range(PFT$LA, na.rm = T)), collapse = '-'),
+            paste(round(range(PFT$LDMC, na.rm = T)), collapse = '-'),
+            paste(round(range(PFT$SLA, na.rm = T), 2), collapse = '-'),
+            paste(round(range(PFT$WD, na.rm = T), 2), collapse = '-')),
+  `mean (sd)` = c(paste0(round(mean(PFT$Thick, na.rm = T)), ' (',
+                         round(sd(PFT$Thick, na.rm = T)), ')'),
+                  paste0(round(mean(PFT$LA, na.rm = T)), ' (',
+                         round(sd(PFT$LA, na.rm = T)), ')'),
+                  paste0(round(mean(PFT$LDMC, na.rm = T)), ' (',
+                         round(sd(PFT$LDMC, na.rm = T)), ')'),
+                  paste0(round(mean(PFT$SLA, na.rm = T),2), ' (',
+                         round(sd(PFT$SLA, na.rm = T),2), ')'),
+                  paste0(round(mean(PFT$WD, na.rm = T),2), ' (',
+                         round(sd(PFT$WD, na.rm = T),2), ')')),
+  unit = c('um', 'mm2', 'mg.g-1', 'm2.kg-1', 'g.cm-3'),
+  strategy = c('Leaf defense vs. investment',
+               'Leaf ressource capture vs.investment',
+               'Leaf defense vs. investment',
+               'Leaf ressource acquisiton vs. defense',
+               'Stem transport, structure and defense')
+  )
+kable(table,  label="traits", row.names = F)
+```
+
+## Environmental variables
+
+To study environment effect on our traits we choose 8 topographical variables representing abiotic factors: digital elevation model, slope, curvature, plan curvature, profile curvature, wetness, southwesterness (SW, aspect in direction of south-west), and distance to the nearest potential river. Digital elevation model is issued from a LIDAR campaign on Uppangala plots with a resolution of $1*1 m^2$. Slope, curvature, plan curvature, profile curvature, wetness and southwesterness ($cos(aspect~in~degres + 225)$) are all derived from the digital elevation model with the RSAGA package [@brenning_statistical_2008]. Distance to the nearest potential river was caluclated under ArcGis (cite).
+
+To study biotic factors we choose 3 available variables: canopy height (canopy), basal area (BA), and stem density. Canopy height is issued from a digital canopy model built with a LIDAR campaign on Uppangala plots with a resolution $1*1 m^2$. Both basal area and stem density are calculated with 2013 girth inventory from Uppangala plot on stem with a diameter above 10 centimeters at breast height ($DBH>10$). Consequently basal area end stem density are highly correlated (Spearman's $rho = 0.84$, $p-value < 0.001$). So we removed stem density to avoid multicolinearity, and we kept canopy height that wasn't correlated to basal area (Spearman's $rho = -0.09$, $p-value > 0.1$).
+
+## Analyses
+
+### Covariation in traits
+
+Traits variation was first investigated in three levels with the coefficient of variation ($cv=sd/mean$) between leaves of the same individual (intra-individual), between trees of the same species (intra-specific), and between species of the Uppangala plot (inter-specific). For the rest of the statistical analysis, we calculated the mean value of each 5 traits for our 92 species. To test the correlation and covariation among traits we performed a principal component analysis (PCA). We investigated peculiar traits covariation highlighted with the PCA with a Spearman's rank correlation test.
+
+Table 2: Coefficient of variation intra-individual, intra-specific and inter-specific. *Mean of coefficient of variation for leaves in all individual (intra-individual), for trees in all species (intra-specific), and coefficient of variation for trees for all species. See table 1 for abbreviation.*
+
+```{r 2 CV}
+PFT_ind <- aggregate(PFT, by = list(PFT$Tree), FUN = mean, na.rm = T)
+row.names(PFT_ind) <- PFT_ind$Group.1
+SpT <- unique(PFT[1:2])
+Sp <- SpT$SP
+names(Sp) <- SpT$Tree
+SpCodeT <- unique(PFT[2:3])
+SpCode <- SpCodeT$Sp_Code
+names(SpCode) <- SpCodeT$SP
+CET <- unique(PFT[c(1,4)])
+CE <- CET$CE
+names(CE) <- CET$Tree
+PFT_ind$SP <- Sp[row.names(PFT_ind)]
+PFT_ind$Sp_Code <- SpCode[as.character(PFT_ind$SP)]
+PFT_ind$CE <- CE[row.names(PFT_ind)]
+PFT_ind <- PFT_ind[-c(1:2)]
+cv <- data.frame(row.names = c('Thick', 'LA', 'LDMC', 'SLA', 'WD'))
+cv$Individual <- unlist(lapply(
+  as.list(row.names(cv)),
+  function(y){mean(aggregate(PFT[which(names(PFT) ==  y)], by = list(PFT$Tree), function(x){sd(x, na.rm = T) / mean(x, na.rm = T)})[,2], na.rm = T)}))
+cv$Species <- unlist(lapply(
+  as.list(row.names(cv)),
+  function(y){mean(aggregate(PFT_ind[which(names(PFT_ind) ==  y)], by = list(PFT_ind$SP), function(x){sd(x, na.rm = T) / mean(x, na.rm = T)})[,2], na.rm = T)}))
+cv$Community <- unlist(
+  lapply(as.list(row.names(cv)),
+         function(y){sd(PFT[,which(names(PFT) ==  y)], na.rm = T) /
+             mean(PFT[,which(names(PFT) ==  y)], na.rm = T)}))
+cv <- round(cv, 2)
+cv['WD','Individual'] <- ''
+kable(cv)
+```
+
+Trait coefficients of variation analysis reveals a general increase of functionnal trait variation among scales (from intra-individual to inter-specific, see table 2). Whereas LA shows already high variablilty at intra-individual level almost as strong as the intra-specific variation ($CV_{individual} = 0.20$ and $CV_{species} = 0.24$). 
+
+### Environment definition
+
+In order to avoid multi-colinearity in future analysis, we reduced our abiotic factors explanatory variables via a principal component analysis (PCA), by keeping less correlated variables with the most ecological meaning to our judgement. In order to see if or if environmental biotic factors were the results of functionnal traits we used structural equation modelling. Three latent variables were defined: *Abiotic environment* defined with selected topographical variables, *Biotic environment* defined with our 2 selected biotic variables, and *Functionnal traits* defined with our 5 functionnal traits. Two models were compared, a first one with the functionnal traits explained by both abiotic and biotic factors (**m1** *Traits ~ Abiotic + Biotic*), and a second one with the biotic factors explained by the functionnal traits and abiotic factors (**m2** *Biotic ~ Traits + Abiotic*). Models were compared with a Chi Square Difference test on Aikaike's Criterion Indice (AIC). 
+
+### Community analysis
+
+Among the whole 10 hectares plot from Uppangala, 240 spatial communities where defined with $20*20 m^2$ quadrats. For all communities, community weighted means and variances [CWM and CWV, sensu @violle_let_2007] were computed for each functional traits and from the species scores obtained on the 2 first PCA axes. We used the following formula to compute each community weighted parameter (CWP):
+$$CWP = \sum_{k=1}^{nj} W_{k,j} * P_{k,j} ~ (1)$$ 
+where $nj$ is the number of species sampled in community $j$, $W_{k,j}$ is the weight of species $k$ in community $j$ used to compute CWP (relative abundance, presence-absence, or relative basal area), and $P_{k,j}$ is the parameter of species $k$ in community $j$ (mean or the variance). In addition 5 functionnal diversity indices (FD) weighted by abundances were computed: functional richness (FRic), functional evenness (FEve), functional divergence (FDiv) and Rao's quadratic entropy (Q) (@villeger_new_2008, @botta-dukat_raos_2005). Spatial variograms were used to investigate our CWM and CWV spatial organization. CWM, CWV, and FD spatial autocorrelation (SAC) was also assessed by Moran's I statistic.
+
+Links between both CWM and CWV with their environment, for both abiotic and biotic factors, were studied by linear regressions on continuous variables. Linear regression models were chosen by a step mesure (in both direction) on a first regression with selected variables. A null model was built by randomizing traits among species (permuting raw in `Trait*Species` matrix). Deviance of models selected by the step mesure was calculated 999 times and compare to observed deviance. Same procedure was also applied to functionnal diversity indices (FD) from our communities. Finally spatial autocorrelation (SAC) of residuals was investigated to assess selected models.
+
+### Fourth-corner analysis
+
+In addition of our community analysis by regression, we conducted both RLQ and fourth-corner analyses to test the effect of environments on Uppangala tree functionnal traits following @dray_testing_2008. Both matrices R (`Environment*Sites`) with selected features and Q (`Traits*Species`) were reduced by a principal component analysis. We used a Monte-Carlo test to compare fourth-corner and RLQ results to 999 nul models built with the model *m6* proposed by @ter_braak_improved_2012. Fourth corner analysis was tested with 3 types of L matrices ($Sites*Species$) with species relative abundance, presence absence or relative basal area in each sites; whereas RLQ analysis was only conducted with relative abundance.
+
+### Phylogenetic signal
+
+Phylogenetic tree of our 92 species was built with `S.PhyloMaker` function implemented by @qian_updated_2016-1. Phylogenetic autocorrelation was investigated with Morans'I indice on 60 species that had information for all 5 functionnal traits, the two PCA axes and in the phylogenetic tree. Phylogenetic signal structure was assessed by a tree tip distances correlogram. In addition, $\beta st$ and $\pi st$ metric proposed by @hardy_characterizing_2007 were used to investigate phylogenetic signal spatial organization with the null model *"1s"*" suggested by @hardy_testing_2008 to see if we were under phylogenetic clustering or overdispersion. Finally phylogenetic association to habitat was also studied by an RLQ analysis with tree tip distances as the Q matrix reduced by a principal coordinate analysis. RLQ result with phylogenetic distance matrix was compared to 999 nul models were phylogenetic tree tips were randomized.
+
+All analysis were conducted in the R 3.3.0  free software environment for statistical computing and graphics [@r_core_team_r:_2016] using the pacakge 
+`ade4` [@dray_ade4_2007], 
+`lavaan` [@rosseel_lavaan:_2012], 
+`FD` [@laliberte_distance-based_2010], 
+`gstat` [@pebesma_multivariable_2004], 
+`ape` [@paradis_ape:_2004], 
+`phylosignal` [@keck_phylosignal:_2015] 
+and `spacodiR` [@eastman_spacodir:_2013].
+
+# Results
+
+## Traits and environment
+
+The multivariate analysis of trait correlation shows WD associated with structural leaf traits orthogonal to the SLA (see figure 1). The first PCA axis (PCA1) covary mainly with Thick, LDMC and WD; opposing thin and big leaves to dense leaves and wood. Whereas the second PCA axis (PCA2) covary mainly with SLA representative of the leaf economic spectrum [LES, @wright_worldwide_2004]. PCA first axis might be associated with the WD covariation to the wood economic spectrum [WES, @chave_towards_2009]. Results are similar to the one found by @fortunel_leaf_2012 where PCA1 and PCA2 were respectively interpreted as leaf and wood economic spectrum (inverted compare to us). Our results integrate less traits (5 against 14), and less species (92 against 758), but still capture the same strategy axes.
+
+Figure 1 shows WD orthogonal to SLA following the results of @baraloto_decoupled_2010 suggesting that the two economic spectrum were decoupled (Spearman's $rho = -0.04$, $p-value > 0.1$). LA is almost opposed to WD and is effectively negatively correlated to it (Spearman's $rho = -0.033$, $p-value < 0.001$) as found by @wright_relationships_2007. Finally, we found the positive relation suggested by @diaz_global_2015 between LDMC and WD (Spearman's $rho = 0.24$, $p-value < 0.001$).
+
+```{r 3 PCA PFT}
+library(vegan)
+
+PFT_ind$LA <- log(PFT_ind$LA)
+PFT_ind$SLA <- log(PFT_ind$SLA)
+PFT_ind$ID <- row.names(PFT_ind)
+row.names(PFT_ind) <- PFT_ind$ID
+PFT_ind <- PFT_ind[-which(names(PFT_ind) == 'ID')]
+Species <- genSpecies()
+PFT_sp <- aggregate(PFT_ind, by = list(PFT_ind$SP), FUN = mean, na.rm = T)
+row.names(PFT_sp) <- PFT_sp$Group.1
+PFT_sp$Sp_Code <- SpCode[row.names(PFT_sp)]
+PFT_sp <- PFT_sp[-c(1:2,4)]
+pca <- princomp(~ LA + WD + Thick + LDMC + SLA, data = PFT_sp, cor = T)
+
+lambda <- pca$sdev * sqrt(nrow(pca$scores))
+pca.var = apply(pca$score, 2, var)
+PCAscores <- as.data.frame(pca$scores)[1:2] # Adding PCA axis in PFT values
+names(PCAscores) <- c('WES', 'LES')
+PCAscores$ID <- row.names(PCAscores)
+plot(t(t(pca$scores)/lambda),pch=16, col = 'lightgrey',
+     # xlab = paste('Axe 1 -', round(lambda[1]/sum(lambda)*100, 2), '%'),
+     # ylab = paste('Axe 2 -', round(lambda[2]/sum(lambda)*100, 2), '%'))
+     xlab = paste('Axe 1 -', round(pca.var[1]/sum(pca.var)*100, 2), '%'),
+     ylab = paste('Axe 2 -', round(pca.var[2]/sum(pca.var)*100, 2), '%'))
+# as.factor(Species[PFT_ind[row.names(pca$scores),2],6])
+par(new=T)
+Rot <- t(t(pca$loadings)*lambda)
+XLIM <- c(-max(abs(Rot[,1])),max(abs(Rot[,1])))
+XLIM <- XLIM+(XLIM*0.2)
+plot(Rot,col=4,axes=FALSE,xlim=XLIM,ylim=XLIM,pch="",xlab = "", ylab = "")
+lines(XLIM, c(0,0), lty = 2, col = 'firebrick', lwd = 2)
+lines(c(0,0), XLIM, lty = 2, col = 'green', lwd = 2)
+legend('topright', c('Leaf economic spectrum', 'Wood economic spectrum'),
+       text.col = c("green", "firebrick"))
+
+arrows (rep(0,nrow(pca$loadings)),rep(0,nrow(pca$loadings)),Rot[,1],Rot[,2],lwd=2)
+text (Rot[,1:2], pos = c(4, 2, 4, 2, 3), rownames(Rot),cex=1.2)
+Hmisc::subplot(function(){
+  b <- barplot((pca.var / sum(pca.var)), las = 2, ylim = c(0,range(bstick(7))[2]),
+          cex.names = 0.7, axes = T, names.arg = NA) ;
+  lines(b, bstick(length(pca.var)), col = 'red') ;
+  legend('topright', c('Eigen values', 'broken stick'), fill = c('grey', 'red'), cex = 0.6,
+         box.col = 'white')},
+  x=grconvertX(c(0.75,1), from='npc'),
+  y=grconvertY(c(0.05,0.30), from='npc')
+)
+axis (3)
+axis (4)
+
+PCAscores <- as.data.frame(pca$scores)[1:2]
+names(PCAscores) <- c('WES', 'LES')
+PCAscores$ID <- row.names(PCAscores)
+PFT_sp$ID <- row.names(PFT_sp)
+PFT_sp <- merge(PFT_sp, PCAscores, all = T)
+row.names(PFT_sp) <- PFT_sp$ID
+PFT_sp <- PFT_sp[-which(names(PFT_sp) == 'ID')]
+```
+
+Figure 1: Principal component analysis (PCA) performed on species trait means. *Bottom right corner subplot represents the eigen values (grey bars) compare to a broken stick distribution for 6 components (red line). See table 1 for abbreviation.*
+
+Multi-colinearity was avoided by reducing our explanatory variables to slope, curvature, wetness and southwesterness, following PCA results (see figure 2). Curvature covary with profile curvature, plan curvature, distance to potential rivers and the PCA first axis. Eleveation (DEM) and wetness are opposed in the principal component analysis and slope and south-westerness doesn't seem to covary much with other variables. Structural equation modelling (SEM) revealed that environmental biotic factors were influencing functionnal traits and not the contrary. Effectively retained model was the first one (**m1** *Traits ~ Abiotic + Biotic*, see supplementary material S1) with a significantly lower AIC on Chi Square Difference test ($AIC = 13195$ against $AIC = 13238$ with $p.value < 0.001$)
+
+```{r 4 env-com}
+library(raster)
+Env <- genEnv()
+Env$Rivers <- readAll(Env$Rivers)
+Trees <- genTrees()
+Trees$SpCode <- tolower(Trees$SpCode)
+Trees$ID <- row.names(Trees)
+Trees <- merge(Trees, PFT_sp, by.x = 'SpCode', by.y = 'Sp_Code')
+row.names(Trees) <- Trees$ID
+Trees <- Trees[-which(names(Trees) == 'ID')]
+com <- quadrats()
+Trees$com <- NA
+XY <- data.frame(X = Trees$X, Y = Trees$Y)
+XY <- XY[-which(is.na(XY$X)),] # Removing NA
+coordinates(XY) <- ~ X + Y
+proj4string(XY) <- crs(com)
+Trees$com[which(!is.na(Trees$X))] <- (XY %over% com)[,1]
+Trees$com[which(!is.na(Trees$com))] <- paste0('C', Trees$com[which(!is.na(Trees$com))])
+com@data$id <- paste0('C', com@data$id)
+com@data$Elevation <- extract(Env$DEM, as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
+Deriv <- DEMderiv(raster(com, 'Elevation'), c('slope', 'curvature', 'plancurvature', 'profcurvature', 'cosaspect'))
+names(Deriv)[5] <- 'SW'
+com@data <- cbind(com@data, extract(Deriv, as(com, "SpatialPolygons"), df = T, fun = mean)[-1])
+com@data$Wetness <- extract(DEMderiv(Env$DEM, 'wetness'), as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
+com@data$Rivers <- extract(Env$Rivers, as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
+com@data$Canopy <- extract(Env$Canopy, as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
+com@data$BA <- aggregate(Trees$`2013_girth`, list(Trees$com), function(x){sum(x, na.rm = T)/2*pi})[,2]
+com@data$StD <- aggregate(rep(1, length(Trees$SpCode)), list(Trees$com), sum)[,2]
+rm(Deriv, XY)
+pca.env <- princomp(~ Elevation + Slope + Curvature + PlanCurvature + ProfileCurvature + Wetness + Rivers + SW, data = com@data, cor = T)
+lambda <- pca.env$sdev * sqrt(nrow(pca.env$scores))
+pca.env.var = apply(pca.env$score, 2, var)
+plot(t(t(pca.env$scores)/lambda),pch=16, col = 'lightgrey',
+     xlab = paste('Axe 1 -', round(pca.env.var[1]/sum(pca.env.var)*100, 2), '%'),
+     ylab = paste('Axe 2 -', round(pca.env.var[2]/sum(pca.env.var)*100, 2), '%'))
+Hmisc::subplot(function(){
+  b <- barplot((pca.env.var / sum(pca.env.var)), las = 2,
+          cex.names = 0.7, axes = T, names.arg = NA) ;
+  lines(b, bstick(length(pca.env.var)), col = 'red') ;
+  legend('topright', c('Eigen values', 'broken stick'), fill = c('grey', 'red'), cex = 0.6,
+         box.col = 'white')},
+  x=grconvertX(c(0.07,0.37), from='npc'),
+  y=grconvertY(c(0.025,0.30), from='npc')
+)
+par(new=T)
+Rot <- t(t(pca.env$loadings)*lambda)
+XLIM <- c(-max(abs(Rot[,1])),max(abs(Rot[,1])))
+XLIM <- XLIM+(XLIM*0.2)
+plot(Rot,col=4,axes=FALSE,xlim=XLIM,ylim=XLIM,pch="",xlab = "", ylab = "")
+lines(XLIM, c(0,0), lty = 2, lwd = 2)
+lines(c(0,0), XLIM, lty = 2, lwd = 2)
+col <- c("#1874CD", "#008B00", "#CD3700", "#9400D3")[c(2, 3, 1, 1, 1,  2, 1, 4)]
+arrows (rep(0,nrow(pca.env$loadings)),rep(0,nrow(pca.env$loadings)),
+        Rot[,1],Rot[,2],lwd=2,col=col)
+legend('topright', c('Elevation', 'Slope', 'Water flow', 'South-West'),
+       text.col = col, cex = 1.2)
+text (Rot[,1:2], pos = c(2, 2, 2, 1, 1, 3, 3, 4), rownames(Rot),cex=1.2,col=col)
+axis (3)
+axis (4)
+```
+
+Figure 2: Principal component analysis (PCA) performed on topgraphical variables. *Bootom left corner subplot represents the eigen values (grey bars) compare to a broken stick distribution for 8 components (red line). SW stand for southwesterness.*
+
+## Community analysis
+
+Spatial variograms of CWM and CWV didn't show a clear plateau (see figure 4) but suggest a spatial organization at a scale of $70 m$. Functionnal diversity indices show also a plateau around $70 m$.
+
+```{r 5 Com, fig.height=4}
+com <- CWT(Trees, com)
+```
+
+```{r 6 lm & null models}
+reg <- '~ Slope + Curvature + Wetness + SW + Canopy + BA'
+LM <- lapply(com, function(x) {with(x@data, list(LES.cwm = lm(formula(paste('LES.cwm', reg))), # CWM
+                                                 SLA.cwm = lm(formula(paste('SLA.cwm', reg))), 
+                                                 WES.cwm = lm(formula(paste('WES.cwm', reg))),
+                                                 WD.cwm = lm(formula(paste('WD.cwm', reg))),
+                                                 LDMC.cwm = lm(formula(paste('LDMC.cwm', reg))),
+                                                 LA.cwm = lm(formula(paste('LA.cwm', reg))),
+                                                 Thick.cwm = lm(formula(paste('Thick.cwm', reg))),
+                                                 LES.cwv = lm(formula(paste('LES.cwv', reg))), # CWV
+                                                 SLA.cwv = lm(formula(paste('SLA.cwv', reg))), 
+                                                 WES.cwv = lm(formula(paste('WES.cwv', reg))),
+                                                 WD.cwv = lm(formula(paste('WD.cwv', reg))),
+                                                 LDMC.cwv = lm(formula(paste('LDMC.cwv', reg))),
+                                                 LA.cwv = lm(formula(paste('LA.cwv', reg))),
+                                                 Thick.cwv = lm(formula(paste('Thick.cwv', reg)))))})
+LM <- lapply(LM, function(y){lapply(y, function(x){step(x, direction = 'both', trace = 0)})})
+Fval <- lapply(LM, function(y){lapply(y, function(x){summary(x)$fstatistic['value']})})
+Fval <- lapply(Fval, function(x){do.call('rbind.data.frame', x)})
+Fval <- data.frame(Fval)
+names(Fval) <- names(LM)
+
+n = 999
+nPFT <- rep(list(PFT_sp), n)
+nPFT <- lapply(nPFT, function(x){row.names(x) <- sample(row.names(x)) ; return(x)})
+nPFT <- lapply(nPFT, function(x){x$Sp_Code <- SpCode[row.names(x)] ; return(x)})
+nTrees <- rep(list(Trees[which(names(Trees) %in% c('SpCode', 'com', '2013_girth'))]), n)
+nTrees <- lapply(nTrees, function(x){x$ID <- row.names(x) ; return(x)})
+nTrees <- mapply(function(x,y){merge(x, y, by.x = 'SpCode', by.y = 'Sp_Code')}, x = nTrees, y = nPFT, SIMPLIFY = F)
+nTrees <- lapply(nTrees, function(x){row.names(x) <- x$ID ; return(x)})
+nTrees <- lapply(nTrees, function(x){x <- x[-which(names(x) == 'ID')] ; return(x)})
+ncom <- lapply(nTrees, function(x){CWT(x, com[[1]])})
+ncom <- lapply(ncom, `[`, names(ncom[[1]]))
+ncom <- apply(do.call(rbind, ncom), 2, as.list) 
+nLM <- rep(list(LM), n)
+nLM <- lapply(nLM, `[`, names(nLM[[1]]))
+nLM <- apply(do.call(rbind, nLM), 2, as.list)
+ncom <- lapply(ncom, function(c){lapply(c, function(x){x <- rep(list(x), 14) ; return(x)})})
+nLM <- mapply(function(x,y){
+  mapply(function(r,s){
+    mapply(function(p,q){
+      lm(p$call,q)
+    }, p = r, q = s, SIMPLIFY = F)
+  }, r = x, s = y, SIMPLIFY = F)
+}, x = nLM, y = ncom, SIMPLIFY = F)
+nFval <- lapply(nLM, function(lm){lapply(lm, function(y){lapply(y, function(x){summary(x)$fstatistic['value']})})})
+nFval <- lapply(nFval, function(x){lapply(x, `[`, names(x[[1]])) ; apply(do.call(rbind, x), 2, as.list)})
+nFval <- lapply(nFval, function(f){lapply(f, unlist)})
+pval <- 1 - mapply(function(x,y){mapply(function(r,s){rank(c(r,s))[1]/(n+1)}, r = x, s= y)}, x = lapply(as.list(Fval), as.list), y = nFval)
+row.names(pval) <- row.names(Fval)
+```
+
+Table 4: Summary for linear models and null models for traits community weighted means. _Linear model results for each trait community weighted means (by abundance (AB), presence-absence (PA) and basal area (BA)) after a variable selection by step mesure in both direction with slope, curvature, wetness, and southwesterness (SW), canopy height (Canopy) and basal area (BA). Model deviance was compared to 999 null model deviances in which traits were randomized among species. See table 1 for abbreviations. The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
+
+```{r CWM}
+kable(regression_table(LM, reg, pval, weight = 'abundance', metric = '.cwm'))
+kable(regression_table(LM, reg, pval, weight = 'presence-absence', metric = '.cwm'))
+```
+
+Table 5: Summary for linear models and null models for traits community weighted variances. _Linear model results for each trait community weighted variances (by abundance (AB), presence-absence (PA) and basal area (BA)) after a variable selection by step mesure in both direction with slope, curvature, wetness, and southwesterness (SW), canopy height (Canopy) and basal area (BA). Model deviance was compared to 999 null model deviances in which traits were randomized among species. See table 1 for abbreviations. The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
+
+```{r CWV}
+kable(regression_table(LM, reg, pval, weight = 'abundance', metric = '.cwv'))
+kable(regression_table(LM, reg, pval, weight = 'presence-absence', metric = '.cwv'))
+```
+
+## Phylogenetic signal
+
+```{r PhyloMaker}
+library(phylosignal)
+library(phytools)
+library(phylobase)
+
+# Building species list
+l <- PFT_sp
+# setdiff(row.names(l), Species$LatinName)
+row.names(l)[which(row.names(l) == 'Actinodaphne tadulingami')] <- 'Actinodaphne tadulingamii'
+Species['agin',] <- c('agin', "Agrostistachys indica", 'Euphorbiaceae', NA, NA)
+Species['anme',] <- c('anme', "Antidesma menasu", 'Euphorbiaceae', NA, NA)
+Species['anmo',] <- c('anme', "Antidesma montanum", 'Euphorbiaceae', NA, NA)
+row.names(l)[which(row.names(l) == 'Blepharistemma membranifolia')] <- 'Blepharistemma serratum '
+row.names(l)[which(row.names(l) == 'Casearia ovata')] <- 'Casearia ovata '
+row.names(l)[which(row.names(l) == 'Cinnamomum malabathrum')] <- 'Cinnamomum malabatrum'
+row.names(l)[which(row.names(l) == 'Cinnamomum sp1')] <- 'Cinnamomum sp.'
+row.names(l)[which(row.names(l) == 'Dimocarpus longan')] <- 'Dimocarpus longan '
+row.names(l)[which(row.names(l) == 'Drypetes confertiflorus')] <- 'Drypetes confertiflora'
+row.names(l)[which(row.names(l) == 'Glochidion malabaricum')] <- 'Glochidion ellipticum'
+row.names(l)[which(row.names(l) == 'Homalium zeylanicum')] <- 'Homalium zeylanicum '
+row.names(l)[which(row.names(l) == 'Ixora nigricams')] <- 'Ixora nigricans  '
+row.names(l)[which(row.names(l) == 'Knema attenuata')] <- 'Knema attenuata  '
+row.names(l)[which(row.names(l) == 'Leptonychia moacurroides')] <- 'Leptonychia caudata '
+row.names(l)[which(row.names(l) == 'Myristica malabarica')] <- 'Myristica malabarica '
+row.names(l)[which(row.names(l) == 'Olea dioica')] <- 'Olea dioica '
+row.names(l)[which(row.names(l) == 'Reinwardtiodendron anaimalaiense')] <- 'Reinwardtiodendron anamalaiense'
+row.names(l)[which(row.names(l) == 'Strombosia ceylanica')] <- 'Strombosia ceylanica '
+row.names(l)[which(row.names(l) == 'Symplocos cochinensis')] <- 'Symplocos cochinchinensis'
+row.names(l)[which(row.names(l) == 'Syzygium laetum')] <- 'Syzygium laetum '
+row.names(l)[which(row.names(l) == 'Vepris bilocularis')] <- 'Vepris bilocularis '
+sp <- Species[which(Species$LatinName %in% row.names(l)), 2:3]
+sp$genus <- unlist(lapply(strsplit(sp$LatinName, ' ', fixed = T), function(x){x[1]}))
+sp$species <- sub(' ', '_', sp$LatinName, fixed = T)
+sp$family <- sp$Family
+sp <- sp[c('species', 'genus', 'family')]
+sp[which(sp$family == 'Flacourtiaceae'),3] <- 'Salicaceae'
+sp[which(sp$family == 'Steruliaceae'),3] <- 'Malvaceae'
+sp[which(sp$family == 'Cesaliniaceae'),3] <- 'Fabaaceae'
+sp['hepa','family'] <- 'Malvaceae'
+# sp <- sp[-which(row.names(sp) == 'hubr'),]
+# sp <- sp[-which(row.names(sp) %in% levels(droplevels(PFT_sp[which(is.na(PFT_sp$WD)),1]))),]
+
+# Getting phylogeny
+path <- system.file('phylogeny', package = 'Uppangala')
+source(file.path(path, 'R_codes for function S.PhyloMaker.txt'))
+phylo <- read.tree(file.path(path, 'PhytoPhylo.tre'))
+nodes <- read.csv(file.path(path, 'nodes.csv'), h = T)
+results <- S.PhyloMaker(sp, phylo, nodes)
+tree <- results$Scenario.1
+```
+
+```{r Phylosignal}
+data <- l
+row.names(data) <- gsub(' ', '_', row.names(data), fixed = T)
+tips <- row.names(data)[which(is.na(l$WD))]
+phy <- list(full = drop.tip(tree, tips), `-WD` = tree)
+data <- list(full = data[phy$full$tip.label,c(2:5,7)], `-WD` = data[phy$`-WD`$tip.label,c(3:5,7)])
+p4d <- mapply(function(p,d){phylo4d(p,d)}, p = phy, d = data)
+# lapply(p4d, barplot)
+phyloS <- lapply(p4d, phyloSignal, methods = 'I')
+phyloS <- lapply(phyloS, function(x){cbind(x$stat, x$pvalue)})
+phyloS <- rbind(phyloS$`-WD`, phyloS$full['WD',])
+names(phyloS) <- c('Moran\'s I', 'p-value')
+phyloS$` ` <- lapply(as.list(phyloS$`p-value`), stars)
+phyCor <- mapply(function(d,p){lapply(as.list(names(d)), function(x){phyloCorrelogram(p, trait = as.character(x))})}, d = data, p = p4d)
+phyCor <- c(phyCor$`-WD`, list(phyCor$full[[1]]))
+names(phyCor) <- unlist(lapply(phyCor, function(x){x$trait}))
+lipa <- lapply(p4d, lipaMoran)
+# mapply(function(x,y){barplot.phylo4d(x, bar.col=(y$p.value < 0.05) + 1)}, x = p4d, y = lipa)
+kable(phyloS)
+```
+
+## Are communities spatially structured ?
+
+```{r Functionnal spatial structure}
+library(spacodiR)
+
+# Traits structure
+Lm <- data.frame(tapply(rep(1, length(Trees[,1])), list(Trees$com, Trees$SpCode), sum))
+Lm[is.na(Lm)] <- 0
+Lm.l <- list(full = Lm, `-WD` = Lm)
+Qm <- PFT_sp[c('SLA', 'LDMC', 'WD', 'Thick', 'LA')]
+row.names(Qm) <- PFT_sp$Sp_Code
+Qm.l <- list(full = Qm, `-WD` = Qm[-3])
+Qm.l <- mapply(function(x,y){x[intersect(row.names(x), names(y)),]}, x = Qm.l, y = Lm.l, SIMPLIFY = F)
+Qm.l$full <- Qm.l$full[-which(is.na(Qm.l$full$WD)),]
+Lm.l <- mapply(function(x,y){y[intersect(row.names(x), names(y))]}, x = Qm.l, y = Lm.l, SIMPLIFY = F)
+spafun <- mapply(function(x,y){spacodi.calc(sp.plot = t(y), sp.traits = x)}, x = Qm.l, y = Lm.l, SIMPLIFY = F)
+spafun <- do.call('rbind.data.frame', lapply(spafun, function(x){x[1:4]}))
+
+Qm.lRD <- lapply(Qm.l, function(x){rep(list(x),999)})
+Qm.lRD <- lapply(Qm.lRD, function(x){lapply(x, function(y){y[sample(row.names(y)),]})})
+Lm.lRD <- lapply(Lm.l, function(x){rep(list(x),999)})
+Lm.lRD <- mapply(function(x,y){mapply(function(r,s){r[row.names(s)]}, r = x, s = y, SIMPLIFY = F)}, x = Lm.lRD, y = Qm.lRD, SIMPLIFY = F)
+spafun.l <- mapply(function(x,y){mapply(function(r,s){spacodi.calc(sp.plot = t(s), sp.traits = r)}, r = x, s = y, SIMPLIFY = F)}, x = Qm.lRD, y = Lm.lRD, SIMPLIFY = F)
+spafun.l <- lapply(spafun.l, function(x){lapply(x, function(y){y[1:4]})})
+spafunRD <- list(Ist = lapply(spafun.l, function(x){unlist(lapply(x, function(y){y$Ist}))}),
+                 Tst = lapply(spafun.l, function(x){unlist(lapply(x, function(y){y$Tst}))}),
+                 Ust = lapply(spafun.l, function(x){unlist(lapply(x, function(y){y$Ust}))}),
+                 TAUst = lapply(spafun.l, function(x){unlist(lapply(x, function(y){y$TAUst}))}))
+pvalues <- mapply(function(obs,rd){
+  mapply(function(o,r){rank(c(o, r))[1]/1000}, o = obs, r = rd)
+  }, obs = lapply(as.list(spafun), as.list), rd = spafunRD)
+row.names(pvalues) <- row.names(spafun)
+
+pvalues <- as.data.frame(pvalues)[3:4]
+pvalues$Ust <-  1- pvalues$Ust
+spafun.res <- format(spafun[3:4], scientific = T, digits = 2)
+pvalues <- data.frame(apply(pvalues, c(1,2), function(y){paste(y, stars(y, ns = ' '))}))
+spafun.res$Ust <- paste(spafun.res$Ust, '/', pvalues$Ust)
+spafun.res$TAUst <- paste(spafun.res$TAUst, '/', pvalues$TAUst)
+kable(spafun.res)
+```
+
+```{r Phylogenetic spatial structure}
+for(i in 1:2) phy[[i]]$tip.label <- gsub('_', ' ', phy[[i]]$tip.label, fixed = T)
+for(i in 1:2) phy[[i]]$tip.label <- as.character(l$Sp_Code[match(phy[[i]]$tip.label, row.names(l))])
+Lm <- lapply(phy, function(x){Lm[intersect(names(Lm), x$tip.label)]})
+phyRD <- lapply(phy, function(x){x$node.label <- NULL ; return(x)})
+phyRD <- lapply(phyRD, function(x){rep(list(x), 999)})
+phyRD <- lapply(phyRD, function(x){lapply(x, resamp.phy)})
+LmRD <- lapply(Lm, function(x){rep(list(x), 999)})
+LmRD <- mapply(function(x,y){mapply(function(r,s){r[intersect(names(r), s$tip.label)]}, r = x, s = y, SIMPLIFY = F)}, x = LmRD, y = phyRD, SIMPLIFY = F)
+phyRD <- mapply(function(x,y){mapply(function(r,s){drop.tip(r, setdiff(r$tip.label, names(s)))}, r = x, s= y, SIMPLIFY = F)}, x = phyRD, y = LmRD, SIMPLIFY = F)
+
+spaphy <- mapply(function(x,y){spacodi.calc(sp.plot = t(y), phy = x)}, x = phy, y = Lm.l, SIMPLIFY = F)
+spaphy <- do.call('rbind.data.frame', lapply(spaphy, function(x){x[1:4]}))
+
+spaphy.l <- mapply(function(x,y){mapply(function(r,s){spacodi.calc(t(r), s)}, r = x, s = y, SIMPLIFY = F)},x = LmRD, y = phyRD, SIMPLIFY = F)
+spaphy.l <- lapply(spaphy.l, function(x){lapply(x, function(y){y[1:4]})})
+spaphyRD <- list(Ist = lapply(spaphy.l, function(x){unlist(lapply(x, function(y){y$Ist}))}),
+                 Tst = lapply(spaphy.l, function(x){unlist(lapply(x, function(y){y$Tst}))}),
+                 Bst = lapply(spaphy.l, function(x){unlist(lapply(x, function(y){y$Bst}))}),
+                 PIst = lapply(spaphy.l, function(x){unlist(lapply(x, function(y){y$PIst}))}))
+pvalues <- mapply(function(obs,rd){
+  mapply(function(o,r){rank(c(o, r))[1]/1000}, o = obs, r = rd)
+  }, obs = lapply(as.list(spaphy), as.list), rd = spaphyRD)
+row.names(pvalues) <- row.names(spaphy)
+
+pvalues <- as.data.frame(pvalues)[3:4]
+pvalues$Bst <-  rep(NaN,2)
+spaphy.res <- format(spaphy[3:4], scientific = T, digits = 2)
+pvalues <- data.frame(apply(pvalues, c(1,2), function(y){paste(y, stars(y, ns = ' '))}))
+spaphy.res$Bst <- paste(spaphy.res$Bst, '/', pvalues$Bst)
+spaphy.res$PIst <- paste(spaphy.res$PIst, '/', pvalues$PIst)
+kable(spaphy.res)
+
+# permut <- list(Bst = mapply(function(x,y){spacodi.by.nodes(sp.plot = t(y), x, sp.parm = "Bst", method = "1s")}, x = phy, y = Lm.l, SIMPLIFY = F), PIst = mapply(function(x,y){spacodi.by.nodes(sp.plot = t(y), x, sp.parm = "PIst", method = "1s")}, x = phy, y = Lm.l, SIMPLIFY = F))
+# par(mfrow=c(2,2)) ; invisible(lapply(permut, function(x){lapply(x, spacodi.permutplot)}))
+```
+
+# Discussion
+
+# *Acknowledgement*
+
+# Supplementary materials
+
+*I'm aware that Supplementary materials goes after References (as figure and tables), but it's not possible for the moment with Rmarkdown and knitr.*
+
+## S1: Structural equation model
+
+```{r SEM}
+library(lavaan)
+m1 <- '
+Abiotic =~ Slope + Curvature + Wetness + SW
+Traits =~ WD.cwm + Thick.cwm + LA.cwm + LDMC.cwm + SLA.cwm
+Biotic =~ BA + Canopy
+Traits ~ Abiotic + Biotic
+'
+m2 <- '
+Abiotic =~ Slope + Curvature + Wetness + SW
+Traits =~ WD.cwm + Thick.cwm + LA.cwm + LDMC.cwm + SLA.cwm
+Biotic =~ BA + Canopy
+Biotic ~ Traits + Abiotic
+'
+fit1 <- sem(m1, data = com$abundance@data)
+fit2 <- sem(m2, data = com$abundance@data)
+semPlot::semPaths(fit1,
+                  what = 'col',
+                  whatLabels = 'std',
+                  style = 'lisrel',
+                  residuals = T,
+                  nCharNodes = 0,
+                  nCharEdges = 0,
+                  groups='manlat',
+                  pastel = T,
+                  ask = F)
+```
+
+Supplementary material S1: Path diagram for structural equation modelling. *Path diagram of the structural equation model* **m1** *Traits ~ Abiotic + Biotic. Arrow values are indicating standardized parameter estimates*.
+
+## S3: Phylogenetic signal among functionnal traits by correlogram
+
+Supplementary materials S3: Correlogram of phylogenetic signal among the 5 functionnal traits.
+```{r phylosignal plots, eval=FALSE, include=FALSE}
+par(mfrow = c(2,4))
+for(i in 1:length(names(data))) plot(phyCor[[i]], main = names(data)[i])
+```
+
+
+# References

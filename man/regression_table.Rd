@@ -4,14 +4,14 @@
 \alias{regression_table}
 \title{Regression table}
 \usage{
-regression_table(LM, model, reg, select = ".cwm")
+regression_table(LM, reg, pval, weight = "abundance", metric = ".cwm")
 }
 \arguments{
 \item{LM}{list. List of tested regressions}
 
-\item{model}{list. List of null models issued from null_model function}
-
 \item{reg}{char. Initial regression formula}
+
+\item{model}{list. List of null models issued from null_model function}
 
 \item{select}{char. subset of models to summarize}
 }
