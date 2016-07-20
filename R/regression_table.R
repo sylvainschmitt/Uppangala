@@ -11,13 +11,7 @@
 #' @examples
 #' # No example yet
 #'
-regression_table <- function(LM, reg, pval, weight = 'abundance', metric = '.cwm'){
-
-  # Results subsetting
-  LM <- LM[[weight]]
-  LM <- LM[grep(metric, names(LM), fixed = T)]
-  pval <- as.data.frame(pval)[weight]
-  pval <- pval[grep(metric, row.names(pval), fixed = T),]
+regression_table <- function(LM, reg, pval, ppval){
 
   # Regression coefficients
   var <- strsplit(substr(reg,3,nchar(reg)), ' + ', fixed = T)[[1]]
@@ -29,21 +23,19 @@ regression_table <- function(LM, reg, pval, weight = 'abundance', metric = '.cwm
     for(v in var){
       if(v %in% row.names(summary(LM[[i]])$coefficients)){
         var_table[i,v] <- paste(format(summary(LM[[i]])$coefficients[v,1], scientific = T, digits = 2),
-                                  stars(summary(LM[[i]])$coefficients[v,4]))
+                                  stars(ppval[i,v], ns = '    '))
       } else {
         var_table[i,v] <- ''
       }
     }
   }
-  var_table$Trait <- gsub(metric, '', var_table$Trait, fixed = T)[1:7]
-
   # LM R squarred
   var_table$R2 <- unlist(lapply(LM, function(x){round(summary(x)$r.squared,2)}))
 
   # Null models
   var_table$`Null model` <- round(pval,3)
   var_table$` ` <- unlist(lapply(pval, stars, ns = ' '))
-  # var_table[which(var_table$` ` == ' '),2:7] <- ' '
+  var_table[which(var_table$` ` == ' '),2:7] <- ' '
 
   return(var_table)
 }
