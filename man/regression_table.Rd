@@ -4,7 +4,7 @@
 \alias{regression_table}
 \title{Regression table}
 \usage{
-regression_table(LM, reg, pval, weight = "abundance", metric = ".cwm")
+regression_table(LM, reg, pval, ppval)
 }
 \arguments{
 \item{LM}{list. List of tested regressions}

@@ -8,6 +8,7 @@ bibliography: refs.bib
 ```{r config, message=FALSE, warning=FALSE, include=FALSE}
 library(knitr)
 library(parallel)
+library(Uppangala)
 opts_chunk$set(
   echo = F, message = F, warning = F, fig.height = 8, fig.width = 8,
   cache = T, cache.lazy = F)
@@ -21,12 +22,12 @@ Keywords: functional trait, tropical evergreen forest, Western Ghats, India...
 
 **Study scheme:**
 
-1. Do variations and covariations in functionnal traits reveal species ecological strategies ?
+1. Do variations and covariations in functionnal traits can reveal species ecological strategies ?
     i. Do functionnal traits vary among species ?
     ii. Do covariations in functional traits represent axes of ecological strategy ?
 2. Do functional composition reflect the influence of abiotic and biotic drivers of community dynamics ?
-    i. locally
-    ii. between communities
+    i. Do local functional composition reflect the influence of abiotic and biotic drivers of community dynamics ?
+    ii. Do functional composition variation between communities reflect the influence of abiotic and biotic drivers of community dynamics ?
 
 **To add:**
 
@@ -55,9 +56,7 @@ Table 1: Functional traits measured. *Traits with their abbreviation, range of v
 
 ```{r 1 Traits}
 rm(list = ls()); invisible(gc())
-library(Uppangala)
 PFT <- genPFT()
-captions <- genCaptions()
 table <- data.frame(
   traits = c('Thickness', 'Leaf area', 'Leaf dry matter content', 'Specific leaf area', 'Wood density'),
   abbreviation = c('Thick', 'LA', 'LDMC', 'SLA', 'WD'),
@@ -94,7 +93,6 @@ We selected 8 topographical variables representing abiotic factors: digital elev
 In order to avoid multi-colinearity in future analyses, we reduced our abiotic factors explanatory variables via a principal component analysis (PCA), by keeping less correlated variables with the most ecological meaning. We reduced our explanatory variables to 4: curvature to represent the water flow paths and soil stabilization areas, wetness to highlight water accumulation areas, southwesterness to represent monsoon winds [@bunyan_effect_2015] and slope.
 
 We selected two uncorrelated biotic factors: canopy height and basal area (Spearman's $rho = -0.09$, $p-value > 0.1$). Canopy height was calculated from a digital canopy model built with the 2013 LIDAR campaign on Uppangala plots with resolution $1*1 m^2$. Basal area was calculated from 2013 girth inventory of Uppangala plot on stems with a diameter above 10 centimeters at breast height ($DBH>10~cm$). 
-<!-- Use of canopy height and basal area as biotic factors of our 5 functional traits was justified by structural equation modelling (see supplementary material S2). -->
 
 ## Analyses
 
@@ -146,16 +144,16 @@ Table 2: Coefficient of intra-individual, intra-specific and inter-specific trai
 PFT_ind <- aggregate(PFT, by = list(PFT$Tree), FUN = mean, na.rm = T)
 row.names(PFT_ind) <- PFT_ind$Group.1
 SpT <- unique(PFT[1:2])
-Sp <- SpT$SP
+Sp <- SpT$Sp
 names(Sp) <- SpT$Tree
 SpCodeT <- unique(PFT[2:3])
-SpCode <- SpCodeT$Sp_Code
-names(SpCode) <- SpCodeT$SP
+SpCode <- SpCodeT$SpCode
+names(SpCode) <- SpCodeT$Sp
 CET <- unique(PFT[c(1,4)])
 CE <- CET$CE
 names(CE) <- CET$Tree
-PFT_ind$SP <- Sp[row.names(PFT_ind)]
-PFT_ind$Sp_Code <- SpCode[as.character(PFT_ind$SP)]
+PFT_ind$Sp <- Sp[row.names(PFT_ind)]
+PFT_ind$SpCode <- SpCode[as.character(PFT_ind$Sp)]
 PFT_ind$CE <- CE[row.names(PFT_ind)]
 PFT_ind <- PFT_ind[-c(1:2)]
 cv <- data.frame(row.names = c('Thick', 'LA', 'LDMC', 'SLA', 'WD'))
@@ -164,7 +162,7 @@ cv$Individual <- unlist(lapply(
   function(y){mean(aggregate(PFT[which(names(PFT) ==  y)], by = list(PFT$Tree), function(x){sd(x, na.rm = T) / mean(x, na.rm = T)})[,2], na.rm = T)}))
 cv$Species <- unlist(lapply(
   as.list(row.names(cv)),
-  function(y){mean(aggregate(PFT_ind[which(names(PFT_ind) ==  y)], by = list(PFT_ind$SP), function(x){sd(x, na.rm = T) / mean(x, na.rm = T)})[,2], na.rm = T)}))
+  function(y){mean(aggregate(PFT_ind[which(names(PFT_ind) ==  y)], by = list(PFT_ind$Sp), function(x){sd(x, na.rm = T) / mean(x, na.rm = T)})[,2], na.rm = T)}))
 cv$Community <- unlist(
   lapply(as.list(row.names(cv)),
          function(y){sd(PFT[,which(names(PFT) ==  y)], na.rm = T) /
@@ -186,23 +184,20 @@ PFT_ind$ID <- row.names(PFT_ind)
 row.names(PFT_ind) <- PFT_ind$ID
 PFT_ind <- PFT_ind[-which(names(PFT_ind) == 'ID')]
 Species <- genSpecies()
-PFT_sp <- aggregate(PFT_ind, by = list(PFT_ind$SP), FUN = mean, na.rm = T)
+PFT_sp <- aggregate(PFT_ind, by = list(PFT_ind$Sp), FUN = mean, na.rm = T)
 row.names(PFT_sp) <- PFT_sp$Group.1
-PFT_sp$Sp_Code <- SpCode[row.names(PFT_sp)]
+PFT_sp$SpCode <- SpCode[row.names(PFT_sp)]
 PFT_sp <- PFT_sp[-c(1:2,4)]
 pca <- princomp(~ LA + WD + Thick + LDMC + SLA, data = PFT_sp, cor = T)
 
 lambda <- pca$sdev * sqrt(nrow(pca$scores))
 pca.var = apply(pca$score, 2, var)
-PCAscores <- as.data.frame(pca$scores)[1:2] # Adding PCA axis in PFT values
+PCAscores <- as.data.frame(pca$scores)[1:2]
 names(PCAscores) <- c('WES', 'LES')
 PCAscores$ID <- row.names(PCAscores)
 plot(t(t(pca$scores)/lambda),pch=16, col = 'lightgrey',
-     # xlab = paste('Axe 1 -', round(lambda[1]/sum(lambda)*100, 2), '%'),
-     # ylab = paste('Axe 2 -', round(lambda[2]/sum(lambda)*100, 2), '%'))
-     xlab = paste('Axe 1 -', round(pca.var[1]/sum(pca.var)*100, 2), '%'),
+      xlab = paste('Axe 1 -', round(pca.var[1]/sum(pca.var)*100, 2), '%'),
      ylab = paste('Axe 2 -', round(pca.var[2]/sum(pca.var)*100, 2), '%'))
-# as.factor(Species[PFT_ind[row.names(pca$scores),2],6])
 par(new=T)
 Rot <- t(t(pca$loadings)*lambda)
 XLIM <- c(-max(abs(Rot[,1])),max(abs(Rot[,1])))
@@ -235,7 +230,7 @@ PFT_sp <- merge(PFT_sp, PCAscores, all = T)
 row.names(PFT_sp) <- PFT_sp$ID
 PFT_sp <- PFT_sp[-which(names(PFT_sp) == 'ID')]
 Q <- PFT_sp[c('LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'Thick')]
-row.names(Q) <- PFT_sp$Sp_Code
+row.names(Q) <- PFT_sp$SpCode
 rm(PCAscores, PFT_ind, SpCodeT, lambda, pca, pca.var, Rot, XLIM)
 ```
 
@@ -244,32 +239,25 @@ Figure 1: Principal component analysis (PCA) performed on species trait means. *
 ```{r 4 env-com}
 library(raster)
 Env <- genEnv()
-Env$Rivers <- readAll(Env$Rivers)
 Trees <- genTrees()
-Trees$SpCode <- tolower(Trees$SpCode)
 Trees$ID <- row.names(Trees)
-Trees <- merge(Trees, PFT_sp, by.x = 'SpCode', by.y = 'Sp_Code')
+Trees <- merge(Trees, PFT_sp)
 row.names(Trees) <- Trees$ID
 Trees <- Trees[-which(names(Trees) == 'ID')]
 com <- quadrats()
-Trees$com <- NA
-XY <- data.frame(X = Trees$X, Y = Trees$Y)
-XY <- XY[-which(is.na(XY$X)),] # Removing NA
-coordinates(XY) <- ~ X + Y
+XY <- Trees[c('x', 'y')]
+coordinates(XY) <- ~ x + y
 proj4string(XY) <- crs(com)
-Trees$com[which(!is.na(Trees$X))] <- (XY %over% com)[,1]
-Trees$com[which(!is.na(Trees$com))] <- paste0('C', Trees$com[which(!is.na(Trees$com))])
-com@data$id <- paste0('C', com@data$id)
+Trees$com <- (XY %over% com)[,1]
 com@data$Elevation <- extract(Env$DEM, as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
 Deriv <- DEMderiv(raster(com, 'Elevation'), c('slope', 'curvature', 'plancurvature', 'profcurvature', 'cosaspect'))
 names(Deriv)[5] <- 'SW'
 com@data <- cbind(com@data, extract(Deriv, as(com, "SpatialPolygons"), df = T, fun = mean)[-1])
 com@data$Wetness <- extract(DEMderiv(Env$DEM, 'wetness'), as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
-com@data$Rivers <- extract(Env$Rivers, as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
 com@data$Canopy <- extract(Env$Canopy, as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
-com@data$BA <- aggregate(Trees$`2013_girth`, list(Trees$com), function(x){sum(pi*(x/(2*pi))^2, na.rm = T)})[,2]
-com@data$StD <- aggregate(rep(1, length(Trees$SpCode)), list(Trees$com), sum)[,2]
-pca.env <- princomp(~ Elevation + Slope + Curvature + PlanCurvature + ProfileCurvature + Wetness + Rivers + SW, data = com@data, cor = T)
+BA <- aggregate(Trees$Girth, list(Trees$com), function(x){sum(pi*(x/(2*pi))^2, na.rm = T)})
+com@data$BA <- BA$x[match(com@data$id, BA$Group.1)]
+pca.env <- princomp(~ Elevation + Slope + Curvature + PlanCurvature + ProfileCurvature + Wetness + SW, data = com@data, cor = T)
 R <- com@data[c('Slope', 'Curvature', 'Wetness', 'SW', 'Canopy', 'BA')]
 row.names(R) <- com@data$id
 L <- data.frame(tapply(rep(1, length(Trees[,1])), list(Trees$com, Trees$SpCode), sum))
@@ -280,7 +268,7 @@ L <- L[sel]
 R <- R[row.names(L),]
 L <- list(abundance = L, `presence-absence` = L)
 L$`presence-absence`[L$`presence-absence` > 1]  <- 1
-# rm(Deriv, XY, com, Env, Trees, sel, PFT_sp)
+rm(Deriv, XY, com, Env, Trees, sel, BA)
 ```
 
 ## Functional composition of communities
@@ -419,7 +407,7 @@ CWV.ses.res <- lapply(CWV.ses.res, data.frame)
 CWV.ses.res <- lapply(CWV.ses.res, function(x){x$res <- paste(format(x$Estimate, scientific = T, digits = 2), apply(x[4], 1, stars, ns = '   ')) ; return(x)})
 CWV.ses.res <- data.frame(data.table::rbindlist(lapply(CWV.ses.res, function(x){data.frame(t(x[5]))}), fill = T))
 CWV.ses.res <- CWV.ses.res[-1]
-CWV.ses.res$Curvature <- NA
+CWV.ses.res$Slope <- NA
 CWV.ses.res <- CWV.ses.res[c('Slope', 'Curvature', 'Wetness', 'SW', 'Canopy', 'BA')]
 CWV.ses.res <- apply(CWV.ses.res, 2, as.character)
 row.names(CWV.ses.res) <- names(CWV.ses)
@@ -466,7 +454,7 @@ CVNND.pval <- data.frame(mapply(function(x,y){
   }, p = as.list(x), q = as.list(data.frame(t(y))))
 }, x = as.list(data.frame(t(CVNND))), y = nCVNND))
 row.names(CVNND.pval) <- colnames(CVNND)
-CVNND.pval.res <- data.frame(inf = apply(CVNND.pval, 2, function(x){length(which(x < 0.025))/length(x)}), sup = apply(CVNND.pval, 2, function(x){length(which(x > 0.975))/length(x)}))
+CVNND.pval.res <- data.frame(inf = apply(CVNND.pval, 2, function(x){length(which(x < 0.05))/length(x)}))
 ## CVNND SES
 CVNND.ses <- data.frame(mapply(function(x,y){
   mapply(function(p,q){
@@ -482,7 +470,6 @@ CVNND.ses.res <- lapply(CVNND.ses.res, function(x){x$res <- paste(format(x$Estim
 CVNND.ses.res <- data.frame(data.table::rbindlist(lapply(CVNND.ses.res, function(x){data.frame(t(x[5]))}), fill = T))
 CVNND.ses.res <- CVNND.ses.res[-1]
 CVNND.ses.res$Slope <- NA
-CVNND.ses.res$BA <- NA
 CVNND.ses.res <- CVNND.ses.res[c('Slope', 'Curvature', 'Wetness', 'SW', 'Canopy', 'BA')]
 CVNND.ses.res <- apply(CVNND.ses.res, 2, as.character)
 row.names(CVNND.ses.res) <- names(CVNND.ses)
@@ -491,7 +478,7 @@ CVNND.ses.res <- data.frame(CVNND.ses.res)
 CVNND.ses.res$R2 <- round(unlist(lapply(CVNND.ses.lm, function(x){summary(x)$r.squared})),3)
 
 # Results
-barplot(t(CVNND.pval.res), las = 2, col = c('darkblue', 'firebrick'), ylim = c(0,1), ylab = 'Proportion of non null communities') ; legend('topright', c('Inferior','Superior'), fill = c('darkblue', 'firebrick'))
+barplot(t(CVNND.pval.res), las = 2, col = c('darkblue'), ylim = c(0,1), ylab = 'Proportion of non null communities') ; legend('topright', c('Inferior'), fill = c('darkblue'))
 kable(CVNND.ses.res)
 rm(CVNND.pval, CVNND.pval.res, CVNND.ses.res, CVNND.ses.lm, nCVNND) ; invisible(gc())
 ```
@@ -504,74 +491,32 @@ rm(CVNND.pval, CVNND.pval.res, CVNND.ses.res, CVNND.ses.lm, nCVNND) ; invisible(
 library(phylosignal)
 library(phytools)
 library(phylobase)
-
-# Building species list
-l <- PFT_sp
-# setdiff(row.names(l), Species$LatinName)
-row.names(l)[which(row.names(l) == 'Actinodaphne tadulingami')] <- 'Actinodaphne tadulingamii'
-Species['agin',] <- c('agin', "Agrostistachys indica", 'Euphorbiaceae', NA, NA)
-Species['anme',] <- c('anme', "Antidesma menasu", 'Euphorbiaceae', NA, NA)
-Species['anmo',] <- c('anme', "Antidesma montanum", 'Euphorbiaceae', NA, NA)
-row.names(l)[which(row.names(l) == 'Blepharistemma membranifolia')] <- 'Blepharistemma serratum '
-row.names(l)[which(row.names(l) == 'Casearia ovata')] <- 'Casearia ovata '
-row.names(l)[which(row.names(l) == 'Cinnamomum malabathrum')] <- 'Cinnamomum malabatrum'
-row.names(l)[which(row.names(l) == 'Cinnamomum sp1')] <- 'Cinnamomum sp.'
-row.names(l)[which(row.names(l) == 'Dimocarpus longan')] <- 'Dimocarpus longan '
-row.names(l)[which(row.names(l) == 'Drypetes confertiflorus')] <- 'Drypetes confertiflora'
-row.names(l)[which(row.names(l) == 'Glochidion malabaricum')] <- 'Glochidion ellipticum'
-row.names(l)[which(row.names(l) == 'Homalium zeylanicum')] <- 'Homalium zeylanicum '
-row.names(l)[which(row.names(l) == 'Ixora nigricams')] <- 'Ixora nigricans  '
-row.names(l)[which(row.names(l) == 'Knema attenuata')] <- 'Knema attenuata  '
-row.names(l)[which(row.names(l) == 'Leptonychia moacurroides')] <- 'Leptonychia caudata '
-row.names(l)[which(row.names(l) == 'Myristica malabarica')] <- 'Myristica malabarica '
-row.names(l)[which(row.names(l) == 'Olea dioica')] <- 'Olea dioica '
-row.names(l)[which(row.names(l) == 'Reinwardtiodendron anaimalaiense')] <- 'Reinwardtiodendron anamalaiense'
-row.names(l)[which(row.names(l) == 'Strombosia ceylanica')] <- 'Strombosia ceylanica '
-row.names(l)[which(row.names(l) == 'Symplocos cochinensis')] <- 'Symplocos cochinchinensis'
-row.names(l)[which(row.names(l) == 'Syzygium laetum')] <- 'Syzygium laetum '
-row.names(l)[which(row.names(l) == 'Vepris bilocularis')] <- 'Vepris bilocularis '
-sp <- Species[which(Species$LatinName %in% row.names(l)), 2:3]
-sp$genus <- unlist(lapply(strsplit(sp$LatinName, ' ', fixed = T), function(x){x[1]}))
-sp$species <- sub(' ', '_', sp$LatinName, fixed = T)
-sp$family <- sp$Family
-sp <- sp[c('species', 'genus', 'family')]
-sp[which(sp$family == 'Flacourtiaceae'),3] <- 'Salicaceae'
-sp[which(sp$family == 'Steruliaceae'),3] <- 'Malvaceae'
-sp[which(sp$family == 'Cesaliniaceae'),3] <- 'Fabaaceae'
-sp['hepa','family'] <- 'Malvaceae'
-# sp <- sp[-which(row.names(sp) == 'hubr'),]
-# sp <- sp[-which(row.names(sp) %in% levels(droplevels(PFT_sp[which(is.na(PFT_sp$WD)),1]))),]
-
-# Getting phylogeny
 path <- system.file('phylogeny', package = 'Uppangala')
 source(file.path(path, 'R_codes for function S.PhyloMaker.txt'))
 phylo <- read.tree(file.path(path, 'PhytoPhylo.tre'))
 nodes <- read.csv(file.path(path, 'nodes.csv'), h = T)
-results <- S.PhyloMaker(sp, phylo, nodes)
+sp <- Species[which(Species$LatinName %in% row.names(PFT_sp)), c('LatinName', 'Genus', 'Family')]
+names(sp) <- c('species', 'genus', 'family')
+results <- invisible(S.PhyloMaker(sp, phylo, nodes)) # Humboldtia_brunonis unmatched
 tree <- results$Scenario.1
+rm(phylor, results, modes, sp, S.PhyloMaker, path)
 ```
 
 Table 7: Summary of Moran’s I statistic and p-values for phylogenetic signal of functional traits. _See table 1 for abbreviations. The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
 
 ```{r Phylosignal}
-data <- l
+data <- PFT_sp
 row.names(data) <- gsub(' ', '_', row.names(data), fixed = T)
-tips <- row.names(data)[which(is.na(l$WD))]
-phy <- list(full = drop.tip(tree, tips), `-WD` = tree)
-data <- list(full = data[phy$full$tip.label,c(2:5,7)], `-WD` = data[phy$`-WD`$tip.label,c(3:5,7)])
-p4d <- mapply(function(p,d){phylo4d(p,d)}, p = phy, d = data)
-# lapply(p4d, barplot)
-phyloS <- lapply(p4d, phyloSignal, methods = 'I')
-phyloS <- lapply(phyloS, function(x){cbind(x$stat, x$pvalue)})
-phyloS <- rbind(phyloS$`-WD`, phyloS$full['WD',])
+tips <- row.names(data)[which(is.na(data$WD))]
+phy <- drop.tip(tree, tips)
+data <- data[phy$tip.label,c(2:5,7)]
+p4d <- phylo4d(phy,data)
+phyloS <- phyloSignal(p4d, methods = 'I') 
+phyloS <- cbind(phyloS$stat, phyloS$pvalue)
 names(phyloS) <- c('Moran\'s I', 'p-value')
-phyloS$` ` <- lapply(as.list(phyloS$`p-value`), stars)
-phyCor <- mapply(function(d,p){lapply(as.list(names(d)), function(x){phyloCorrelogram(p, trait = as.character(x))})}, d = data, p = p4d)
-phyCor <- c(phyCor$`-WD`, list(phyCor$full[[1]]))
-names(phyCor) <- unlist(lapply(phyCor, function(x){x$trait}))
-lipa <- lapply(p4d, lipaMoran)
-# mapply(function(x,y){barplot.phylo4d(x, bar.col=(y$p.value < 0.05) + 1)}, x = p4d, y = lipa)
+phyloS$` ` <- lapply(as.list(phyloS$`p-value`), stars, ns = ' ')
 kable(phyloS)
+rm(data, tips, p4d, phyloS)
 ```
 
 Variations of both functional and phylogenetic compositions between communities don't significantly differ from null models ($U_{st} = -1.1*10^-3$ with $p-value = 0.114$, $\tau _{st} = 1.8*10^-3$ with $p-value = 0.079$, $\beta _{st} = -8.3*10^-4$ with $p-value = NaN$, and $\pi _{st} = -1.8*10^-3$ with $p-value = 0.247$).  
@@ -580,49 +525,49 @@ Variations of both functional and phylogenetic compositions between communities 
 
 Table 8: Summary of variation of functional composition between communities. _$U st$ and $\tau st$ metric proposed by @hardy_characterizing_2007 were used to investigate variation of functional composition between communities. Observed values were compared to the one obtained with the null model *"1s"*" suggested by @hardy_testing_2008. The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
 
-```{r Functionnal spatial structure}
+```{r Functionnal spatial structure, eval=FALSE, include=FALSE}
 library(spacodiR)
+mtest <- dist(as(quadrats(), 'SpatialPoints')@coords)
 
-# Traits structure
-Lm <- data.frame(tapply(rep(1, length(Trees[,1])), list(Trees$com, Trees$SpCode), sum))
-Lm[is.na(Lm)] <- 0
-Lm.l <- list(full = Lm, `-WD` = Lm)
-Qm <- PFT_sp[c('SLA', 'LDMC', 'WD', 'Thick', 'LA')]
-row.names(Qm) <- PFT_sp$Sp_Code
-Qm.l <- list(full = Qm, `-WD` = Qm[-3])
-Qm.l <- mapply(function(x,y){x[intersect(row.names(x), names(y)),]}, x = Qm.l, y = Lm.l, SIMPLIFY = F)
-Qm.l$full <- Qm.l$full[-which(is.na(Qm.l$full$WD)),]
-Lm.l <- mapply(function(x,y){y[intersect(row.names(x), names(y))]}, x = Qm.l, y = Lm.l, SIMPLIFY = F)
-spafun <- mapply(function(x,y){spacodi.calc(sp.plot = t(y), sp.traits = x)}, x = Qm.l, y = Lm.l, SIMPLIFY = F)
-spafun <- do.call('rbind.data.frame', lapply(spafun, function(x){x[1:4]}))
+# Observed Hardys
+spafun <- lapply(as.list(1:length(Q)), function(i){
+  if (length(which(is.na(Q[i]))) > 0)
+    q.names <- row.names(Q[-which(is.na(Q[i])),])
+  else
+    q.names <- row.names(Q)
+  sel <- intersect(names(L$abundance), q.names)
+  return(spacodi.calc(sp.plot = t(L$abundance[sel]), sp.traits = data.frame(Q[sel,i], row.names = sel), pairwise = T))
+})
+names(spafun) <- names(Q)
+spafun <- lapply(spafun, function(x){x[c('pairwise.Ist','pairwise.Ust', 'pairwise.TAUst')]})
+## Mantel values
+spafun.mantel <- lapply(spafun, function(t){lapply(t, function(m){vegan::mantel(m, mtest, permutations = 0)$statistic})})
 
-Qm.lRD <- lapply(Qm.l, function(x){rep(list(x),999)})
-Qm.lRD <- lapply(Qm.lRD, function(x){lapply(x, function(y){y[sample(row.names(y)),]})})
-Lm.lRD <- lapply(Lm.l, function(x){rep(list(x),999)})
-Lm.lRD <- mapply(function(x,y){mapply(function(r,s){r[row.names(s)]}, r = x, s = y, SIMPLIFY = F)}, x = Lm.lRD, y = Qm.lRD, SIMPLIFY = F)
-spafun.l <- mapply(function(x,y){mapply(function(r,s){spacodi.calc(sp.plot = t(s), sp.traits = r)}, r = x, s = y, SIMPLIFY = F)}, x = Qm.lRD, y = Lm.lRD, SIMPLIFY = F)
-spafun.l <- lapply(spafun.l, function(x){lapply(x, function(y){y[1:4]})})
-spafunRD <- list(Ist = lapply(spafun.l, function(x){unlist(lapply(x, function(y){y$Ist}))}),
-                 Tst = lapply(spafun.l, function(x){unlist(lapply(x, function(y){y$Tst}))}),
-                 Ust = lapply(spafun.l, function(x){unlist(lapply(x, function(y){y$Ust}))}),
-                 TAUst = lapply(spafun.l, function(x){unlist(lapply(x, function(y){y$TAUst}))}))
-pvalues <- mapply(function(obs,rd){
-  mapply(function(o,r){rank(c(o, r))[1]/1000}, o = obs, r = rd)
-  }, obs = lapply(as.list(spafun), as.list), rd = spafunRD)
-row.names(pvalues) <- row.names(spafun)
+# Simulated Hardys
+cl <- makeCluster(3)
+clusterExport(cl, list('nQ', 'L', 'spacodi.calc'))
+nspafun <- clusterApply(cl, nQ, function(q){
+  lapply(as.list(1:length(q)), function(i){
+    if (length(which(is.na(q[i]))) > 0)
+      q.names <- row.names(q[-which(is.na(q[i])),])
+    else
+      q.names <- row.names(q)
+    sel <- intersect(names(L$abundance), q.names)
+    return(spacodi.calc(sp.plot = t(L$abundance[sel]), sp.traits = data.frame(q[sel,i], row.names = sel), pairwise = T))
+  })
+})
+stopCluster()
+rm(cl, nQ) ; invisible(gc())
+## Simulated mantels
 
-pvalues <- as.data.frame(pvalues)[3:4]
-pvalues$Ust <-  1- pvalues$Ust
-spafun.res <- format(spafun[3:4], scientific = T, digits = 2)
-pvalues <- data.frame(apply(pvalues, c(1,2), function(y){paste(y, stars(y, ns = ' '))}))
-spafun.res$Ust <- paste(spafun.res$Ust, '/', pvalues$Ust)
-spafun.res$TAUst <- paste(spafun.res$TAUst, '/', pvalues$TAUst)
+
+# Result
 kable(spafun.res)
 ```
 
 Table 9: Summary of variation of phylogenetic composition between communities. _$\beta st$ and $\pi st$ metric proposed by @hardy_characterizing_2007 were used to investigate variation of phylogenetic composition between communities. Observed values were compared to a null model randomizing traits among species (permuting raw in `Trait*Species` matrix). The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
 
-```{r Phylogenetic spatial structure}
+```{r Phylogenetic spatial structure, eval=FALSE, include=FALSE}
 for(i in 1:2) phy[[i]]$tip.label <- gsub('_', ' ', phy[[i]]$tip.label, fixed = T)
 for(i in 1:2) phy[[i]]$tip.label <- as.character(l$Sp_Code[match(phy[[i]]$tip.label, row.names(l))])
 Lm <- lapply(phy, function(x){Lm[intersect(names(Lm), x$tip.label)]})
@@ -654,9 +599,6 @@ pvalues <- data.frame(apply(pvalues, c(1,2), function(y){paste(y, stars(y, ns = 
 spaphy.res$Bst <- paste(spaphy.res$Bst, '/', pvalues$Bst)
 spaphy.res$PIst <- paste(spaphy.res$PIst, '/', pvalues$PIst)
 kable(spaphy.res)
-
-# permut <- list(Bst = mapply(function(x,y){spacodi.by.nodes(sp.plot = t(y), x, sp.parm = "Bst", method = "1s")}, x = phy, y = Lm.l, SIMPLIFY = F), PIst = mapply(function(x,y){spacodi.by.nodes(sp.plot = t(y), x, sp.parm = "PIst", method = "1s")}, x = phy, y = Lm.l, SIMPLIFY = F))
-# par(mfrow=c(2,2)) ; invisible(lapply(permut, function(x){lapply(x, spacodi.permutplot)}))
 ```
 
 # Discussion
@@ -709,50 +651,5 @@ axis (4)
 ```
 
 Supplementary material S1: Principal component analysis (PCA) performed on topgraphical variables. *Bootom left corner subplot represents the eigen values (grey bars) compare to a broken stick distribution for 8 components (red line). SW stand for southwesterness.*
-
-## S2: Structural equation model
-
-In order to see if or if environmental biotic factors were the results of functional traits we used structural equation modelling. Three latent variables were defined: *Abiotic environment* defined with selected topographical variables, *Biotic environment* defined with our 2 selected biotic variables, and *functional traits* defined with our 5 functional traits. Two models were compared, a first one with the functional traits explained by both abiotic and biotic factors (**m1** *Traits ~ Abiotic + Biotic*), and a second one with the biotic factors explained by the functional traits and abiotic factors (**m2** *Biotic ~ Traits + Abiotic*). Models were compared with a Chi Square Difference test on Aikaike's Criterion Indice (AIC). 
-
-Structural equation modelling (SEM) revealed that environmental biotic factors were influencing functional traits and not the contrary. Effectively retained model was the first one (**m1** *Traits ~ Abiotic + Biotic*, see supplementary material S1) with a significantly lower AIC on Chi Square Difference test ($AIC = 13195$ against $AIC = 13238$ with $p.value < 0.001$).
-
-```{r SEM}
-library(lavaan)
-m1 <- '
-Abiotic =~ Slope + Curvature + Wetness + SW
-Traits =~ WD.cwm + Thick.cwm + LA.cwm + LDMC.cwm + SLA.cwm
-Biotic =~ BA + Canopy
-Traits ~ Abiotic + Biotic
-'
-m2 <- '
-Abiotic =~ Slope + Curvature + Wetness + SW
-Traits =~ WD.cwm + Thick.cwm + LA.cwm + LDMC.cwm + SLA.cwm
-Biotic =~ BA + Canopy
-Biotic ~ Traits + Abiotic
-'
-fit1 <- sem(m1, data = com$abundance@data)
-fit2 <- sem(m2, data = com$abundance@data)
-semPlot::semPaths(fit1,
-                  what = 'col',
-                  whatLabels = 'std',
-                  style = 'lisrel',
-                  residuals = T,
-                  nCharNodes = 0,
-                  nCharEdges = 0,
-                  groups='manlat',
-                  pastel = T,
-                  ask = F)
-```
-
-Supplementary material S2: Path diagram for structural equation modelling. *Path diagram of the structural equation model* **m1** *Traits ~ Abiotic + Biotic. Arrow values are indicating standardized parameter estimates*.
-
-## S3: Phylogenetic signal among functional traits by correlogram
-
-```{r phylosignal plots}
-par(mfrow = c(2,4))
-for(i in 1:length(names(data))) plot(phyCor[[i]], main = names(data)[i])
-```
-
-Supplementary materials S3: Correlogram of phylogenetic signal among the 5 functional traits.
 
 # References

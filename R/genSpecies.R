@@ -14,10 +14,10 @@ genSpecies <- function(){
   path <- system.file('extdata', 'Species.csv', package = 'Uppangala')
   species <- read.table(path,sep=",",dec=".", stringsAsFactors =F, h = T) # Dans BDD Uppangala
   # Formatting table
-  species <- species[c('spco', 'Latin_name', 'Family', 'PotStrata')]
-  colnames(species) <- c("SpCode","LatinName","Family","PotStrata")
-  species <- species[-which(is.na(species$LatinName)),]
+  species <- species[c('Sp_code', 'Sp_code_large', 'Latin_name', 'Family', 'Genus', 'Species', 'Pot_strata', 'old_Sp_code')]
+  colnames(species) <- c("SpCode", "SpCodeL", "LatinName", "Family", 'Genus', 'Species', 'PotStrata', 'OldCode')
   species$SpCode <- tolower(species$SpCode)
+  species[duplicated(species$SpCode),1] <- species[duplicated(species$SpCode),8]
   rownames(species) <- species$SpCode
   # Expliciting strata
   species$ESI <- 0; species[grep(x=species$PotStrata,pattern="\\bESI\\b"),]$ESI <- 1
@@ -37,6 +37,11 @@ genSpecies <- function(){
   species$Strata[species$ESIV==1] <- 'ESIV'
   species$Strata <- as.factor(species$Strata)
   species <- species[-which(names(species) %in% levels(species$Strata))]
+  # Errors corrections
+  species['agin',] <- c('agin', 'Agrind', "Agrostistachys indica", 'Euphorbiaceae', 'Agrostistachys', 'indica', NA, 'agin', NA)
+  species[which(species$Family == 'Flacourtiaceae'),4] <- 'Salicaceae'
+  species[which(species$Family == 'Steruliaceae'),4] <- 'Malvaceae'
+  species[which(species$Family == 'Cesaliniaceae'),4] <- 'Fabaaceae'
 
   return(species)
 }

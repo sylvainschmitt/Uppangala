@@ -29,6 +29,7 @@ quadrats <- function(cs = c(20,20),
   cd <- floor(diff(t(bb))/cs)  # number of cells per direction
   grd <- GridTopology(cellcentre.offset = cc, cellsize = cs, cells.dim = cd)
   grd <- SpatialGridDataFrame(grd,  dat = data.frame(id=1:prod(cd)), proj4string = proj)
+  grd@data$id <- paste0('C', grd@data$id)
 
   return(grd)
 }

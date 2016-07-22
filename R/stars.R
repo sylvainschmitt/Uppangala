@@ -10,7 +10,7 @@
 #' stars(0.049)
 #'
 stars = function(val, ns = 'n.s.'){
-  if(!is.numeric(val) || is.nan(val)){
+  if(!is.numeric(val) || is.nan(val) || is.na(val)){
     val = 1
   }
   if(val < 0.001){
