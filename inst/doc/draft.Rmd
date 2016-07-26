@@ -1,7 +1,7 @@
 ---
 title: 'Uppangala tree functional traits: Article draft'
-author: Sylvain Schmitt sylvain.schmitt@agroparistech.fr
-output: pdf_document
+author: "Sylvain Schmitt sylvain.schmitt@agroparistech.fr"
+output: word_document
 bibliography: refs.bib
 ---
 
@@ -92,7 +92,7 @@ We selected 8 topographical variables representing abiotic factors: digital elev
 
 In order to avoid multi-colinearity in future analyses, we reduced our abiotic factors explanatory variables via a principal component analysis (PCA), by keeping less correlated variables with the most ecological meaning. We reduced our explanatory variables to 4: curvature to represent the water flow paths and soil stabilization areas, wetness to highlight water accumulation areas, southwesterness to represent monsoon winds [@bunyan_effect_2015] and slope.
 
-We selected two uncorrelated biotic factors: canopy height and basal area (Spearman's $rho = -0.09$, $p-value > 0.1$). Canopy height was calculated from a digital canopy model built with the 2013 LIDAR campaign on Uppangala plots with resolution $1*1 m^2$. Basal area was calculated from 2013 girth inventory of Uppangala plot on stems with a diameter above 10 centimeters at breast height ($DBH>10~cm$). 
+We selected two biotic factors: canopy height and basal area. Canopy height was calculated from a digital canopy model built with the 2013 LIDAR campaign on Uppangala plots with resolution $1*1 m^2$. Basal area was calculated from 2013 girth inventory of Uppangala plot on stems with a diameter above 10 centimeters at breast height ($DBH>10~cm$). 
 
 ## Analyses
 
@@ -102,7 +102,7 @@ Traits variation was first investigated in three levels with the coefficient of 
 
 For the rest of the statistical analysis, we calculated the mean value of each 5 traits for our 92 species. To test the correlation and covariation among traits we performed a principal component analysis (PCA).
 
-### Functional composition of communities
+### Local functionnal composition of communities
 
 Among the whole 10 hectares plot from Uppangala, 240 spatial communities where defined with $20*20 m^2$ quadrats. To test for pattern in functional composition of communities we used null model approach. A first null model (NM1) randomizes traits among species (permuting raw in `Trait*Species` matrix). The second model (NM2) randomizes abundances among species inside each community but keeps the observed list of species and trait values inside communities. NM1 allow to assess environmental filtering and biotic process on Uppangala plot species. NM2 bring more insight on environmental and biotic effects on species distribution inside communities [@bernard-verdier_community_2012].
 
@@ -114,17 +114,21 @@ $$CWM = \sum_{i=1}^{S} p_{i} * t_{i} ~ (1)$$
 CWM was also computed in presence-absence, to get better insight of the role of rare species in community traits distribution. CWV for each trait $t$ was calculated as the difference between the mean of species trait values, $t_{i}$, and the $CWM$, of the $S$ species in each community, with each species, $i$, weighted by its relative
 abundance, $p_{i}$:
 $$CWV = \sum_{i=1}^{S} p_{i} * (t_{i} - CWM)^2 ~ (2)$$
-CVNND was computed in abundance inside each community. For both CWV and CVNND, we calculated the standardized effect size (SES) as: 
-$$SES = \frac{(I_{obs} - I_{null})}{\sigma _{null}}$$
+CVNND for each trait $t$ was calculated as nearest neigbor distances (NND) variance, $\sigma _{NND}$, of the $i$ individuals in each community, divided by its mean, $\mu _{NND}$; and NND for one individual $i$ is calculated as the minimal distance $d$ between the $j$ other individuals of the community :
+$$CVNND = \frac{\sigma _{NDD}}{\mu _{NDD}} ~ with ~ NND_{i} = min(d_{i,j})_{i \neq j} ~ (3)$$
+For both CWV and CVNND, we calculated the standardized effect size (SES) as: 
+$$SES = \frac{(I_{obs} - I_{null})}{\sigma _{null}} (4)$$
 where $I_{obs}$ is the observed metric and $I_{null}$ and $\sigma _{null}$ are the mean and standard deviation of null distributions of NM2 and NM1 for CWV and CVNND respectively.
 
 Linear regressions between CWMs and biotic and abiotic factors after step measure were compared to corresponding 999 null linear regressions from NM1 with F-statistic. For both CWV and CVNND, proportion of of communities differing from null expectaions was tested with a two-tailed test; and links between SES and environment was investigated by linear regression. Analyses were conducted on the five functional traits and the two economic spectra defined with the species scores obtained on the 2 first PCA axes.
 
-### Composition variation between communities
+### Functionnal and phylogenetic composition between communities
 
 Phylogenetic tree of our 92 species was built with `S.PhyloMaker` function implemented by @qian_updated_2016-1. Phylogenetic signal was globaly assessed for each functional trait among the phylogenetic tree by Moran's I statistic. Positive Moran's I value will indicate convergence of trait value inside the phylogeny whereas negative Moran's I will show divergence.
 
-$\beta st$ and $\pi st$ metric proposed by @hardy_characterizing_2007 were used to investigate variation of phylogenetic composition between communities. Observed values were compared to the one obtained with the null model *"1s"*" suggested by @hardy_testing_2008 to see if we were under phylogenetic clustering or overdispersion. In parrallel variation of functional composition between communities was assessed by $U st$ and $\tau st$ metric proposed by @hardy_characterizing_2007. Observed values were compared to NM1. Negative Hardy's metrics significate that species are functionaly or phylogenetically
+$\beta st$ and $\pi st$ metric proposed by @hardy_characterizing_2007 were used to investigate variation of phylogenetic composition between community pairs. In parrallel variation of functional composition between community pairs was assessed by $U st$ and $\tau st$ metric. Environmental distances between community pairs was also calculated as distances between communities on the plan composed by the two first axes of the principal component analysis of environmental variables (see suppplementary materials S1). Finally spatial distances between community pairs was also assessed. We used Mantel test to sudy the link between functionnal and phylogenetic pairwise compositions with hardy's metrics and environmental distances between community pairs. A second mantel test was realized to assess those pairwise links between environment and functionnal and phylogenetic structure knowing spatial structure with the spatial distances between community pairs matrix.
+
+Observed mantel correlations for phylogenetic composition were compared to 999 obtained with the null model *"1s"*" suggested by @hardy_testing_2008 randomizing phylogenetic tree tips. Observed mantel correlations for functionnal composition were compared to NM1, randomizing traits among species.
 
 All analysis were conducted in the R 3.3.0  free software environment for statistical analyses and graphics [@r_core_team_r:_2016] using the package 
 `ade4` [@dray_ade4_2007], 
@@ -343,8 +347,8 @@ ppval <- lapply(ppval, function(x){1 - x})
 rm(pFval, npFval)
 
 # Result tables
-kable(regression_table(CWM.lm[[1]], reg, pval[,1], ppval[[1]]))
-kable(regression_table(CWM.lm[[2]], reg, pval[,2], ppval[[2]]))
+kable(bold(regression_table(CWM.lm[[1]], reg, pval[,1], ppval[[1]])))
+kable(bold(regression_table(CWM.lm[[2]], reg, pval[,2], ppval[[2]])))
 rm(CWM.lm, nCWM.lm, pval, ppval, reg) ; invisible(gc())
 ```
 
@@ -404,7 +408,7 @@ CWV.ses.lm <- apply(CWV.ses, 2, function(y){lm(y ~., R)})
 CWV.ses.lm <- lapply(CWV.ses.lm, function(x){step(x, direction = 'both', trace = 0)})
 CWV.ses.res <- lapply(CWV.ses.lm, function(x){summary(x)$coefficients})
 CWV.ses.res <- lapply(CWV.ses.res, data.frame)
-CWV.ses.res <- lapply(CWV.ses.res, function(x){x$res <- paste(format(x$Estimate, scientific = T, digits = 2), apply(x[4], 1, stars, ns = '   ')) ; return(x)})
+CWV.ses.res <- lapply(CWV.ses.res, function(x){x$res <- paste(format(x$Estimate, scientific = T, digits = 2, trim = T), apply(x[4], 1, stars, ns = '   ')) ; return(x)})
 CWV.ses.res <- data.frame(data.table::rbindlist(lapply(CWV.ses.res, function(x){data.frame(t(x[5]))}), fill = T))
 CWV.ses.res <- CWV.ses.res[-1]
 CWV.ses.res$Slope <- NA
@@ -413,11 +417,11 @@ CWV.ses.res <- apply(CWV.ses.res, 2, as.character)
 row.names(CWV.ses.res) <- names(CWV.ses)
 CWV.ses.res[is.na(CWV.ses.res)] <- ''
 CWV.ses.res <- data.frame(CWV.ses.res)
-CWV.ses.res$R2 <- round(unlist(lapply(CWV.ses.lm, function(x){summary(x)$r.squared})),3)
+CWV.ses.res$`$R^2$` <- round(unlist(lapply(CWV.ses.lm, function(x){summary(x)$r.squared})),3)
 
 # Results
 barplot(t(CWV.pval.res), las = 2, col = c('darkblue', 'firebrick'), ylim = c(0,1), ylab = 'Proportion of non null communities') ; legend('topright', c('Inferior','Superior'), fill = c('darkblue', 'firebrick'))
-kable(CWV.ses.res)
+kable(bold(CWV.ses.res))
 rm(CWV.pval, CWV.pval.res, CWV.ses.res, CWV.ses.lm, nCWV)
 ```
 
@@ -466,7 +470,7 @@ CVNND.ses.lm <- apply(CVNND.ses, 2, function(y){lm(y ~., R)})
 CVNND.ses.lm <- lapply(CVNND.ses.lm, function(x){step(x, direction = 'both', trace = 0)})
 CVNND.ses.res <- lapply(CVNND.ses.lm, function(x){summary(x)$coefficients})
 CVNND.ses.res <- lapply(CVNND.ses.res, data.frame)
-CVNND.ses.res <- lapply(CVNND.ses.res, function(x){x$res <- paste(format(x$Estimate, scientific = T, digits = 2), apply(x[4], 1, stars, ns = '   ')) ; return(x)})
+CVNND.ses.res <- lapply(CVNND.ses.res, function(x){x$res <- paste(format(x$Estimate, scientific = T, digits = 2, trim = T), apply(x[4], 1, stars, ns = '   ')) ; return(x)})
 CVNND.ses.res <- data.frame(data.table::rbindlist(lapply(CVNND.ses.res, function(x){data.frame(t(x[5]))}), fill = T))
 CVNND.ses.res <- CVNND.ses.res[-1]
 CVNND.ses.res$Slope <- NA
@@ -475,17 +479,15 @@ CVNND.ses.res <- apply(CVNND.ses.res, 2, as.character)
 row.names(CVNND.ses.res) <- names(CVNND.ses)
 CVNND.ses.res[is.na(CVNND.ses.res)] <- ''
 CVNND.ses.res <- data.frame(CVNND.ses.res)
-CVNND.ses.res$R2 <- round(unlist(lapply(CVNND.ses.lm, function(x){summary(x)$r.squared})),3)
+CVNND.ses.res$`$R^2$` <- round(unlist(lapply(CVNND.ses.lm, function(x){summary(x)$r.squared})),3)
 
 # Results
 barplot(t(CVNND.pval.res), las = 2, col = c('darkblue'), ylim = c(0,1), ylab = 'Proportion of non null communities') ; legend('topright', c('Inferior'), fill = c('darkblue'))
-kable(CVNND.ses.res)
+kable(bold(CVNND.ses.res))
 rm(CVNND.pval, CVNND.pval.res, CVNND.ses.res, CVNND.ses.lm, nCVNND) ; invisible(gc())
 ```
 
 ## Composition variation between communities
-
-**Artefacts of phylogenetic tree building to be removed**
 
 ```{r PhyloMaker}
 library(phylosignal)
@@ -499,7 +501,7 @@ sp <- Species[which(Species$LatinName %in% row.names(PFT_sp)), c('LatinName', 'G
 names(sp) <- c('species', 'genus', 'family')
 results <- invisible(S.PhyloMaker(sp, phylo, nodes)) # Humboldtia_brunonis unmatched
 tree <- results$Scenario.1
-rm(phylor, results, modes, sp, S.PhyloMaker, path)
+rm(phylo, results, modes, sp, S.PhyloMaker, path)
 ```
 
 Table 7: Summary of Moran’s I statistic and p-values for phylogenetic signal of functional traits. _See table 1 for abbreviations. The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
@@ -512,93 +514,173 @@ phy <- drop.tip(tree, tips)
 data <- data[phy$tip.label,c(2:5,7)]
 p4d <- phylo4d(phy,data)
 phyloS <- phyloSignal(p4d, methods = 'I') 
-phyloS <- cbind(phyloS$stat, phyloS$pvalue)
-names(phyloS) <- c('Moran\'s I', 'p-value')
-phyloS$` ` <- lapply(as.list(phyloS$`p-value`), stars, ns = ' ')
-kable(phyloS)
-rm(data, tips, p4d, phyloS)
+phyloS <- data.frame(paste(round(phyloS$stat[,1], 3), 
+                           unlist(lapply(as.list(phyloS$pvalue[,1]), stars, ns = ' '))),
+                     row.names = row.names(phyloS$stat))
+names(phyloS) <- 'Moran\'s I'
+kable(bold(phyloS))
+rm(data, tips, p4d, phyloS, phy)
 ```
 
-Variations of both functional and phylogenetic compositions between communities don't significantly differ from null models ($U_{st} = -1.1*10^-3$ with $p-value = 0.114$, $\tau _{st} = 1.8*10^-3$ with $p-value = 0.079$, $\beta _{st} = -8.3*10^-4$ with $p-value = NaN$, and $\pi _{st} = -1.8*10^-3$ with $p-value = 0.247$).  
+Table 8: Summary of Mantel test between floristic composition, environment and spatial distances between communities. _$Ist$  was used to investigate variation of floristic composition between communities. Observed values were compared to a null model randomizing individuals among subplots while preserving the regional abundance of species, and the number of individuals per community. E is the mantel test of the metric with the environmental distance matrix issued from PCA two first axes. S|E is the mantel partial test of the spatial distance matrix knowing the environment matrix. The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
 
-**Following tables will probably be removed in final report by simply including results in text. They are just here for discussion.**
-
-Table 8: Summary of variation of functional composition between communities. _$U st$ and $\tau st$ metric proposed by @hardy_characterizing_2007 were used to investigate variation of functional composition between communities. Observed values were compared to the one obtained with the null model *"1s"*" suggested by @hardy_testing_2008. The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
-
-```{r Functionnal spatial structure, eval=FALSE, include=FALSE}
+```{r Ist}
 library(spacodiR)
-mtest <- dist(as(quadrats(), 'SpatialPoints')@coords)
 
-# Observed Hardys
-spafun <- lapply(as.list(1:length(Q)), function(i){
-  if (length(which(is.na(Q[i]))) > 0)
-    q.names <- row.names(Q[-which(is.na(Q[i])),])
-  else
-    q.names <- row.names(Q)
-  sel <- intersect(names(L$abundance), q.names)
-  return(spacodi.calc(sp.plot = t(L$abundance[sel]), sp.traits = data.frame(Q[sel,i], row.names = sel), pairwise = T))
-})
-names(spafun) <- names(Q)
-spafun <- lapply(spafun, function(x){x[c('pairwise.Ist','pairwise.Ust', 'pairwise.TAUst')]})
+# Environmental matrices
+XY <- data.frame(as(quadrats(), 'SpatialPoints')@coords)
+row.names(XY) <- paste0('C',row.names(XY))
+XY <- XY[row.names(L$abundance),]
+Ms <- dist(XY)
+XY <- pca.env$scores[,1:2]
+row.names(XY) <- paste0('C',row.names(XY))
+XY <- XY[row.names(L$abundance),]
+Me <- dist(XY)
+rm(XY)
+
+# Observed Ist
+spaflo <- spacodi.calc(sp.plot = t(L$abundance), pairwise = T)$'pairwise.Ist'
 ## Mantel values
-spafun.mantel <- lapply(spafun, function(t){lapply(t, function(m){vegan::mantel(m, mtest, permutations = 0)$statistic})})
+spaflo.mantel <- list(`E` = vegan::mantel(spaflo, Me, permutations = 0)$statistic, 
+                      `S | E`= vegan::mantel.partial(spaflo, Ms, Me, permutations = 0)$statistic)
 
-# Simulated Hardys
+# Simulated mantel
+nL <- vegan::permatfull(L$abundance, fixedmar = 'both', mtype = 'count', times = n, shuffle = 'both')
 cl <- makeCluster(3)
-clusterExport(cl, list('nQ', 'L', 'spacodi.calc'))
-nspafun <- clusterApply(cl, nQ, function(q){
-  lapply(as.list(1:length(q)), function(i){
-    if (length(which(is.na(q[i]))) > 0)
-      q.names <- row.names(q[-which(is.na(q[i])),])
-    else
-      q.names <- row.names(q)
-    sel <- intersect(names(L$abundance), q.names)
-    return(spacodi.calc(sp.plot = t(L$abundance[sel]), sp.traits = data.frame(q[sel,i], row.names = sel), pairwise = T))
-  })
-})
-stopCluster()
-rm(cl, nQ) ; invisible(gc())
-## Simulated mantels
-
+clusterExport(cl, list('nL', 'spacodi.calc', 'Me', 'Ms'))
+nspaflo <- lapply(nL$perm, function(l){spacodi.calc(sp.plot = t(l), pairwise = T)$'pairwise.Ist'})
+nspaflo.mantel <- lapply(nspaflo, function(ns){
+  list(`E` = vegan::mantel(ns, Me, permutations = 0)$statistic, 
+       `S | E`= vegan::mantel.partial(ns, Ms, Me, permutations = 0)$statistic)})
+stopCluster(cl)
+rm(cl, nL) ; invisible(gc())
+## Non null mantels
+nspaflo.mantel <- lapply(nspaflo.mantel, `[`, names(nspaflo.mantel[[1]]))
+nspaflo.mantel <- apply(do.call(rbind, nspaflo.mantel), 2, as.list)
+nspaflo.mantel <- lapply(nspaflo.mantel, unlist)
+spaflo.res <- mapply(function(s, ns){
+    paste(format(s, scientific = T, digits = 3),
+          Uppangala::stars(min(1-rank(c(s,ns))[1]/(n+1),rank(c(s,ns))[1]/(n+1)), ns = '   '))
+}, s = spaflo.mantel, ns = nspaflo.mantel)
+spaflo.res <- data.frame(spaflo.res)
+names(spaflo.res) <- c('$I_{st}$')
 
 # Result
-kable(spafun.res)
+kable(bold(spaflo.res))
+rm(mtest, spaflo.mantel, nspaflo, nspaflo.mantel, spaflo.res)
 ```
 
-Table 9: Summary of variation of phylogenetic composition between communities. _$\beta st$ and $\pi st$ metric proposed by @hardy_characterizing_2007 were used to investigate variation of phylogenetic composition between communities. Observed values were compared to a null model randomizing traits among species (permuting raw in `Trait*Species` matrix). The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
+Table 9: Summary of Mantel test between functionnal composition, environment and spatial distances between communities. _$U st$ and $\tau st$ metric proposed by @hardy_characterizing_2007 were used to investigate variation of functional composition between communities. Observed values were compared to the null model NM1 randomizing traits among species (permuting raw in `Trait*Species` matrix). E is the mantel test of the metric with the environmental distance matrix issued from PCA two first axes. S|E is the mantel partial test of the spatial distance matrix knowing the environment matrix. The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
 
-```{r Phylogenetic spatial structure, eval=FALSE, include=FALSE}
-for(i in 1:2) phy[[i]]$tip.label <- gsub('_', ' ', phy[[i]]$tip.label, fixed = T)
-for(i in 1:2) phy[[i]]$tip.label <- as.character(l$Sp_Code[match(phy[[i]]$tip.label, row.names(l))])
-Lm <- lapply(phy, function(x){Lm[intersect(names(Lm), x$tip.label)]})
-phyRD <- lapply(phy, function(x){x$node.label <- NULL ; return(x)})
-phyRD <- lapply(phyRD, function(x){rep(list(x), 999)})
-phyRD <- lapply(phyRD, function(x){lapply(x, resamp.phy)})
-LmRD <- lapply(Lm, function(x){rep(list(x), 999)})
-LmRD <- mapply(function(x,y){mapply(function(r,s){r[intersect(names(r), s$tip.label)]}, r = x, s = y, SIMPLIFY = F)}, x = LmRD, y = phyRD, SIMPLIFY = F)
-phyRD <- mapply(function(x,y){mapply(function(r,s){drop.tip(r, setdiff(r$tip.label, names(s)))}, r = x, s= y, SIMPLIFY = F)}, x = phyRD, y = LmRD, SIMPLIFY = F)
+```{r Ust & TAUst}
+# Observed Hardys
+spafun <- lapply(as.list(1:length(Q)), function(i){
+  if (length(which(is.na(Q[i]))) > 0) {
+    sel <- intersect(names(L$abundance), row.names(Q[-which(is.na(Q[i])),]))
+    return(spacodi.calc(sp.plot = t(L$abundance[sel]), sp.traits = data.frame(Q[sel,i], row.names = sel), pairwise = T)[c('pairwise.Ust', 'pairwise.TAUst')])
+  } else {
+    return(spacodi.calc(sp.plot = t(L$abundance), sp.traits = Q, pairwise = T)[c('pairwise.Ust', 'pairwise.TAUst')])
+  }
+})
+names(spafun) <- names(Q)
+## Mantel values
+spafun.mantel <- lapply(spafun, function(t){list(`E` = lapply(t, function(M){vegan::mantel(M, Me, permutations = 0)$statistic}), `S | E` = lapply(t, function(M){vegan::mantel.partial(M, Ms, Me, permutations = 0)$statistic}))})
 
-spaphy <- mapply(function(x,y){spacodi.calc(sp.plot = t(y), phy = x)}, x = phy, y = Lm.l, SIMPLIFY = F)
-spaphy <- do.call('rbind.data.frame', lapply(spaphy, function(x){x[1:4]}))
 
-spaphy.l <- mapply(function(x,y){mapply(function(r,s){spacodi.calc(t(r), s)}, r = x, s = y, SIMPLIFY = F)},x = LmRD, y = phyRD, SIMPLIFY = F)
-spaphy.l <- lapply(spaphy.l, function(x){lapply(x, function(y){y[1:4]})})
-spaphyRD <- list(Ist = lapply(spaphy.l, function(x){unlist(lapply(x, function(y){y$Ist}))}),
-                 Tst = lapply(spaphy.l, function(x){unlist(lapply(x, function(y){y$Tst}))}),
-                 Bst = lapply(spaphy.l, function(x){unlist(lapply(x, function(y){y$Bst}))}),
-                 PIst = lapply(spaphy.l, function(x){unlist(lapply(x, function(y){y$PIst}))}))
-pvalues <- mapply(function(obs,rd){
-  mapply(function(o,r){rank(c(o, r))[1]/1000}, o = obs, r = rd)
-  }, obs = lapply(as.list(spaphy), as.list), rd = spaphyRD)
-row.names(pvalues) <- row.names(spaphy)
+# Simulated mantel
+cl <- makeCluster(3)
+clusterExport(cl, list('nQ', 'L', 'Me', 'Ms', 'spacodi.calc'))
+nspafun.mantel <- clusterApply(cl, nQ, function(q){
+  s <- lapply(as.list(1:length(q)), function(i){
+    if (length(which(is.na(q[i]))) > 0) {
+      sel <- intersect(names(L$abundance), row.names(q[-which(is.na(q[i])),]))
+      return(spacodi.calc(sp.plot = t(L$abundance[sel]), sp.traits = data.frame(q[sel,i], row.names = sel), pairwise = T)[c('pairwise.Ust', 'pairwise.TAUst')])
+    } else {
+      return(spacodi.calc(sp.plot = t(L$abundance), sp.traits = q, pairwise = T)[c('pairwise.Ust', 'pairwise.TAUst')])
+    }
+  })
+  names(s) <- names(q)
+  res <- list(
+    `E` = lapply(s, function(t){
+      lapply(t, function(M){
+        try(vegan::mantel(M, Me, permutations = 0)$statistic)
+        })
+      }),
+    `S | E` = lapply(s, function(t){
+      lapply(t, function(M){
+        try(vegan::mantel.partial(M, Ms, Me, permutations = 0)$statistic)
+        })
+      })
+    )
+  res <- lapply(res, function(r){names(r) <- names(q) ; return(r)})
+  res <- lapply(res, `[`, names(res[[1]]))
+  res <- apply(do.call(rbind, res), 2, as.list)
+  return(res)
+})
+stopCluster(cl)
+rm(cl, nQ) ; invisible(gc())
 
-pvalues <- as.data.frame(pvalues)[3:4]
-pvalues$Bst <-  rep(NaN,2)
-spaphy.res <- format(spaphy[3:4], scientific = T, digits = 2)
-pvalues <- data.frame(apply(pvalues, c(1,2), function(y){paste(y, stars(y, ns = ' '))}))
-spaphy.res$Bst <- paste(spaphy.res$Bst, '/', pvalues$Bst)
-spaphy.res$PIst <- paste(spaphy.res$PIst, '/', pvalues$PIst)
-kable(spaphy.res)
+## Non null mantels
+nspafun.mantel <- lapply(nspafun.mantel, `[`, names(nspafun.mantel[[1]]))
+nspafun.mantel <- apply(do.call(rbind, nspafun.mantel), 2, as.list)
+nspafun.mantel <- lapply(nspafun.mantel, function(s){lapply(s, `[`, names(s[[1]]))})
+nspafun.mantel <- lapply(nspafun.mantel, function(s){apply(do.call(rbind, s), 2, as.list)})
+nspafun.mantel <- lapply(nspafun.mantel, function(s){lapply(s, function(m){lapply(m, `[`, names(m[[1]]))})})
+nspafun.mantel <- lapply(nspafun.mantel, function(s){lapply(s, function(m){apply(do.call(rbind, m), 2, as.list)})})
+nspafun.mantel <- lapply(nspafun.mantel, function(s){lapply(s, function(x){lapply(x, function(x){as.numeric(unlist(x))})})})
+spafun.res <- data.frame(mapply(function(x,y){
+  mapply(function(r,s){
+    mapply(function(p,q){
+      paste(format(p, scientific = T, digits = 3), 
+            Uppangala::stars(min(rank(c(p,q))[1]/(n+1), 1-rank(c(p,q))[1]/(n+1)), ns = '   '))
+    }, p = r, q = s, SIMPLIFY = F)
+  }, r = x, s= y)
+}, x = spafun.mantel, y = nspafun.mantel))
+spafun.res <- cbind(data.frame('Mantel test' = c('E', ' ', 'S|E', ' '), 'Metric' = rep(c('$U_{st}$', '$\\tau _{st}$'), 2)), spafun.res)
+
+# Result
+kable(bold(spafun.res))
+rm(spafun.mantel, nspafun.mantel, spafun.res)
+```
+
+Table 10: Summary of Mantel test between phylogenetic composition, environment and spatial distances between communities. _$\beta st$ and $\pi st$ metric proposed by @hardy_characterizing_2007 were used to investigate variation of phylogenetic composition between communities. Observed values were compared to the one obtained with the null model *"1s"*" suggested by @hardy_testing_2008 randomizong phylogenetic tree tips. E is the mantel test of the metric with the environmental distance matrix issued from PCA two first axes. S|E is the mantel partial test of the spatial distance matrix knowing the environment matrix. The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
+
+```{r BETAst $ PIst}
+# Observed Hardys
+phy <- tree
+phy$tip.label <- Species$SpCode[match(gsub('_', ' ',phy$tip.label), Species$LatinName)]
+tips <- c(setdiff(phy$tip.label, names(L$abundance)), setdiff(names(L$abundance), phy$tip.label))
+phy <- drop.tip(phy, tips)
+phy$node.label <- NULL
+spaphy <- spacodi.calc(sp.plot = t(L$abundance), phy = phy, pairwise = T)[c('pairwise.Bst', 'pairwise.PIst')]
+## Mantel values
+spaphy.mantel <- list(`E` = lapply(spaphy, function(m){vegan::mantel(m, Me, permutations = 0)$statistic}), 
+                      `S | E`= lapply(spaphy, function(m){vegan::mantel.partial(m, Ms, Me, permutations = 0)$statistic}))
+
+# Simulated mantel
+nphy <- rep(list(phy), 999)
+cl <- makeCluster(3)
+clusterExport(cl, list('nphy', 'L', 'spacodi.calc', 'Ntip', 'resamp.phy', 'branching.times'))
+nphy <- clusterApply(cl, nphy, resamp.phy)
+stopCluster(cl)
+nspaphy <- lapply(nphy, function(p){spacodi.calc(sp.plot = t(L$abundance), phy = p, pairwise = T)[c('pairwise.Bst', 'pairwise.PIst')]})
+rm(cl, nphy) ; invisible(gc())
+nspaphy.mantel <- list(`E` =lapply(nspaphy, function(x){lapply(x, function(M){vegan::mantel(M, Me, permutations = 0)$statistic})}), `S | E` = lapply(nspaphy, function(x){lapply(x, function(M){vegan::mantel.partial(M, Ms, Me, permutations = 0)$statistic})}))
+## Non null mantels
+nspaphy.mantel <- lapply(nspaphy.mantel, function(s){lapply(s, `[`, names(s[[1]]))})
+nspaphy.mantel <- lapply(nspaphy.mantel, function(s){apply(do.call(rbind, s), 2, as.list)})
+nspaphy.mantel <- lapply(nspaphy.mantel, function(s){lapply(s, unlist)})
+spaphy.res <- mapply(function(s, ns){
+  mapply(function(x,y){
+    paste(format(x, scientific = T, digits = 3), 
+          Uppangala::stars(min(1-rank(c(x,y))[1]/(n+1),rank(c(x,y))[1]/(n+1)), ns = '   '))
+  }, x = s, y = ns)
+}, s = spaphy.mantel, ns = nspaphy.mantel)
+row.names(spaphy.res) <- c('$\\beta_{st}$', '$\\pi_{st}$')
+  
+# Result
+kable(bold(spaphy.res))
+rm(mtest, spaphy.mantel, nspaphy, nspaphy.mantel, spaphy.res)
 ```
 
 # Discussion
@@ -612,11 +694,7 @@ kable(spaphy.res)
 
 # Supplementary materials
 
-**I'm aware that Supplementary materials goes after References (as figure and tables), but it's not possible for the moment with Rmarkdown and knitr.**
-
 ## S1: Principal component analysis performed on topgraphical variables
-
-Curvature covary with profile curvature, plan curvature, distance to potential rivers and the PCA first axis. Elevation and wetness are opposed in the principal component analysis and slope and south-westerness doesn't seem to covary much with other variables.
 
 ```{r PCA Env}
 lambda <- pca.env$sdev * sqrt(nrow(pca.env$scores))
@@ -651,5 +729,7 @@ axis (4)
 ```
 
 Supplementary material S1: Principal component analysis (PCA) performed on topgraphical variables. *Bootom left corner subplot represents the eigen values (grey bars) compare to a broken stick distribution for 8 components (red line). SW stand for southwesterness.*
+
+Curvature covary with profile curvature, plan curvature, distance to potential rivers and the PCA first axis. Elevation and wetness are opposed in the principal component analysis and slope and south-westerness doesn't seem to covary much with other variables.
 
 # References

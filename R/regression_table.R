@@ -30,7 +30,7 @@ regression_table <- function(LM, reg, pval, ppval){
     }
   }
   # LM R squarred
-  var_table$R2 <- unlist(lapply(LM, function(x){round(summary(x)$r.squared,2)}))
+  var_table$`$R^2$` <- unlist(lapply(LM, function(x){round(summary(x)$r.squared,2)}))
 
   # Null models
   var_table$`Null model` <- round(pval,3)
