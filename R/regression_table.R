@@ -35,7 +35,7 @@ regression_table <- function(LM, reg, pval, ppval){
   # Null models
   var_table$`Null model` <- round(pval,3)
   var_table$` ` <- unlist(lapply(pval, stars, ns = ' '))
-  var_table[which(var_table$` ` == ' '),2:7] <- ' '
+  var_table <- var_table[-which(var_table$` ` == ' '),]
 
   return(var_table)
 }

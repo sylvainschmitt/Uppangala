@@ -1,7 +1,7 @@
 ---
 title: 'Uppangala tree functional traits: Article draft'
 author: "Sylvain Schmitt sylvain.schmitt@agroparistech.fr"
-output: word_document
+output: pdf_document
 bibliography: refs.bib
 ---
 
@@ -22,16 +22,17 @@ Keywords: functional trait, tropical evergreen forest, Western Ghats, India...
 
 **Study scheme:**
 
-1. Do variations and covariations in functionnal traits can reveal species ecological strategies ?
-    i. Do functionnal traits vary among species ?
-    ii. Do covariations in functional traits represent axes of ecological strategy ?
-2. Do functional composition reflect the influence of abiotic and biotic drivers of community dynamics ?
-    i. Do local functional composition reflect the influence of abiotic and biotic drivers of community dynamics ?
-    ii. Do functional composition variation between communities reflect the influence of abiotic and biotic drivers of community dynamics ?
+1. Do variations and covariations in functional traits reflect distinct ecological strategies within and among species ?
+    i. Do and how functional traits vary among species ?
+    ii. Do covariations in functional traits represent axes of ecological strategy within species ?
+2. Does functional composition reflect the influence of local abiotic and biotic drivers of community dynamics ?
+    i. Do local functional composition ($\alpha$ scale) reflect the influence of abiotic and biotic drivers of community dynamics ?
+    ii. Do functional composition variation between communities ($\beta$ scale) reflect the changing of abiotic and biotic conditions ?
 
 **To add:**
 
-* Functional traits can be linked to trade-offs in tree strategy for functionning, survival and reproduction [@baraloto_decoupled_2010, and see table 1], which vary depending on environment condition. For instance, SLA varies along a soil fertility - shade index whereas LDMC will only be linked to soil fertility [@hodgson_is_2011].
+* Functional traits can be linked to trade-offs in tree strategy for functionning, survival and reproduction [@baraloto_decoupled_2010, and see table 1], which vary depending on environment condition. 
+* For instance, SLA varies along a soil fertility - shade index whereas LDMC is basically linked to soil fertility [@hodgson_is_2011]. **! In european temperate context !**
 * Leaf investment definition
 * Leaf ressource acquisition definition
 
@@ -39,16 +40,16 @@ Keywords: functional trait, tropical evergreen forest, Western Ghats, India...
 
 ## Study site
 
-The study was carried out in the Kadamakal Reserve Forest (Kodagu District, Karnataka State, India), in the 10-ha "Uppangala plot" named after the nearest village. The permanent plot was established in 1990 by the French Institute of Pondicherry and described by @pascal_structure_1996. The Uppangala plot vegetation was assigned to low elevation *Dipterocarpus indicus - Kingiodendron pinnatum - Humboldtia brunonis* dense moist evergreen forest type [@pascal_wet_1988]. Climate and geology of the 10-ha plot can be considered as homogeneous. General topagraphy of the site shows a regular east-west alternation between thalwegs and ridges separated by relatively steep slopes, so that topography can be assumed as the major local abiotic factor which varies inside the plot [@gimaret-carpentier_sampling_1998]. Each tree girth is monitored by a two-year census.
-**Girth monitoring to develop shortly**
+The study was carried out in the the 10-ha "Uppangala plot" of undisturbed, old-growth wet evergreen Diptrocarp forest. The plot is located in the Kadamakal Reserve Forest (Kodagu District, Karnataka State, India) in India's Western Ghats biodiversity hotspot. Climate is characterized by a peak of heavy rainfall during monsoon and a marked dry season. Annual precipitation averages 5108 mm with 90% between June and October and an average dry season (monthly rainfall $\leq 45$ mm) of 3.8 months [@pelissier_twenty_2011]. Mean annual temperature in the station of Sampaji (15 km from Uppangala) is about 27$^\circ C$, with a mean minimum about 25$^\circ C$ during July rainfall pick and a maximum mean temperature of 29$^\circ C$ in April [@pascal_structure_1996]. Climate and geology of the 10-ha plot can be considered as homogeneous. General topography of the site shows a regular east-west alternation between thalwegs and ridges separated by relatively steep slopes, so that topography can be assumed as the major local abiotic factor which varies inside the plot [@gimaret-carpentier_sampling_1998]. The permanent plot was established in 1990 by the French Institute of Pondicherry and described by @pascal_structure_1996. Since 1989, all trees $\geq 30$ cm girth at breast height (gbh) were monitored in an area progressively extended to 10ha in 2014. All trees were identified, tagged, mapped, and provided with permanent dendrometer bands censused every 2-5 years.
 
 ## Wood and leaf sampling
 
-We collected trait data on 91 over 117 (78%) species. We sampled five individuals per species for most abundant species and we completed with less abundant and rare species with one to five individuals. Most abundant species were defined as the 32 species respresenting more than 80% of Uppangala tree individuals. Thus we generated data for 98.8% of the tree individuals present in the Uppangala plot. For each individual we collected 6 mature shadow dry leaves and one branch sample with a diameter close to 1cm following recommendation from @perez-harguindeguy_new_2013. Individuals and leaves were selected regarding their light condition, development stage and sanitary state for consistancy. Dawkins crown exposure index [@dawkins_management_1958] was registered to check the validity of the sampling. Leaf and branch samples were kept in humidified ziplock filled with enriched CO2 air inside a black bag untill their measurement in the following 24 hours. For some individuals we were unable to collect an appropriate branch sample (58 over 267 individuals representing 12 missing species over 91).
+We collected trait data on 89 over 111 (80.1%) species. The 32 most abundant species represent more than 80% of Uppangala tree individuals.
+We sampled five individuals per species for most abundant species and we completed with less abundant and rare species with one to five individuals (in total of 267 individuals).  Thus we got trait data for 99.0% of the tree individuals present in the Uppangala plot. For each individual we collected 6 mature shadow leaves and one branch sample with a diameter close to 1 cm following recommendation from @perez-harguindeguy_new_2013. Individuals and leaves were selected in consistent light condition, development stage and sanitary state. Dawkins crown exposure index [@dawkins_management_1958] was assessed for each tree sampled. Leaf and branch samples were kept in humidified ziplock filled with enriched CO2 air inside a black bag untill their measurement in the following 24 hours. For some individuals, we were unable to collect an appropriate branch sample (58 over 267 individuals representing 11 missing species over 89 accounitg for 1% of individuals present in the 10ha plot).
 
 ## Trait measurements
 
-Leaf petioles, rachis and petiolules were removed for all measurements. Leaf fresh weights, area and thickness were measured, using a scanner [cite] and a microgauge [cite]. Leaves were first kept in herbarium and then dried in an oven for at least 72 hours at 60 degrees celsisus, the drying process was stopped after dry leaf weights were stable in time. Once dried, the leaves were weighted directly after been extracted from the oven to avoid humidity bias. The bark and pit of branch samples were removed in order to keep only branch wood with no soft tissues. Branch wood samples were sink in water to evaluate their volume by water displacement. Samples were then dried for 48 hours at 80 degrees celsius and weighted. 
+Leaf petioles, rachis and petiolules were removed for all measurements. Leaf fresh weights, area and thickness were measured, using a scanner **[cite]** and a microgauge **[cite]**. Leaves were first kept in herbarium and then dried in an oven for at least 72 hours at 60 $^\circ C$, the drying process was stopped after dry leaf weights were stable in time. Once dried, the leaves were weighted directly after been extracted from the oven to avoid humidity bias. The bark and pit of branch samples were removed in order to keep only branch wood with no soft tissues. Branch wood samples were sink in water to evaluate their volume by water displacement. Samples were then dried for 48 hours at 80 degrees celsius and weighted. 
 
 We calculated five functional traits of leaf and wood samples: leaf thickness (Thick in $\mu m$ ), leaf area measured from scans (LA in $mm^2$), leaf dry matter content as the leaf dry weight divided by the leaf fresh weight (LDMC in $mg.g^-1$), specific leaf area as the leaf area divided by the leaf dry mass (SLA in $m^2.kg^-1$), and branch wood density  as the the wood sample dry weight divided by its volume (WD in $g.cm^-3$, see table 1). 
 
@@ -75,7 +76,7 @@ table <- data.frame(
                          round(sd(PFT$SLA, na.rm = T),2), ')'),
                   paste0(round(mean(PFT$WD, na.rm = T),2), ' (',
                          round(sd(PFT$WD, na.rm = T),2), ')')),
-  unit = c('um', 'mm2', 'mg.g-1', 'm2.kg-1', 'g.cm-3'),
+  unit = c('$\\mu m$', '$mm^2$', '$mg.g^-1$', '$m^2.kg^-1$', '$g.cm^-3$'),
   strategy = c('Leaf defense vs. investment',
                'Leaf ressource capture vs.investment',
                'Leaf defense vs. investment',
@@ -88,61 +89,60 @@ rm(table)
 
 ## Environmental variables
 
-We selected 8 topographical variables representing abiotic factors: digital elevation model, slope, curvature, plan curvature, profile curvature, wetness (function of both slope and elevation representing water flow and accumulation areas), southwesterness (SW, aspect in direction of south-west), and distance to the nearest potential river. Digital elevation model is issued from a 2013 LIDAR campaign on Uppangala plots with a resolution of $1*1 m^2$. Slope, curvature, plan curvature, profile curvature, wetness and southwesterness ($cos(aspect~in~degres + 225)$) are all derived from the digital elevation model with the RSAGA package [@brenning_statistical_2008]. Distance to the nearest potential river was computed using ArcGis [@desktop_arcgis_2011].
+We selected 8 topographical variables representing abiotic factors: digital elevation model, slope, curvature, plan curvature, profile curvature, wetness (function of both slope and elevation representing water flow and accumulation areas), southwesterness (SW, aspect in direction of south-west), and distance to the nearest potential river. Digital elevation model was provided by a 2013 LIDAR campaign on Uppangala plots with a resolution of $1*1 m^2$. Slope, curvature, plan curvature, profile curvature, wetness and southwesterness ($cos(aspect~in~degres + 225)$) were all derived from the digital elevation model using the RSAGA package [@brenning_statistical_2008]. Distance to the nearest potential river was computed using ArcGis [@desktop_arcgis_2011].
 
-In order to avoid multi-colinearity in future analyses, we reduced our abiotic factors explanatory variables via a principal component analysis (PCA), by keeping less correlated variables with the most ecological meaning. We reduced our explanatory variables to 4: curvature to represent the water flow paths and soil stabilization areas, wetness to highlight water accumulation areas, southwesterness to represent monsoon winds [@bunyan_effect_2015] and slope.
+In order to identify main source of environmental variation and to avoid multi-colinearity in future analyses, we reduced our abiotic explanatory variables via a principal component analysis (PCA). We selected less correlated variables with the most ecological meaning. Thus we reduced our explanatory variables to 4: curvature to represent the water flow paths and soil accumulation areas, wetness to highlight water accumulation areas, southwesterness to represent aspect [@bunyan_effect_2015] and slope.
 
-We selected two biotic factors: canopy height and basal area. Canopy height was calculated from a digital canopy model built with the 2013 LIDAR campaign on Uppangala plots with resolution $1*1 m^2$. Basal area was calculated from 2013 girth inventory of Uppangala plot on stems with a diameter above 10 centimeters at breast height ($DBH>10~cm$). 
+We selected two biotic factors related to local forest structure: canopy height and basal area. Canopy height was calculated from a digital canopy model built with the 2013 LIDAR campaign on Uppangala plots with resolution $1*1 m^2$. Basal area was calculated from 2013 girth inventory of Uppangala plot on stems with a diameter above 10 centimeters at breast height ($DBH>10~cm$). 
 
 ## Analyses
 
 ### Traits variation and covariation
 
-Traits variation was first investigated in three levels with the coefficient of variation ($cv = \frac{\sigma}{\mu}$ with $\sigma$ the standard deviation and $\mu$ the mean) between leaves of the same individual (intra-individual), between trees of the same species (intra-specific), and between species (inter-specific).
+The coefficient of variation of traits was investigated at three levels ($cv = \frac{\sigma}{\mu}$ with $\sigma$ the standard deviation and $\mu$ the mean): between leaves of the same individual (intra-individual), between trees of the same species (intra-specific for species with more than one individual), and between species (inter-specific). We performed a principal component analysis (PCA) of the mean value of traits per species. Subsequent community-level analysis were based on trait values averaged per species.
 
-For the rest of the statistical analysis, we calculated the mean value of each 5 traits for our 92 species. To test the correlation and covariation among traits we performed a principal component analysis (PCA).
+### Local functional composition of communities
 
-### Local functionnal composition of communities
+Across the whole 10 hectare plot from Uppangala, 240 local communities where defined in $20*20 m^2$ quadrats. To investigate functional composition of communities we used a null model approach. A first null model (NM1) randomizes trait values among species (permuting raw in `Trait*Species` matrix). The second model (NM2) randomizes abundances among species inside each community but keeps the observed list of species and trait values inside communities [@bernard-verdier_community_2012]. 
 
-Among the whole 10 hectares plot from Uppangala, 240 spatial communities where defined with $20*20 m^2$ quadrats. To test for pattern in functional composition of communities we used null model approach. A first null model (NM1) randomizes traits among species (permuting raw in `Trait*Species` matrix). The second model (NM2) randomizes abundances among species inside each community but keeps the observed list of species and trait values inside communities. NM1 allow to assess environmental filtering and biotic process on Uppangala plot species. NM2 bring more insight on environmental and biotic effects on species distribution inside communities [@bernard-verdier_community_2012].
-
-To investigate traits distribution of communities we used community weighted means (CWM), community weighted variances (CWV), and coefficients of variation from the nearest neighbour distance (CVNND) [CWM and CWV, sensu @violle_let_2007, CVNND, @jung_intraspecific_2010]. CWV lower than expected under a null model will be evidence for convergence of traits inside the community whereas higher CWV will show divergence in trait distribution. CVNND is used to detect niche differenciation patterns in case of a lower CVNND as observed under a null model.
-
-CWM for each trait $t$ was calculated as the mean of species trait values, $t_{i}$, of the $S$ species in each community, with each species, $i$, weighted by its relative
-abundance, $p_{i}$:
+To investigate local functional composition of communities we used community weighted means (CWM), community weighted variances (CWV), and coefficients of variation from the nearest neighbour distance (CVNND) [CWM and CWV, sensu @violle_let_2007, CVNND, @jung_intraspecific_2010]. CWM for each trait $t$ was calculated as the mean of species trait values, $t_{i}$, of the $S$ species in each community, with each species, $i$, weighted by its relative abundance, $p_{i}$:
 $$CWM = \sum_{i=1}^{S} p_{i} * t_{i} ~ (1)$$
-CWM was also computed in presence-absence, to get better insight of the role of rare species in community traits distribution. CWV for each trait $t$ was calculated as the difference between the mean of species trait values, $t_{i}$, and the $CWM$, of the $S$ species in each community, with each species, $i$, weighted by its relative
+CWM was also computed in presence-absence, to further emphasize role of rare species in community trait distribution. Linear regressions between CWMs and biotic and abiotic factors ($CWM_{trait} = Slope + Curvature + Wetness + SW + Canopy + BA$), after stepwise selection, were compared to corresponding 999 null linear regressions from NM1 with F-statistic. 
+
+CWV for each trait $t$ was calculated as the mean distance of trait values, $t_{i}$, to $CWM$, of the $S$ species in each community, with each species, $i$, weighted by its relative
 abundance, $p_{i}$:
 $$CWV = \sum_{i=1}^{S} p_{i} * (t_{i} - CWM)^2 ~ (2)$$
-CVNND for each trait $t$ was calculated as nearest neigbor distances (NND) variance, $\sigma _{NND}$, of the $i$ individuals in each community, divided by its mean, $\mu _{NND}$; and NND for one individual $i$ is calculated as the minimal distance $d$ between the $j$ other individuals of the community :
-$$CVNND = \frac{\sigma _{NDD}}{\mu _{NDD}} ~ with ~ NND_{i} = min(d_{i,j})_{i \neq j} ~ (3)$$
-For both CWV and CVNND, we calculated the standardized effect size (SES) as: 
-$$SES = \frac{(I_{obs} - I_{null})}{\sigma _{null}} (4)$$
+CVNND for each trait $t$, scaled with its mean and variance, was calculated as nearest neigbor distances (NND) standard deviation, $\sigma _{NND}$, of the $i$ individuals in each community, divided by its mean, $\mu _{NND}$; and NND for one individual $i$ is calculated as the minimal distance $d$ between the $j$ other individuals of the community :
+$$CVNND = \frac{\sigma _{NND}}{\mu _{NND}} ~ , ~ ~ ~ NND = [NND_{i} = min(d_{i,j})_{i \neq j}] ~ (3)$$
+For both CWV and CVNND, proportion of of communities differing from null expectaions was tested with a two-tailed test with adjusted p-values by Benjamini-Hochberg correction. CWV lower than expected under a null model will be evidence for convergence of traits inside the community whereas higher CWV will show divergence in trait distribution. CVNND is used to detect niche differenciation patterns in case of a lower CVNND as observed under a null model [@jung_intraspecific_2010]. We then calculated the standardized effect size (SES) as: $$SES = \frac{(I_{obs} - I_{null})}{\sigma _{null}} (4)$$
 where $I_{obs}$ is the observed metric and $I_{null}$ and $\sigma _{null}$ are the mean and standard deviation of null distributions of NM2 and NM1 for CWV and CVNND respectively.
+Effect of environment on SES was investigated by linear regression with selected biotic and abiotic factors. Analyses were conducted on the five functional traits and the species scores obtained on the 2 first PCA axes.
 
-Linear regressions between CWMs and biotic and abiotic factors after step measure were compared to corresponding 999 null linear regressions from NM1 with F-statistic. For both CWV and CVNND, proportion of of communities differing from null expectaions was tested with a two-tailed test; and links between SES and environment was investigated by linear regression. Analyses were conducted on the five functional traits and the two economic spectra defined with the species scores obtained on the 2 first PCA axes.
+### Floristic, functional and phylogenetic composition between communities
 
-### Functionnal and phylogenetic composition between communities
+Phylogenetic tree of our 89 species was built with `S.PhyloMaker` function implemented by @qian_updated_2016-1. Phylogenetic signal was globaly assessed for each functional trait among the phylogenetic tree by Moran's I statistic. Positive Moran's I value indicates convergence of trait values within the phylogeny whereas negative Moran's I will show divergence.
 
-Phylogenetic tree of our 92 species was built with `S.PhyloMaker` function implemented by @qian_updated_2016-1. Phylogenetic signal was globaly assessed for each functional trait among the phylogenetic tree by Moran's I statistic. Positive Moran's I value will indicate convergence of trait value inside the phylogeny whereas negative Moran's I will show divergence.
+To investigate floristic, functional, and phylogenetic composition between communities we used $I_{st}$, for floristic composition, $U_{st}$ and $\tau _{st}$, for functional composition in abundance and presence-absence respectively, and $\beta _{st}$ and $\pi _{st}$, for phylogenetic composition in abundance and presence-absence respectively [@hardy_characterizing_2007]. 
 
-$\beta st$ and $\pi st$ metric proposed by @hardy_characterizing_2007 were used to investigate variation of phylogenetic composition between community pairs. In parrallel variation of functional composition between community pairs was assessed by $U st$ and $\tau st$ metric. Environmental distances between community pairs was also calculated as distances between communities on the plan composed by the two first axes of the principal component analysis of environmental variables (see suppplementary materials S1). Finally spatial distances between community pairs was also assessed. We used Mantel test to sudy the link between functionnal and phylogenetic pairwise compositions with hardy's metrics and environmental distances between community pairs. A second mantel test was realized to assess those pairwise links between environment and functionnal and phylogenetic structure knowing spatial structure with the spatial distances between community pairs matrix.
+Variation of composition between community pairs with those metrics was translated as a floristic, functional and phylogenetic distance, and compared to environmental and spatial distances among community pairs. Environmental distances were calculated as geometric distances between communities on the plan composed by the two first axes of environmental variables PCA (see supplementary material S1). Correlations with environment and space were assessed with two Mantel tests successively with floristic, functional, and phylogenetic community compositions. A firt full Mantel statistic evaluates the correlation between each metric distance matrix and the environmental distance matrix (E). The second partial Mantel statistic assess the correlation between each metric distance matrix and the spatial distance matrix knowing environmental distance matrix (E|S), representing spatial residuals that can influence community composition once the environment effect taken into account.
 
-Observed mantel correlations for phylogenetic composition were compared to 999 obtained with the null model *"1s"*" suggested by @hardy_testing_2008 randomizing phylogenetic tree tips. Observed mantel correlations for functionnal composition were compared to NM1, randomizing traits among species.
+We used null models to test if observed correlation with Mantel statistic differed significantly from expectations under null hypothesis. $I_{st}$ correlation to environment and space was tested with 999 repetions of the model nul described by @myers_beta-diversity_2013 which randomizes individuals among subplots while preserving the regional abundance of species, and the number of individuals per community. $U st$ and $\tau st$ were tested by the nul model NM1 which randomizes traits among species. Finally $\beta st$ and $\pi st$ were tested against the nul model *"1s"* suggested by @hardy_testing_2008 which randomizes phylogenetic tree tips.
 
-All analysis were conducted in the R 3.3.0  free software environment for statistical analyses and graphics [@r_core_team_r:_2016] using the package 
+
+All analysis were conducted using the R 3.3.0  software environment [@r_core_team_r:_2016] with packages 
 `ade4` [@dray_ade4_2007], 
 `ape` [@paradis_ape:_2004], 
-`phylosignal` [@keck_phylosignal:_2015] 
-and `spacodiR` [@eastman_spacodir:_2013].
+`phylosignal` [@keck_phylosignal:_2015], 
+`spacodiR` [@eastman_spacodir:_2013],
+`vegan` [@oksanen_vegan:_2016].
 
 # Results
 
 ## Traits variation and covariation
 
-Trait coefficients of variation analysis reveals a general increase of functional trait variation among scales (from intra-individual to inter-specific, see table 2). Whereas LA shows already high variablilty at intra-individual level almost as strong as the intra-specific variation ($CV_{individual} = 0.20$ and $CV_{species} = 0.24$, wilcoxon rank test $p-value = 0.137$). 
+We found a general increase of functional trait variation from intra-individual to inter-specific level (see table 2). Whereas LA shows already high variabililty at intra-individual level almost as strong as the intra-specific variation ($CV_{individual} = 0.20$ and $CV_{species} = 0.24$, wilcoxon rank test $p-value = 0.137$). 
 
-Table 2: Coefficient of intra-individual, intra-specific and inter-specific trait variation. *Mean of coefficient of variation for leaves in all individual (intra-individual), for trees in all species (intra-specific), and coefficient of variation for trees for all species. See table 1 for abbreviation.*
+Table 2: Coefficient of intra-individual, intra-specific and inter-specific trait variation. *Mean of coefficient of variation for leaves in all individuals (intra-individual), for trees in all species (intra-specific), and coefficient of variation for trees for all species. See table 1 for abbreviation.*
 
 ```{r 2 CV}
 PFT_ind <- aggregate(PFT, by = list(PFT$Tree), FUN = mean, na.rm = T)
@@ -177,7 +177,7 @@ kable(cv)
 rm(PFT, CET, cv, CE, Sp, SpT)
 ```
 
-The multivariate analysis of trait correlation shows WD associated with structural leaf traits orthogonal to the SLA (see figure 1). The first PCA axis (PCA1) covary mainly with Thick, LDMC and WD; opposing thin and big leaves to dense leaves and wood. Whereas the second PCA axis (PCA2) covary mainly with SLA representative of the leaf economic spectrum [LES, @wright_worldwide_2004]. PCA first axis might be associated with the WD covariation to the wood economic spectrum [WES, @chave_towards_2009]. Results are similar to the one found by @fortunel_leaf_2012 where PCA1 and PCA2 were respectively interpreted as leaf and wood economic spectrum (inverted compare to us). Our results integrate less traits (5 against 14), and less species (92 against 758), but still capture the same strategy axes.
+The principal component nalysis (PCA) shows WD associated with structural leaf traits orthogonal to the SLA (see figure 1). The first PCA axis (PCA1) covary mainly with Thick, LDMC and WD; opposing thin and big leaves to dense leaves and wood. PCA1 axis associates WD to leaf structural traits variation linked to hydraulic conductivity efficiency associated with the wood economic spectrum [WES, @chave_towards_2009]. Whereas the PCA2 covary mainly positively with SLA and negatively with LDMC representative of the leaf economic spectrum [LES, @wright_worldwide_2004].
 
 ```{r 3 PCA PFT}
 library(vegan)
@@ -238,7 +238,7 @@ row.names(Q) <- PFT_sp$SpCode
 rm(PCAscores, PFT_ind, SpCodeT, lambda, pca, pca.var, Rot, XLIM)
 ```
 
-Figure 1: Principal component analysis (PCA) performed on species trait means. *Bottom right corner subplot represents the eigen values (grey bars) compare to a broken stick distribution for 6 components (red line). See table 1 for abbreviation.*
+Figure 1: Principal component analysis (PCA) performed on species trait means. *Bottom right corner subplot represents the eigen values (grey bars) compare to a broken stick distribution for 5 components (red line). See table 1 for abbreviation.*
 
 ```{r 4 env-com}
 library(raster)
@@ -275,11 +275,11 @@ L$`presence-absence`[L$`presence-absence` > 1]  <- 1
 rm(Deriv, XY, com, Env, Trees, sel, BA)
 ```
 
-## Functional composition of communities
+## Local functional composition of communities
 
-Table 4: Summary of linear models and null models for traits community weighted means. _Linear model results for each trait community weighted means by species relative abundance after a variable selection by step mesure in both direction with slope, curvature, wetness, and southwesterness (SW), canopy height (Canopy) and basal area (BA). Model global and partial F-statistics were compared to 999 null model F-statistics in which traits were randomized among species. See table 1 for abbreviations. The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
+Community weighted means (CWM) only show few significant trends along environmental gradients (see table 3). CWMs reveal that local mean WD will significantly increase under South-West; whereas SLA and LA, in presence-absence only, tend to decrease with curvature. In addition, LDMC in presence-absence is decreasing with canopy height.
 
-**Second table are the result in presence-absence. They are juste here for discussion. But they probably won't be in the final report under this shape.**
+Table 3: Summary of linear regressions and null models for CWMs of traits. _Linear regression results for each trait CWMs by species relative abundance and presence after a variable stepwise selection with slope, curvature, wetness, and southwesterness (SW), canopy height (Canopy) and basal area (BA). Linear regressions global and partial F-statistics were compared to 999 null linear regressions built with null model NM1 which randomizes traits among species. See table 1 for abbreviations. The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
 
 ```{r CWM}
 # Observed CWMs
@@ -352,11 +352,11 @@ kable(bold(regression_table(CWM.lm[[2]], reg, pval[,2], ppval[[2]])))
 rm(CWM.lm, nCWM.lm, pval, ppval, reg) ; invisible(gc())
 ```
 
-Table 5: Summary of linear models for traits standardized effect size of community weighted variances. _Linear model results for each trait standardized effect size of community weighted variances species relative abundance after a variable selection by step mesure in both direction with slope, curvature, wetness, and southwesterness (SW), canopy height (Canopy) and basal area (BA). See table 1 for abbreviations. The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
+Traits divergence is measured with community weighted variances (CWV). Overall, observed CWVs doesn't differ from null expectations for all traits at the exception of one community for WD (over 240 communities). Still we can observe some trends between standardized effect size (SES) of CWVs and environment (see table 4). Effectively South-West orientation will make local functional composition of communities converge towards a mean LES and LDMC whereas LA will diverge inside community under South-West orientation. LA and LDMC values will also diverge with increasing curvature. Observed CVNNDs doesn't reveal niche differenciation among communities for all traits. Still we can observe some trends between standardized effect size (SES) of CVNNDs and environment (see table 4). Species tend to differentiate their LA with lower curvature and wetness and their WD opppositely to SouthWest orientation.
 
-**First output is the result of two tails test on communities CWVs for each traits. They are juste here for discussion. But they probably won't be in the final report under this shape.**
+Table 4: Summary of linear regressions for traits standardized effect size (SES) of CWVs and CVNNDs. _Linear regression results for each trait SES of CWVs and CVNNDs after a variablestepwise selection with slope, curvature, wetness, and southwesterness (SW), canopy height (Canopy) and basal area (BA). See table 1 for abbreviations. The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
 
-```{r CWV, fig.height=4}
+```{r CWV}
 # Observed CWVs
 CWV <- lapply(names(CWM$abundance), function(v){apply(cbind(data.frame(CWM$abundance[[which(names(CWM$abundance) == v)]]),L$abundance), 1, function(x){sqrt(weighted.mean((Q[,v]-x[1])^2, x[-1], na.rm=T))})})
 names(CWV) <- names(CWM$abundance)
@@ -397,7 +397,7 @@ CWV.pval <- data.frame(mapply(function(x,y){
     rank(c(p,q))[1]/(n+1)
   }, p = as.list(x), q = as.list(data.frame(t(y))))
 }, x = CWV, y = nCWV))
-CWV.pval.res <- data.frame(inf = apply(CWV.pval, 2, function(x){length(which(x < 0.025))/length(x)}), sup = apply(CWV.pval, 2, function(x){length(which(x > 0.975))/length(x)}))
+CWV.pval.res <- data.frame(inf = apply(apply(CWV.pval, 2, p.adjust, method = 'fdr'), 2, function(x){length(which(x < 0.025))/length(x)}), sup = apply(apply(1 - CWV.pval, 2, p.adjust, method = 'fdr'), 2, function(x){length(which(x < 0.025))/length(x)}))
 ## CWV SES
 CWV.ses <- data.frame(mapply(function(x,y){
   mapply(function(p,q){
@@ -411,8 +411,9 @@ CWV.ses.res <- lapply(CWV.ses.res, data.frame)
 CWV.ses.res <- lapply(CWV.ses.res, function(x){x$res <- paste(format(x$Estimate, scientific = T, digits = 2, trim = T), apply(x[4], 1, stars, ns = '   ')) ; return(x)})
 CWV.ses.res <- data.frame(data.table::rbindlist(lapply(CWV.ses.res, function(x){data.frame(t(x[5]))}), fill = T))
 CWV.ses.res <- CWV.ses.res[-1]
-CWV.ses.res$Slope <- NA
-CWV.ses.res <- CWV.ses.res[c('Slope', 'Curvature', 'Wetness', 'SW', 'Canopy', 'BA')]
+var <- c('Slope', 'Curvature', 'Wetness', 'SW', 'Canopy', 'BA')
+CWV.ses.res[,setdiff(var, names(CWV.ses.res))] <- NA
+CWV.ses.res <- CWV.ses.res[var]
 CWV.ses.res <- apply(CWV.ses.res, 2, as.character)
 row.names(CWV.ses.res) <- names(CWV.ses)
 CWV.ses.res[is.na(CWV.ses.res)] <- ''
@@ -420,16 +421,12 @@ CWV.ses.res <- data.frame(CWV.ses.res)
 CWV.ses.res$`$R^2$` <- round(unlist(lapply(CWV.ses.lm, function(x){summary(x)$r.squared})),3)
 
 # Results
-barplot(t(CWV.pval.res), las = 2, col = c('darkblue', 'firebrick'), ylim = c(0,1), ylab = 'Proportion of non null communities') ; legend('topright', c('Inferior','Superior'), fill = c('darkblue', 'firebrick'))
+# barplot(t(CWV.pval.res), las = 2, col = c('darkblue', 'firebrick'), ylim = c(0,1), ylab = 'Proportion of non null communities') ; legend('topright', c('Inferior','Superior'), fill = c('darkblue', 'firebrick'))
 kable(bold(CWV.ses.res))
 rm(CWV.pval, CWV.pval.res, CWV.ses.res, CWV.ses.lm, nCWV)
 ```
 
-Table 6: Summary of linear models for traits standardized effect size of coefficient of variation of nearest neighbour distances. _Linear model results for each trait standardized effect size of coefficient of variation of nearest neighbour distances after a variable selection by step mesure in both direction with slope, curvature, wetness, and southwesterness (SW), canopy height (Canopy) and basal area (BA). See table 1 for abbreviations. The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
-
-**First output is the result of two tails test on communities CWVs for each traits. They are juste here for discussion. But they probably won't be in the final report under this shape.**
-
-```{r CVNND, fig.height=4}
+```{r CVNND}
 # Observed CVNND
 CVNND <- apply(L$abundance, 1, function(l){apply(Q, 2, function(q){cati::CVNND(rep(q, l), na.rm = T)})})
 
@@ -458,6 +455,7 @@ CVNND.pval <- data.frame(mapply(function(x,y){
   }, p = as.list(x), q = as.list(data.frame(t(y))))
 }, x = as.list(data.frame(t(CVNND))), y = nCVNND))
 row.names(CVNND.pval) <- colnames(CVNND)
+CVNND.pval <- apply(CVNND.pval, 2, p.adjust, method = 'fdr')
 CVNND.pval.res <- data.frame(inf = apply(CVNND.pval, 2, function(x){length(which(x < 0.05))/length(x)}))
 ## CVNND SES
 CVNND.ses <- data.frame(mapply(function(x,y){
@@ -473,8 +471,8 @@ CVNND.ses.res <- lapply(CVNND.ses.res, data.frame)
 CVNND.ses.res <- lapply(CVNND.ses.res, function(x){x$res <- paste(format(x$Estimate, scientific = T, digits = 2, trim = T), apply(x[4], 1, stars, ns = '   ')) ; return(x)})
 CVNND.ses.res <- data.frame(data.table::rbindlist(lapply(CVNND.ses.res, function(x){data.frame(t(x[5]))}), fill = T))
 CVNND.ses.res <- CVNND.ses.res[-1]
-CVNND.ses.res$Slope <- NA
-CVNND.ses.res <- CVNND.ses.res[c('Slope', 'Curvature', 'Wetness', 'SW', 'Canopy', 'BA')]
+CVNND.ses.res[,setdiff(var, names(CVNND.ses.res))] <- NA
+CVNND.ses.res <- CVNND.ses.res[var]
 CVNND.ses.res <- apply(CVNND.ses.res, 2, as.character)
 row.names(CVNND.ses.res) <- names(CVNND.ses)
 CVNND.ses.res[is.na(CVNND.ses.res)] <- ''
@@ -482,47 +480,20 @@ CVNND.ses.res <- data.frame(CVNND.ses.res)
 CVNND.ses.res$`$R^2$` <- round(unlist(lapply(CVNND.ses.lm, function(x){summary(x)$r.squared})),3)
 
 # Results
-barplot(t(CVNND.pval.res), las = 2, col = c('darkblue'), ylim = c(0,1), ylab = 'Proportion of non null communities') ; legend('topright', c('Inferior'), fill = c('darkblue'))
+# barplot(t(CVNND.pval.res), las = 2, col = c('darkblue'), ylim = c(0,1), ylab = 'Proportion of non null communities') ; legend('topright', c('Inferior'), fill = c('darkblue'))
 kable(bold(CVNND.ses.res))
 rm(CVNND.pval, CVNND.pval.res, CVNND.ses.res, CVNND.ses.lm, nCVNND) ; invisible(gc())
 ```
 
-## Composition variation between communities
+## Floristic, functional and phylogenetic composition between communities
 
-```{r PhyloMaker}
-library(phylosignal)
-library(phytools)
-library(phylobase)
-path <- system.file('phylogeny', package = 'Uppangala')
-source(file.path(path, 'R_codes for function S.PhyloMaker.txt'))
-phylo <- read.tree(file.path(path, 'PhytoPhylo.tre'))
-nodes <- read.csv(file.path(path, 'nodes.csv'), h = T)
-sp <- Species[which(Species$LatinName %in% row.names(PFT_sp)), c('LatinName', 'Genus', 'Family')]
-names(sp) <- c('species', 'genus', 'family')
-results <- invisible(S.PhyloMaker(sp, phylo, nodes)) # Humboldtia_brunonis unmatched
-tree <- results$Scenario.1
-rm(phylo, results, modes, sp, S.PhyloMaker, path)
-```
+Floristic composition between communities is correlated significantly to environement spatial organization with Mantel test ($r_{I_{st},E} = 0.23$ with $p-value < 0.001$) and without any spatial residuals represented with partial Mantel test knowing environment ($r_{I_{st},S|E} = 0.01$ with $p-value > 0.1$).
 
-Table 7: Summary of Moran’s I statistic and p-values for phylogenetic signal of functional traits. _See table 1 for abbreviations. The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
+Overall, functional composition between communities is not correlated to environment nor to space knowing the environment effect (see table 5). Still WD between communities, in abundance as well as in presence absence, is positively significantly correlated to environment and is even negatively correlated in presence absence to spatial structure knowing environment spatial effect. 
 
-```{r Phylosignal}
-data <- PFT_sp
-row.names(data) <- gsub(' ', '_', row.names(data), fixed = T)
-tips <- row.names(data)[which(is.na(data$WD))]
-phy <- drop.tip(tree, tips)
-data <- data[phy$tip.label,c(2:5,7)]
-p4d <- phylo4d(phy,data)
-phyloS <- phyloSignal(p4d, methods = 'I') 
-phyloS <- data.frame(paste(round(phyloS$stat[,1], 3), 
-                           unlist(lapply(as.list(phyloS$pvalue[,1]), stars, ns = ' '))),
-                     row.names = row.names(phyloS$stat))
-names(phyloS) <- 'Moran\'s I'
-kable(bold(phyloS))
-rm(data, tips, p4d, phyloS, phy)
-```
+Whereas LDMC is not phylogenetically convergent nor divergent (Moran's I of 0 with a $p-value > 0.1$), LA and Thick are significantly convergent among the phylogenetic tree (Moran's I of 0.021 and 0.018 with a $p-value < 0.001$), and WD and SLA are weakly convergent (Moran's I of 0.005 and 0.003 with $p-value < 0.1$). Phylogenetic composition between communities is not correlated to environement spatial organization with Mantel test ($r_{\beta_{st},E} = 0.02$ and $r_{\pi_{st},E} = 0.05$ with $p-value > 0.1$) nor with spatial residuals represented with partial Mantel test knowing environment ($r_{\beta_{st},S|E} = 0.01$ and $r_{\pi_{st},S|E} = -0.01$ with $p-value > 0.1$ respectively).
 
-Table 8: Summary of Mantel test between floristic composition, environment and spatial distances between communities. _$Ist$  was used to investigate variation of floristic composition between communities. Observed values were compared to a null model randomizing individuals among subplots while preserving the regional abundance of species, and the number of individuals per community. E is the mantel test of the metric with the environmental distance matrix issued from PCA two first axes. S|E is the mantel partial test of the spatial distance matrix knowing the environment matrix. The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
+<!-- **Table to replace by text**: Summary of Mantel test between floristic composition, environment and spatial distances between communities. _$Ist$  was used to investigate variation of floristic composition between communities. Observed values were compared to a null model randomizing individuals among subplots while preserving the regional abundance of species, and the number of individuals per community. E is the mantel test of the metric with the environmental distance matrix issued from PCA two first axes. S|E is the mantel partial test of the spatial distance matrix knowing the environment matrix. The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001).._ -->
 
 ```{r Ist}
 library(spacodiR)
@@ -566,11 +537,11 @@ spaflo.res <- data.frame(spaflo.res)
 names(spaflo.res) <- c('$I_{st}$')
 
 # Result
-kable(bold(spaflo.res))
+# kable(bold(spaflo.res))
 rm(mtest, spaflo.mantel, nspaflo, nspaflo.mantel, spaflo.res)
 ```
 
-Table 9: Summary of Mantel test between functionnal composition, environment and spatial distances between communities. _$U st$ and $\tau st$ metric proposed by @hardy_characterizing_2007 were used to investigate variation of functional composition between communities. Observed values were compared to the null model NM1 randomizing traits among species (permuting raw in `Trait*Species` matrix). E is the mantel test of the metric with the environmental distance matrix issued from PCA two first axes. S|E is the mantel partial test of the spatial distance matrix knowing the environment matrix. The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
+Table 5: Summary of Mantel test between functional composition, environment and spatial distances between communities. _$U st$ and $\tau st$ metric proposed by @hardy_characterizing_2007 were used to investigate variation of functional composition between communities. Observed values were compared to the null model NM1 randomizing traits among species (permuting raw in `Trait*Species` matrix). E is the mantel test of the metric with the environmental distance matrix issued from PCA two first axes. S|E is the mantel partial test of the spatial distance matrix knowing the environment matrix. The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
 
 ```{r Ust & TAUst}
 # Observed Hardys
@@ -631,19 +602,51 @@ nspafun.mantel <- lapply(nspafun.mantel, function(s){lapply(s, function(x){lappl
 spafun.res <- data.frame(mapply(function(x,y){
   mapply(function(r,s){
     mapply(function(p,q){
-      paste(format(p, scientific = T, digits = 3), 
-            Uppangala::stars(min(rank(c(p,q))[1]/(n+1), 1-rank(c(p,q))[1]/(n+1)), ns = '   '))
+      paste(round(p, 3), Uppangala::stars(min(rank(c(p,q))[1]/(n+1), 1-rank(c(p,q))[1]/(n+1)), ns = '   '))
     }, p = r, q = s, SIMPLIFY = F)
   }, r = x, s= y)
 }, x = spafun.mantel, y = nspafun.mantel))
-spafun.res <- cbind(data.frame('Mantel test' = c('E', ' ', 'S|E', ' '), 'Metric' = rep(c('$U_{st}$', '$\\tau _{st}$'), 2)), spafun.res)
+spafun.res <- cbind(data.frame('Mantel statistic' = c('E', ' ', 'S|E', ' '), 'Metric' = rep(c('$U_{st}$', '$\\tau _{st}$'), 2)), spafun.res)
 
 # Result
 kable(bold(spafun.res))
 rm(spafun.mantel, nspafun.mantel, spafun.res)
 ```
 
-Table 10: Summary of Mantel test between phylogenetic composition, environment and spatial distances between communities. _$\beta st$ and $\pi st$ metric proposed by @hardy_characterizing_2007 were used to investigate variation of phylogenetic composition between communities. Observed values were compared to the one obtained with the null model *"1s"*" suggested by @hardy_testing_2008 randomizong phylogenetic tree tips. E is the mantel test of the metric with the environmental distance matrix issued from PCA two first axes. S|E is the mantel partial test of the spatial distance matrix knowing the environment matrix. The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
+```{r PhyloMaker}
+library(phylosignal)
+library(phytools)
+library(phylobase)
+path <- system.file('phylogeny', package = 'Uppangala')
+source(file.path(path, 'R_codes for function S.PhyloMaker.txt'))
+phylo <- read.tree(file.path(path, 'PhytoPhylo.tre'))
+nodes <- read.csv(file.path(path, 'nodes.csv'), h = T)
+sp <- Species[which(Species$LatinName %in% row.names(PFT_sp)), c('LatinName', 'Genus', 'Family')]
+names(sp) <- c('species', 'genus', 'family')
+results <- invisible(S.PhyloMaker(sp, phylo, nodes)) # Humboldtia_brunonis unmatched
+tree <- results$Scenario.1
+rm(phylo, results, modes, sp, S.PhyloMaker, path)
+```
+
+<!-- **Table to replace by text**: Summary of Moran’s I statistic and p-values for phylogenetic signal of functional traits. _See table 1 for abbreviations. The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._ -->
+
+```{r Phylosignal}
+data <- PFT_sp
+row.names(data) <- gsub(' ', '_', row.names(data), fixed = T)
+tips <- row.names(data)[which(is.na(data$WD))]
+phy <- drop.tip(tree, tips)
+data <- data[phy$tip.label,c(2:5,7)]
+p4d <- phylo4d(phy,data)
+phyloS <- phyloSignal(p4d, methods = 'I') 
+phyloS <- data.frame(paste(round(phyloS$stat[,1], 3), 
+                           unlist(lapply(as.list(phyloS$pvalue[,1]), stars, ns = ' '))),
+                     row.names = row.names(phyloS$stat))
+names(phyloS) <- 'Moran\'s I'
+# kable(bold(phyloS))
+rm(data, tips, p4d, phyloS, phy)
+```
+
+<!-- **Table to replace by text**: Summary of Mantel test between phylogenetic composition, environment and spatial distances between communities. _$\beta st$ and $\pi st$ metric proposed by @hardy_characterizing_2007 were used to investigate variation of phylogenetic composition between communities. Observed values were compared to the one obtained with the null model *"1s"*" suggested by @hardy_testing_2008 randomizong phylogenetic tree tips. E is the mantel test of the metric with the environmental distance matrix issued from PCA two first axes. S|E is the mantel partial test of the spatial distance matrix knowing the environment matrix. The number of asterisk indicate the p-value threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._ -->
 
 ```{r BETAst $ PIst}
 # Observed Hardys
@@ -679,13 +682,18 @@ spaphy.res <- mapply(function(s, ns){
 row.names(spaphy.res) <- c('$\\beta_{st}$', '$\\pi_{st}$')
   
 # Result
-kable(bold(spaphy.res))
+# kable(bold(spaphy.res))
 rm(mtest, spaphy.mantel, nspaphy, nspaphy.mantel, spaphy.res)
 ```
 
 # Discussion
 
 ## Strategy axes
+
+**To add:**
+
+* Results are similar to the one found by @fortunel_leaf_2012 where PCA1 and PCA2 were respectively interpreted as leaf and wood economic spectrum (inverted compare to us). Our results integrate less traits (5 against 14), and less species (89 against 758), at a smaller scale, but still capture the same strategy axes.
+
 ## Community assembly
 ## Process scales
 ## Limits and perspectives
@@ -728,7 +736,7 @@ axis (3)
 axis (4)
 ```
 
-Supplementary material S1: Principal component analysis (PCA) performed on topgraphical variables. *Bootom left corner subplot represents the eigen values (grey bars) compare to a broken stick distribution for 8 components (red line). SW stand for southwesterness.*
+Supplementary material S1: Principal component analysis (PCA) performed on topgraphical variables. *Botom left corner subplot represents the eigen values (grey bars) compare to a broken stick distribution for 7 components (red line). SW stand for southwesterness.*
 
 Curvature covary with profile curvature, plan curvature, distance to potential rivers and the PCA first axis. Elevation and wetness are opposed in the principal component analysis and slope and south-westerness doesn't seem to covary much with other variables.
 
