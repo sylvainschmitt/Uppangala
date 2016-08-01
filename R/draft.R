@@ -134,3 +134,29 @@
 # plot(as(com, 'SpatialPolygons'), add = T, border = 'grey')
 # text(coordinates(com), com$id, col = rainbow(n)[com$group], cex = 0.7)
 
+# ## Light to soil and canopy height ##
+# Canopy <- raster('./inst/extdata/Canopy.tif')
+# terrain_rays <- read.csv("C:/Users/sylvain/Desktop/terrain_rays.csv", header=FALSE)
+# light <- terrain_rays[c(1,2,4)]
+# names(light) <- c('x','y','light')
+# light <- rasterFromXYZ(light)
+# Canopy <- crop(Canopy, extent(light))
+# Canopy <- resample(Canopy, light)
+# Comp <- stack(Canopy, light)
+# plot(Comp)
+# summary(lm(values(light) ~ values(Canopy)))
+# plot(values(light) ~ values(Canopy))
+
+# ## LDMC - Canopy ##
+# com <- row.names(which(R == max(R$Canopy), arr.ind = T))
+# hist(CWM$`presence-absence`$LDMC)
+# CWM$`presence-absence`$LDMC[com]
+# comp <- colnames(L$`presence-absence`[com,L$`presence-absence`[com,] > 0])
+# Species$LatinName[match(comp, Species$SpCode)]
+# barplot(t(Q[match(comp, row.names(Q)),][5]), las = 2)
+# plot(Q$LDMC ~ as.numeric(Species$Strata[match(row.names(Q), Species$SpCode)]), xlab = 'Strata', ylab = 'LDMC')
+# abline(lm(Q$LDMC ~ as.numeric(Species$Strata[match(row.names(Q), Species$SpCode)])), col = 'red')
+# mtext(paste('LDMC ~ Strata***, R2 =', round(summary(lm(Q$LDMC ~ as.numeric(Species$Strata[match(row.names(Q), Species$SpCode)])), col = 'red')$r.squared, 3)))
+# plot(Q$LDMC ~ as.numeric(Species$Strata[match(row.names(Q), Species$SpCode)]), xlab = 'Strata', ylab = 'LDMC')
+# abline(lm(Q$LDMC ~ as.numeric(Species$Strata[match(row.names(Q), Species$SpCode)])), col = 'red')
+# mtext(paste('LDMC ~ Strata***, R2 =', round(summary(lm(Q$LDMC ~ as.numeric(Species$Strata[match(row.names(Q), Species$SpCode)])), col = 'red')$r.squared, 3)))
