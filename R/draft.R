@@ -160,3 +160,31 @@
 # plot(Q$LDMC ~ as.numeric(Species$Strata[match(row.names(Q), Species$SpCode)]), xlab = 'Strata', ylab = 'LDMC')
 # abline(lm(Q$LDMC ~ as.numeric(Species$Strata[match(row.names(Q), Species$SpCode)])), col = 'red')
 # mtext(paste('LDMC ~ Strata***, R2 =', round(summary(lm(Q$LDMC ~ as.numeric(Species$Strata[match(row.names(Q), Species$SpCode)])), col = 'red')$r.squared, 3)))
+
+# ## RLQ bis ##
+# library(ade4)
+# Q <- Q[-which(is.na(Q$WD)),-c(1,3)]
+# L <- L$abundance[row.names(Q)]
+# L.coa <- dudi.coa(L, scannf = F)
+# R.pca <- dudi.pca(R, scannf = F, row.w = L.coa$lw)
+# Q.pca <- dudi.pca(Q, scannf = F, row.w = L.coa$cw)
+# rlq <- rlq(R.pca, L.coa, Q.pca, scannf = T)
+# rlq$l1
+# s.label(rlq$mQ, xax = 4, yax = 5, boxes = F)
+# s.arrow(rlq$l1, xax = 4, yax = 5, add.plot = T)
+# FamilyFact <- as.factor(Species$Family[match(row.names(rlq$mQ), Species$SpCode)])
+# col <- rainbow(length(levels(FamilyFact)))[as.numeric(FamilyFact)]
+# s.class(rlq$mQ, FamilyFact, clabel = 0, xax = 4, yax = 5, cellipse = 0, label = rep(' ',72), col = col, add.plot = T)
+# legend('topleft', levels(FamilyFact), fill = col)
+# selsp <- c('anmo', 'baco', 'blse', 'desi', 'dila', 'mrin')
+# col = rep(1, length(Q$LDMC))
+# col[match(selsp, row.names(Q))] <- 2
+# barplot(Q$LDMC, col = c('grey','firebrick')[col], las = 2, names.arg = row.names(Q))
+# s.label(rlq$mR, xax = 4, yax = 5, boxes = F)
+# s.arrow(rlq$l1, xax = 4, yax = 5, add.plot = T)
+#
+# L['C224',which(L['C224',] > 0)]
+# bca <- bca(Q.pca, as.factor(Species$Family[match(row.names(Q.pca$tab), Species$SpCode)]), scannf = T)
+# bca$c1
+# biplot(bca, xax = 5, yax = 3)
+# randtest(bca)

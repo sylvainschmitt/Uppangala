@@ -1,5 +1,5 @@
 ---
-title: 'Uppangala tree functional traits: Article draft'
+title: 'Seasonal filtering at community scale of a tropical evergreen forest from Western Ghats, India'
 author: "Sylvain Schmitt sylvain.schmitt@agroparistech.fr"
 output: pdf_document
 bibliography: refs.bib
@@ -16,11 +16,26 @@ opts_chunk$set(
 
 # Abstract
 
-Keywords: functional trait, tropical evergreen forest, Western Ghats, India...
+## Keywords
+
+functional trait; tropical evergreen forest; Western Ghats; India...
 
 # Introduction
 
-**Study scheme:**
+Ecology offers different theories describing community composition of tropical forest. Niche theory invoke ecological filtering responsible for species assembly inside communities [@chave_comparing_2002]. On the other hand neutral theory [@hubbell_neutral_2005] assume functional equivalence of species, implying species distributions shaped by stochastic events as dispersion and death. @lortie_rethinking_2004 offered a conceptual framewok that reconciliates the two approach by defining integrated community concept. Integrated communities are build on three levels: $\gamma$ diversity as the initial regional species pool filtered by stochastic neutral events, $\beta$ diversity between communities resulting from abiotic filtering and stochastic events among communities, and $\alpha$ diversity defining the community assembly after local abiotic and biotic filtering.
+
+Communities are composed from species spanning a range of functional traits responsible for their growth, survival and reproduction. Functional traits can thus be linked to trade-offs representative of species ecological strategies. For instance, specific leaf area varies along a soil fertility - shade index representative of a trade-off between ressource acquisition by photosynthesis and leaf investment in defense and leaf lifespan [@hodgson_is_2011]. Due to common ecological strategies, functional traits will covary in so called economic spectra. @wright_worldwide_2004 showed the leaf economic spectrum followed by the wood economic spectrum of @chave_towards_2009. The leaf economic spectrum opposes productive ecological strategy to conservative persistent species. The wood economic spectrum is separating species between three pole close to @grime_evidence_1977 primary strategy axes: (i) competitive species, with high conductive efficiency, (ii) stress tolerant species, resistant to embolism, and (iii) disturbance tolerant species, with high mechanical strength. A debated question is links between species economic spectra and strategy axes. Whereas @baraloto_decoupled_2010 highlighted decoupled economic spectra allowing tree species to adjust differently their ecological strategies; @reich_world-wide_2014 advocate more for a whole plant economic spectrum identified by @freschet_evidence_2010 opposing fast growing species to more conservative ones.
+
+Stochastic process and environmental filtering will be highly scale dependent. Effectively some functional traits will be more variable at the individual level with plasticity to micro-environmental conditions whereas others will be more affected on global environmental gradient with phylogeny. For instance, @messier_trait_2016 argued the scale to which traits are covarying in ecological strategy, more especially they question the existence of the leaf economic spectrum at community scale.
+
+<!-- Tropical evergreen forest are composed by tree keeping their foliage all year around. Yet species will observe leaves fall events ruled by their leaf lifespan. Leaf lifespan will tend to decrease in tropical evergreen forest seasonally dry [@poorter_leaf_2009; @prior_leaf_2003]. -->
+
++ *Move to India Western Ghats context*
++ *No study of community ecology with functional traits*
++ *Peculiar case of highly seasonal moist evergreen forest*
++ *Move to previous questionning*
++ *Quid from ecological strategies at small scale in Uppangala forest*
++ *Quid from partitionning between stochastic event and environmental filtering on community structure*
 
 1. Do variations and covariations in functional traits reflect distinct ecological strategies within and among species ?
     i. Do and how functional traits vary among species ?
@@ -28,13 +43,6 @@ Keywords: functional trait, tropical evergreen forest, Western Ghats, India...
 2. Does functional composition reflect the influence of local abiotic and biotic drivers of community dynamics ?
     i. Do local functional composition ($\alpha$ scale) reflect the influence of abiotic and biotic drivers of community dynamics ?
     ii. Do functional composition variation between communities ($\beta$ scale) reflect the changing of abiotic and biotic conditions ?
-
-**To add:**
-
-* Functional traits can be linked to trade-offs in tree strategy for functionning, survival and reproduction [@baraloto_decoupled_2010, and see table 1], which vary depending on environment condition. 
-* For instance, SLA varies along a soil fertility - shade index whereas LDMC is basically linked to soil fertility [@hodgson_is_2011]. **! In european temperate context !**
-* Leaf investment definition
-* Leaf ressource acquisition definition
 
 # Material and methods
 
@@ -49,7 +57,7 @@ We sampled five individuals per species for most abundant species and we complet
 
 ## Trait measurements
 
-Leaf petioles, rachis and petiolules were removed for all measurements. Leaf fresh weights, area and thickness were measured, using a scanner **[cite]** and a microgauge **[cite]**. Leaves were first kept in herbarium and then dried in an oven for at least 72 hours at 60 $^\circ C$, the drying process was stopped after dry leaf weights were stable in time. Once dried, the leaves were weighted directly after been extracted from the oven to avoid humidity bias. The bark and pit of branch samples were removed in order to keep only branch wood with no soft tissues. Branch wood samples were sink in water to evaluate their volume by water displacement. Samples were then dried for 48 hours at 80 degrees celsius and weighted. 
+Leaf petioles, rachis and petiolules were removed for all measurements. Leaf fresh weights, area and thickness were measured, using a bend scanner and a micrometer. Leaves were first kept in herbarium and then dried in an oven for at least 72 hours at 60 $^\circ C$, the drying process was stopped after dry leaf weights were stable in time. Once dried, the leaves were weighted directly after been extracted from the oven to avoid humidity bias. The bark and pit of branch samples were removed in order to keep only branch wood with no soft tissues. Branch wood samples were sink in water to evaluate their volume by water displacement. Samples were then dried for 48 hours at 80 degrees celsius and weighted. 
 
 We calculated five functional traits of leaf and wood samples: leaf thickness (Thick in $\mu m$ ), leaf area measured from scans (LA in $mm^2$), leaf dry matter content as the leaf dry weight divided by the leaf fresh weight (LDMC in $mg.g^-1$), specific leaf area as the leaf area divided by the leaf dry mass (SLA in $m^2.kg^-1$), and branch wood density  as the the wood sample dry weight divided by its volume (WD in $g.cm^-3$, see table 1). 
 
@@ -690,7 +698,7 @@ rm(mtest, spaphy.mantel, nspaphy, nspaphy.mantel, spaphy.res)
 
 ## Ecological strategies
 
-Plants distinguish theimselves in functional trait composition betwen individuals and even more between species. Variation of species functional composition results from functional trade-offs that compose major variation axes of functional traits called economic spectra. We found back the leaf economic spectrum of @wright_worldwide_2004 opposing in our case SLA to LDMC in a trade-off between productivity, with less carbon investment for higher photosynthesis rates, opposed to persistance, with more leaf defense and investment. Independantly to that spectrum, we detected a second major axis of trait variation opposing WD to LA and Thick. This axis opposes more resistant to stress and disturbance species, thanks to denser wood, to competitive species, with thicker and larger leaves for a more efficient water conductivity. This spectrum correspond to the wood economic spectrum described by @chave_neutral_2004, and more precisely this opposition between small thin leave with dense wood to large thick leaves with light wood correspond to unexplained results of @baraloto_decoupled_2010.
+Plants distinguish theimselves in functional trait composition betwen individuals and even more between species. Variation of species functional composition results from functional trade-offs that compose major variation axes of functional traits called economic spectra. We found back the leaf economic spectrum of @wright_worldwide_2004 opposing in our case SLA to LDMC in a trade-off between productivity, with less carbon investment for higher photosynthesis rates, opposed to persistance, with more leaf defense and investment. Independantly to that spectrum, we detected a second major axis of trait variation opposing WD to LA and Thick. This axis opposes more resistant to stress and disturbance species, thanks to denser wood, to competitive species, with thicker and larger leaves for a more efficient water conductivity. This spectrum correspond to the wood economic spectrum described by @chave_towards_2009, and more precisely this opposition between small thin leave with dense wood to large thick leaves with light wood correspond to unexplained results of @baraloto_decoupled_2010.
 
 Results are similar to the one found by @fortunel_leaf_2012 where PCA first and second axes were respectively interpreted as leaf and wood economic spectrum (inverted compare to us). Our results integrate less traits (5 against 14), and less species (89 against 758), at a smaller scale, but still capture the same strategy axes.
 
