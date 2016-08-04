@@ -1,5 +1,5 @@
 ---
-title: 'Seasonal filtering at community scale of a tropical evergreen forest from Western Ghats, India'
+title: Functional assembly into and among community of a tropical evergreen forest from Western Ghats, India
 author: "Sylvain Schmitt sylvain.schmitt@agroparistech.fr"
 output: pdf_document
 bibliography: refs.bib
@@ -8,6 +8,7 @@ bibliography: refs.bib
 ```{r config, message=FALSE, warning=FALSE, include=FALSE}
 library(knitr)
 library(parallel)
+cores <- detectCores() - 1
 library(Uppangala)
 opts_chunk$set(
   echo = F, message = F, warning = F, fig.height = 8, fig.width = 8,
@@ -24,15 +25,15 @@ functional trait; tropical evergreen forest; Western Ghats; India...
 
 Ecology offers different theories describing community composition of tropical forest. Niche theory invoke ecological filtering responsible for species assembly inside communities [@chave_comparing_2002]. On the other hand neutral theory [@hubbell_neutral_2005] assume functional equivalence of species, implying species distributions shaped by stochastic events as dispersion and death. @lortie_rethinking_2004 offered a conceptual framewok that reconciliates the two approach by defining integrated community concept. Integrated communities are build on three levels: $\gamma$ diversity as the initial regional species pool filtered by stochastic neutral events, $\beta$ diversity between communities resulting from abiotic filtering and stochastic events among communities, and $\alpha$ diversity defining the community assembly after local abiotic and biotic filtering.
 
-Communities are composed from species spanning a range of functional traits responsible for their growth, survival and reproduction. Functional traits can thus be linked to trade-offs representative of species ecological strategies. For instance, specific leaf area varies along a soil fertility - shade index representative of a trade-off between ressource acquisition by photosynthesis and leaf investment in defense and leaf lifespan [@hodgson_is_2011]. Due to common ecological strategies, functional traits will covary in so called economic spectra. @wright_worldwide_2004 showed the leaf economic spectrum followed by the wood economic spectrum of @chave_towards_2009. The leaf economic spectrum opposes productive ecological strategy to conservative persistent species. The wood economic spectrum is separating species between three pole close to @grime_evidence_1977 primary strategy axes: (i) competitive species, with high conductive efficiency, (ii) stress tolerant species, resistant to embolism, and (iii) disturbance tolerant species, with high mechanical strength. A debated question is links between species economic spectra and strategy axes. Whereas @baraloto_decoupled_2010 highlighted decoupled economic spectra allowing tree species to adjust differently their ecological strategies; @reich_world-wide_2014 advocate more for a whole plant economic spectrum identified by @freschet_evidence_2010 opposing fast growing species to more conservative ones.
+Communities are composed from species spanning a range of functional traits responsible for their growth, survival and reproduction. Functional traits can thus be linked to trade-offs representative of species ecological strategies. For instance, specific leaf area varies along a soil fertility - shade index representative of a trade-off between ressource acquisition by photosynthesis and leaf investment in defense and leaf lifespan [@hodgson_is_2011]. Due to common ecological strategies, functional traits will covary in so called economic spectra. @wright_worldwide_2004 discovered the leaf economic spectrum followed by the wood economic spectrum of @chave_towards_2009. The leaf economic spectrum opposes productive ecological strategy to conservative persistent species. The wood economic spectrum is separating species between three pole close to @grime_evidence_1977 primary strategy axes: (i) competitive species, with high conductive efficiency, (ii) stress tolerant species, resistant to embolism, and (iii) disturbance tolerant species, with high mechanical strength. A debated question is links between species economic spectra and strategy axes. Whereas @baraloto_decoupled_2010 highlighted decoupled economic spectra allowing tree species to adjust differently their ecological strategies; @reich_world-wide_2014 advocate more for a whole plant economic spectrum identified by @freschet_evidence_2010 opposing fast growing species to more conservative ones.
 
 Stochastic process and environmental filtering will be highly scale dependent. Effectively some functional traits will be more variable at the individual level with plasticity to micro-environmental conditions whereas others will be more affected on global environmental gradient with phylogeny. For instance, @messier_trait_2016 argued the scale to which traits are covarying in ecological strategy, more especially they question the existence of the leaf economic spectrum at community scale.
 
-<!-- Tropical evergreen forest are composed by tree keeping their foliage all year around. Yet species will observe leaves fall events ruled by their leaf lifespan. Leaf lifespan will tend to decrease in tropical evergreen forest seasonally dry [@poorter_leaf_2009; @prior_leaf_2003]. -->
+
 
 + *Move to India Western Ghats context*
-+ *No study of community ecology with functional traits*
-+ *Peculiar case of highly seasonal moist evergreen forest*
+    - *No previous study of community ecology with functional traits*
+    - *Peculiar case of highly seasonal moist evergreen forest*
 + *Move to previous questionning*
 + *Quid from ecological strategies at small scale in Uppangala forest*
 + *Quid from partitionning between stochastic event and environmental filtering on community structure*
@@ -241,8 +242,6 @@ PFT_sp$ID <- row.names(PFT_sp)
 PFT_sp <- merge(PFT_sp, PCAscores, all = T)
 row.names(PFT_sp) <- PFT_sp$ID
 PFT_sp <- PFT_sp[-which(names(PFT_sp) == 'ID')]
-Q <- PFT_sp[c('LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'Thick')]
-row.names(Q) <- PFT_sp$SpCode
 rm(PCAscores, PFT_ind, SpCodeT, lambda, pca, pca.var, Rot, XLIM)
 ```
 
@@ -274,6 +273,8 @@ R <- com@data[c('Slope', 'Curvature', 'Wetness', 'SW', 'Canopy', 'BA')]
 row.names(R) <- com@data$id
 L <- data.frame(tapply(rep(1, length(Trees[,1])), list(Trees$com, Trees$SpCode), sum))
 L[is.na(L)] <- 0
+Q <- PFT_sp[c('LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'Thick')]
+row.names(Q) <- PFT_sp$SpCode
 sel <- intersect(row.names(Q), names(L))
 Q <- Q[sel,]
 L <- L[sel]
@@ -310,7 +311,7 @@ n = 999
 nQ <- rep(list(Q), n)
 nQ <- lapply(nQ, function(x){row.names(x) <- sample(row.names(x)) ; return(x)})
 nQ <- lapply(nQ, function(x){x[names(L$abundance),]})
-cl <- makeCluster(3)
+cl <- makeCluster(cores)
 clusterExport(cl, list('L', 'nQ'))
 nCWM <- clusterApply(cl, L, function(l){
   lapply(nQ, function(q){
@@ -375,7 +376,7 @@ nL <- lapply(nL,function(l){apply(l, 1, function(x){x[x != 0] <- sample(x[x != 0
 nL <- lapply(nL, function(x){t(x)})
 nL <- lapply(nL, data.frame)
 
-cl <- makeCluster(3)
+cl <- makeCluster(cores)
 clusterExport(cl, list('nL', 'CWM', 'Q'))
 nCWM.cwv <- clusterApply(cl, nL, function(l){
   lapply(as.list(names(CWM$abundance)), function(v){
@@ -439,7 +440,7 @@ rm(CWV.pval, CWV.pval.res, CWV.ses.res, CWV.ses.lm, nCWV)
 CVNND <- apply(L$abundance, 1, function(l){apply(Q, 2, function(q){cati::CVNND(rep(q, l), na.rm = T)})})
 
 # Simulated CVNNDs 
-cl <- makeCluster(3)
+cl <- makeCluster(cores)
 clusterExport(cl, list('nQ', 'L'))
 nCVNND <- clusterApply(cl, nQ, function(x){
   apply(L$abundance, 1, function(l){
@@ -525,7 +526,7 @@ spaflo.mantel <- list(`E` = vegan::mantel(spaflo, Me, permutations = 0)$statisti
 
 # Simulated mantel
 nL <- vegan::permatfull(L$abundance, fixedmar = 'both', mtype = 'count', times = n, shuffle = 'both')
-cl <- makeCluster(3)
+cl <- makeCluster(cores)
 clusterExport(cl, list('nL', 'spacodi.calc', 'Me', 'Ms'))
 nspaflo <- lapply(nL$perm, function(l){spacodi.calc(sp.plot = t(l), pairwise = T)$'pairwise.Ist'})
 nspaflo.mantel <- lapply(nspaflo, function(ns){
@@ -567,7 +568,7 @@ spafun.mantel <- lapply(spafun, function(t){list(`E` = lapply(t, function(M){veg
 
 
 # Simulated mantel
-cl <- makeCluster(3)
+cl <- makeCluster(cores)
 clusterExport(cl, list('nQ', 'L', 'Me', 'Ms', 'spacodi.calc'))
 nspafun.mantel <- clusterApply(cl, nQ, function(q){
   s <- lapply(as.list(1:length(q)), function(i){
@@ -670,7 +671,7 @@ spaphy.mantel <- list(`E` = lapply(spaphy, function(m){vegan::mantel(m, Me, perm
 
 # Simulated mantel
 nphy <- rep(list(phy), 999)
-cl <- makeCluster(3)
+cl <- makeCluster(cores)
 clusterExport(cl, list('nphy', 'L', 'spacodi.calc', 'Ntip', 'resamp.phy', 'branching.times'))
 nphy <- clusterApply(cl, nphy, resamp.phy)
 stopCluster(cl)
@@ -704,17 +705,19 @@ Results are similar to the one found by @fortunel_leaf_2012 where PCA first and 
 
 ## Local functional composition
 
-The leaf economic specrtum is majorly affected by aspect with a convergence of value toward optimal functional traits under South-West orientation, especially for rare species with LDMC. Aspect, and more specifically south-west, effect in tropical forest is scarcely documented but highlighted in discussion by @gunatilleke_specieshabitat_2006. @bunyan_effect_2015 observed a similar effect on shola distribution of Western Ghats and suggested it could result from monsoon winds. Effectively monsoon winds arise fom south-west direction in this region, and bring more stressfull and disturbed conditions to species. Curvature is also affecting the leaf economy. Convex area will accumulate soil and attract water flux increasing soil fertiliy conditions for species that will invest more in leaf ressource acquisition toward a productive strategy with higher SLA and a convergent optimal LDMC. SLA and LDMC with curvature effect seems to reflect well soil fertility [@hodgson_is_2011]. **LDMC rare species <- Canopy height**
+The leaf economic spectrum is majorly affected by aspect with a convergence of value toward optimal functional traits under South-West orientation, especially for rare species with LDMC. Aspect, and more specifically south-west, effect in tropical forest is scarcely documented but highlighted in discussion by @gunatilleke_specieshabitat_2006. @bunyan_effect_2015 observed a similar effect on shola distribution of Western Ghats and suggested it could result from monsoon winds. Effectively monsoon winds arise fom south-west direction in this region, and bring more stressfull and disturbed conditions to species [@soman_aspects_1990]. Curvature is also affecting the leaf economy. Convex area will accumulate soil and attract water flux increasing soil fertiliy conditions for species that will invest more in leaf ressource acquisition toward a productive strategy with higher SLA and a convergent optimal LDMC. SLA and LDMC with curvature effect seems to reflect well soil fertility [@hodgson_is_2011]. 
 
-The wood economic spectrum defined by WD, LA, and Thick is only partially affected by environment at our 10 ha plot scale. Neutral hypothesis of funcional equivalence [@hubbell_neutral_2005] are most of the times sufficient to build back similar links between topography and functional compoisiton of communities. Still aspect wiht south-west orientation and curvature are the two main ecological factors filtering functional traits from the wood economic spectrum. South-west orientation, with probably more disturbance and stress, is globaly increasing community WD mean values while reducing eveness by convergence toward different optimal WD. In parrallel, LA is broaden with south-west direction, pehraps to answer to hydraulic diversity induced by WD multimodality, as WD and LA are mechanically linked [@coomes_scaling_2008]. Fertility decrease with curvature increase results in smaller leaves inside communities with a distribution broaden by multimodality reducing eveness. Wetness is increasing with higher curvature and lower LA eveness, indicating that multimodality is happening more in wettest low elevation area. Wetness could compensate water departure trigerred by positive curvature in lower areas. 
+Biotic factors also affect the LES through the negative effect of canopy height on LDMC. The canopy height effect in fact is null on understorey species and only apply on species that take part in the canopy composition or emerge (results unshown). We could have assumed that understorey species would be investing in higher LDMC for an higher leaf lifespan under shade stress [@kitajima_tissue-level_2010]. But both the high variation of canopy height resulting in a relatively light open canopy and the dry season of 3.8 months suggest that leaf lifespan investment is not so obvious. Instead of a growth-survival trade-off shade tolerant species may adopt a more low-high light growth trade-off strategy [@poorter_leaf_2009] strongly affecting SLA but not driving LDMC. Emergent and high canopy species will have a lower LDMC, resulting from a more productive strategy toward leaf resource acquisition at the expense of leaf carbon investment in defense and resistance. Thus canopy species with the lowest LDMC will grow the fastest and then reach the highest canopy. Measurement of LDMC on species classified as canopy and emergent are realized most of the time on shadow leaves from understorey individuals. Still we observed previous relation indicating that species phylogenetic determinism is stronger than micro-environmental variation plasticity for LDMC, as suggested by the intra-specific variation of LDMC 1.5 times bigger than intra-individuals variation.
+
+The wood economic spectrum defined by WD, LA, and Thick is only partially affected by environment at our 10 ha plot scale. Neutral hypothesis of funcional equivalence [@hubbell_neutral_2005] are most of the times sufficient to build back similar links between topography and functional compoisiton of communities. Still aspect wiht south-west orientation and curvature are the two main ecological factors filtering functional traits from the wood economic spectrum. South-west orientation, with probably more disturbance and stress, is globaly increasing community WD mean values while reducing eveness by convergence toward different optimal WD. In parrallel, LA is broaden with south-west direction, pehraps to answer to hydraulic diversity induced by WD multimodality, as WD and LA are mechanically linked [@coomes_scaling_2008]. Fertility decrease, with curvature increase, results in smaller leaves inside communities with a distribution broaden by multimodality reducing eveness. Wetness is increasing with higher curvature and lower LA eveness, indicating that multimodality is happening more in wettest low elevation area. Wetness could compensate water departure trigerred by positive curvature in lower elevation areas. 
 
 ## Composition between communities
 
-Limited dispersal, assumed by neutral theory, does not affect florisitic composition of communities at the 10 ha plot scale due to the absence of links  with spatial residuals. Florisitic composition of communities is only shaped by environment. On opposite, functional composition is overall not structured with environment nor with spatial residuals. Whereas at the community level environment is partially shapping florisitic composition, at the 10 ha level functional variation between communities is stochastic. Measured functional traits should vary to a larger scale [@messier_trait_2016]. Still WD is positively correlated to $\beta$ structure. WD of rare species is even diverging with spatial residuals supposing an unaccounted spatially organized variable opposing close community in WD composition. Topography removed from spatial residuals, and climate and pedology being constant in the 10 ha plot, this unaccouted variation is assumed to be due to stochastic event in plot history as death. Unshowed analysis reveals that this spatial divergence of WD is not explained by tree death events from the two last decades but certainly to older events. Finally, variation in distance between taxon wasn't translated in phylogenetic variation whereas most of measured functional traits appeared phylogenetically conserved and clustered.
+Limited dispersal, assumed by neutral theory [@condit_beta-diversity_2002], does not affect florisitic composition of communities at the 10 ha plot scale due to the absence of links  with spatial residuals. Florisitic composition of communities is only shaped by environment. On opposite, functional composition is overall not structured with environment nor with spatial residuals.At the 10 ha level functional variation between communities is stochastic; whereas at the community level environment is partially shapping florisitic composition. Measured functional traits should vary to a larger scale [@messier_trait_2016]. Still WD is positively correlated to $\beta$ structure. **To developp**. WD of rare species is even diverging with spatial residuals supposing an unaccounted spatially organized variable opposing close community in WD composition. Topography removed from spatial residuals, and climate and pedology being constant in the 10 ha plot, this unaccouted variation is assumed to be due to stochastic event in plot history as death. Unshowed analysis reveals that this spatial divergence of WD is not explained by tree death events from the two last decades but certainly to older events. Finally, variation in distance between taxon wasn't translated in phylogenetic variation whereas most of measured functional traits appeared phylogenetically conserved and clustered.
 
 ## Limits and perspectives
 
-Ecological strategies underline two econmic spectra by comparisons to previous study results. But the multivariate analysis of our functional traits lack trait diversity for correct interpretations of functional trade-offs. Measured traits were all morphological and from the leaf except for one. Anatomical and chemical traits as leaf vein patterns and leaf chemical content (N, P, K) could brought broader perspective on ecological strategies of Uppangala species. Still the study reveal that few commonly used traits can highlight well known strategy axes.
+Ecological strategies underline two econmic spectra as shown by @baraloto_decoupled_2010. Whereas the multivariate analysis of our functional traits lack trait diversity for correct interpretations of functional trade-offs. Measured traits were all morphological and from the leaf except for one. Anatomical and chemical traits as leaf vein patterns and leaf chemical content (N, P, K) could brought broader perspective on ecological strategies of Uppangala species. Still the study reveal that few commonly used traits can highlight well known strategy axes.
 
 Besides patterns have been detected between functional composition and environment at both local ($\alpha$) and between-community ($\beta$) scales. Lot of relation observed didn't differ from those obtain with null hypothesis reflecting neutral theory [as functional equivalence, @hubbell_neutral_2005]. Ecological gradient and spatial scale sizes can be at the origin of this lack of environmental filtering. Effectively the abiotic variation is mainly topographic with a constant climate and pedology. Study highlighting environmental filtering often present a higher environmental variation [@bernard-verdier_community_2012]. Similar to this, the 10 ha plot scale is really fine and partially responsible for the small environmental variation. @kraft_functional_2008 detected topographical filtering on functional trait and @gunatilleke_specieshabitat_2006 observed niche differentiation on 25 ha tropical forest plots including large flat valleys. This mid-low elevation study of functional traits from western ghats forest could be reproduced at higher elevation or in dryer areas as eastern Ghats for better insight of environmental filtering at broad scale. On the other hand WD as shown to be plastic to environment at fine scale both in $\alpha$ and $\beta$ levels. Species WD seems highly adptated to environment in western Gahts forests in link to monsoon events.
 

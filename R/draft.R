@@ -188,3 +188,13 @@
 # bca$c1
 # biplot(bca, xax = 5, yax = 3)
 # randtest(bca)
+
+PFT_sp0 <- PFT_sp
+PFT_sp <- PFT_sp0
+sel <- which(Species$Strata[match(PFT_sp$SpCode, Species$SpCode)] %in% c('ESII'))
+PFT_sp <- PFT_sp[sel,]
+par(mfrow = c(1,2))
+hist(PFT_sp$LDMC[sel], xlim = range(PFT_sp$LDMC), col = 'firebrick', xlab = 'LDMC', main = "ESI species LDMC")
+hist(PFT_sp$LDMC[sel], xlim = range(PFT_sp$LDMC), col = 'blue', xlab = 'LDMC', main = "ESII species LDMC")
+# CWMII <- CWM
+# summary(CWM.lm$abundance$LDMC)
