@@ -27,6 +27,7 @@ genPFT <- function(){
   PFT$SLA = PFT$SLA / 1000 # from mm2.g-1 to m2.kg-1
   PFT$HA = PFT$HA / PFT$LA
   names(PFT)[which(names(PFT) == 'HA')] = 'SHA' # Specific holes area
+  names(PFT)[which(names(PFT) == 'Thick')] = 'LT'
   # Errors modification
   PFT$WD[which(PFT$WD > 1)] <- NA # Wood sample too small for correct WD measurement
   species <- genSpecies()
