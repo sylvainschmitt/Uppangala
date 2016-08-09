@@ -13,3 +13,4 @@ inst/doc/*.png
 inst/doc/*_files
 inst/doc/*_cache
 inst/phylogeny
+inst/doc/*.csl

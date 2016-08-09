@@ -36,6 +36,8 @@ regression_table <- function(LM, reg, pval, ppval){
   var_table$`Null model` <- round(pval,3)
   var_table$` ` <- unlist(lapply(pval, stars, ns = ' '))
   var_table <- var_table[-which(var_table$` ` == ' '),]
+  var_table$`Null model` <- paste(var_table$`Null model`, var_table$` `)
+  var_table <- var_table[-length(names(var_table))]
 
   return(var_table)
 }
