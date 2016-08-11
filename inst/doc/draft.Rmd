@@ -59,9 +59,9 @@ Since 1989, all trees $\geq 30$ cm girth at breast height (gbh) have been monito
 
 Leaf petioles, rachis and petiolules were removed for all measurements. Leaf fresh weights, area and thickness were measured, using a weighing scale, a bend scanner and a micrometer respectively. Leaves were first kept in herbarium and then dried in an oven for at least 72 hours at 60 $^\circ C$. Once dried, the leaves were weighted directly after been extracted from the oven to avoid humidity bias. The bark and pit of branch samples were removed in order to keep only branch wood with no soft tissues. Branch wood samples were sink in water to evaluate their volume by water displacement. Samples were then dried for 48 hours at 80 $^\circ C$ and weighted. 
 
-We calculated five functional traits of leaf and wood samples: leaf thickness (LT in $\mu m$ ), leaf area measured from scans (LA in $mm^2$), leaf dry matter content as the leaf dry weight divided by the leaf fresh weight (LDMC in $mg.g^-1$), specific leaf area as the leaf area divided by the leaf dry mass (SLA in $m^2.kg^-1$), and branch wood density  as the the wood sample dry weight divided by its volume (WD in $g.cm^-3$, see table 1). **Justify trait choice**.
+We calculated five functional traits of leaf and wood samples: leaf thickness (LT in $\mu m$ ), leaf area measured from scans (LA in $mm^2$), leaf dry matter content as the leaf dry weight divided by the leaf fresh weight (LDMC in $mg.g^-1$), specific leaf area as the leaf area divided by the leaf dry mass (SLA in $m^2.kg^-1$), and branch wood density  as the the wood sample dry weight divided by its volume (WD in $g.cm^-3$, see table 1). We choose those five traits because they have been widely used, besides there easier measurement, and they have been shown to be good indicator of species abilities to grow, survive and reproduce [@wilson_specific_1999].
 
-Table 1: Functional traits measured. *Traits with their abbreviation, range of values in the sampling, mean and standard deviation, standard unit, and associated trade-off in tree strategy for functionning, survival and reproduction from @baraloto_decoupled_2010.*
+Table 1: Functional traits measured. *Traits with their abbreviation, standard unit, and associated trade-off in tree strategy for functionning, survival and reproduction from @baraloto_decoupled_2010.*
 
 ```{r 1 Traits}
 rm(list = ls()[-which(ls() == "cores")]); invisible(gc())
@@ -69,36 +69,22 @@ PFT <- genPFT()
 table <- data.frame(
   Trait = c('Leaf thickness', 'Leaf area', 'Leaf dry matter content', 'Specific leaf area', 'Wood density'),
   Abbreviation = c('LT', 'LA', 'LDMC', 'SLA', 'WD'),
-  Range = c(paste(range(PFT$LT, na.rm = T), collapse = '-'),
-            paste(round(range(PFT$LA, na.rm = T)), collapse = '-'),
-            paste(round(range(PFT$LDMC, na.rm = T)), collapse = '-'),
-            paste(round(range(PFT$SLA, na.rm = T), 2), collapse = '-'),
-            paste(round(range(PFT$WD, na.rm = T), 2), collapse = '-')),
-  m = c(paste0(round(mean(PFT$LT, na.rm = T)), ' (',
-                         round(sd(PFT$LT, na.rm = T)), ')'),
-                  paste0(round(mean(PFT$LA, na.rm = T)), ' (',
-                         round(sd(PFT$LA, na.rm = T)), ')'),
-                  paste0(round(mean(PFT$LDMC, na.rm = T)), ' (',
-                         round(sd(PFT$LDMC, na.rm = T)), ')'),
-                  paste0(round(mean(PFT$SLA, na.rm = T),2), ' (',
-                         round(sd(PFT$SLA, na.rm = T),2), ')'),
-                  paste0(round(mean(PFT$WD, na.rm = T),2), ' (',
-                         round(sd(PFT$WD, na.rm = T),2), ')')),
   Unit = c('$\\mu m$', '$mm^2$', '$mg.g^-1$', '$m^2.kg^-1$', '$g.cm^-3$'),
   s = c('Leaf defense vs. investment',
-               'Leaf resource capture vs.investment',
-               'Leaf defense vs. investment',
-               'Leaf resource acquisiton vs. defense',
-               'Stem transport, structure and defense')
-  )
-names(table)[c(4,6)] <- c('Mean (sd)', 'Trade-off')
+        'Leaf resource capture vs.investment',
+        'Leaf defense vs. investment',
+        'Leaf resource acquisiton vs. defense',
+        'Stem transport, structure and defense')
+)
+names(table)[4] <- 'Trade-off'
 kable(table, row.names = F)
 rm(table)
 ```
 
 ## Environmental variables
 
-We selected 8 topographical variables representing the abiotic environment: elevation, slope, curvature, plan curvature, profile curvature, wetness (function of both slope and elevation representing water flow and accumulation areas), southwesterness (SW, aspect in direction of south-west: $cos(aspect~in~degres + 225)$) derived from the digital elevation model using the RSAGA package [@brenning_statistical_2008], and distance to the nearest potential river computed using ArcGis [@desktop_arcgis_2011]. Digital elevation model was provided by a 2013 LIDAR campaign on Uppangala plots with a resolution of $1*1 m^2$. **Justify variable choice**.
+Because topography was assumed as a major source of environmental variation [@gimaret-carpentier_sampling_1998], we selected 8 topographical variables representing the abiotic environment: elevation, slope, curvature, plan curvature, profile curvature, wetness (function of both slope and elevation representing water flow and accumulation areas), southwesterness (SW, aspect in direction of south-west: $cos(aspect~in~degres + 225)$) derived from the digital elevation model using the RSAGA package [@brenning_statistical_2008], and distance to the nearest potential river computed using ArcGis [@desktop_arcgis_2011]. 
+<!-- Digital elevation model was provided by a 2013 LIDAR campaign on Uppangala plots with a resolution of $1*1 m^2$. -->
 
 In order to identify the main sources of environmental variation and to avoid multi-colinearity in subsequent analyses, we performed a principal component analysis (PCA) of the environmental variables. We selected the less correlated variables with the most ecological meaning. Thus we reduced our explanatory variables to 4 variables: curvature representing the water flow paths and soil accumulation areas, wetness highlighting water accumulation areas, southwesterness representing aspect [@bunyan_effect_2015] and slope.
 
@@ -112,9 +98,9 @@ The coefficient of variation of traits was investigated at three levels ($cv = \
 
 ### Community trait variability
 
-Across the whole 10 hectare plot, $20*20 m^2$ quadrats were defined and represented 240 local communities. To investigate local functional composition of communities we used community weighted means (CWM), community weighted variances (CWV), and coefficients of variation from the nearest neighbour distance (CVNND) [CWM and CWV, sensu @violle_let_2007; CVNND, @jung_intraspecific_2010]. CWM for each trait $t$ was calculated as the mean of species trait values, $t_{i}$, of the $S$ species in each community, with each species, $i$, weighted by its relative abundance, $p_{i}$:
+Across the whole 10 hectare plot, $30*30 m^2$ quadrats were defined and represented 110 local communities. Communities where split in two guilds representing canopy and emergent species and understorey species following their potential maximum strata as defined by **cite**. To investigate local functional composition of canopy and understorey communities we used community weighted means (CWM), community weighted variances (CWV), and coefficients of variation from the nearest neighbour distance (CVNND) [CWM and CWV, sensu @violle_let_2007; CVNND, @jung_intraspecific_2010]. CWM for each trait $t$ was calculated as the mean of species trait values, $t_{i}$, of the $S$ species in each community, with each species, $i$, weighted by its relative abundance, $p_{i}$:
 $$CWM = \sum_{i=1}^{S} p_{i} * t_{i} ~ (1)$$
-We also calculated the average of trait values based on species presence-absence, to further emphasize the contribution of rare species in community trait distribution [@cingolani_filtering_2007]. CWV for each trait $t$ was calculated as the mean distance of trait values, $t_{i}$, to $CWM$, of the $S$ species in each community, with each species, $i$, weighted by its relative
+We also calculated the average of trait values based on species presence-absence, to further emphasize the contribution of less abundant and rare species in community trait distribution [@cingolani_filtering_2007]. CWV for each trait $t$ was calculated as the mean distance of trait values, $t_{i}$, to $CWM$, of the $S$ species in each community, with each species, $i$, weighted by its relative
 abundance, $p_{i}$:
 $$CWV = \sum_{i=1}^{S} p_{i} * (t_{i} - CWM)^2 ~ (2)$$
 CVNND for each trait $t$, scaled with its mean and variance, was calculated as nearest neigbor distances (NND) standard deviation, $\sigma _{NND}$, of the $i$ individuals in each community, divided by its mean, $\mu _{NND}$; and NND for one individual $i$ is calculated as the minimal distance $d$ between the $j$ other individuals of the community :
@@ -128,11 +114,11 @@ The influence of environment on SES values was investigated by linear regression
 
 A phylogenetic tree of our 89 species was built with `S.PhyloMaker` function proposed by @qian_updated_2016-1. We assessed phylogenetic signal of each functional using the Moran's I statistic. Positive Moran's I value indicated convergence of trait values within the phylogeny whereas negative Moran's I will showed divergence.
 
-To investigate taxonomic, functional, and phylogenetic variation among communities we calculated $I_{st}$, for taxonomic composition, $U_{st}$ and $\tau _{st}$, for functional composition in abundance and presence-absence respectively, and $\beta _{st}$ and $\pi _{st}$, for phylogenetic composition in abundance and presence-absence respectively [@hardy_characterizing_2007]. **Develop indices**.
+To investigate taxonomic, functional, and phylogenetic variation among communities we calculated $I_{st}$, for taxonomic composition, $U_{st}$ and $\tau _{st}$, for functional composition in abundance and presence-absence respectively, and $\beta _{st}$ and $\pi _{st}$, for phylogenetic composition in abundance and presence-absence respectively [@hardy_characterizing_2007]. $I_{st}$ measures species turnover accounting for local abundance. $U_{st}$ and $\beta _{st}$ integrate only phylogenetic and functional turnover, respectively, weighting species by their local abundances; whereas $\tau _{st}$ and $\pi _{st}$ express phylogenetic and functional turnover, respectively, without accounting for species local abundances.
 
 Variation of composition between community pairs with those metrics was translated as a taxonomic, functional and phylogenetic distance, and compared to environmental and spatial distances among community pairs. Environmental distances were calculated as geometric distances between communities on the plan composed by the two first axes of environmental variables PCA (see supplementary material S1). Correlations with environment and space were assessed based on two Mantel tests successively with taxonomic, functional, and phylogenetic community compositions. A firt Mantel statistic assessed the correlation between each metric distance matrix and the environmental distance matrix (E). The second partial Mantel statistic assessed the correlation between each metric distance matrix and the spatial distance matrix knowing environmental distance matrix (E|S), to represent remaining spatial dependency in community composition once the influence of environmental variation is taken into account.
 
-We used null models to test if observed correlation with Mantel statistic differed significantly from expectations under null hypothesis. $I_{st}$ correlation to environment and space was tested with 999 repetions of the model nul described by @myers_beta-diversity_2013 which randomizes individuals among subplots while preserving the regional abundance of species, and the number of individuals per community. $U st$ and $\tau st$ were tested by the nul model NM1 which randomizes traits among species. Finally $\beta st$ and $\pi st$ were tested against the nul model *"1s"* suggested by @hardy_testing_2008 which randomizes phylogenetic tree tips. **One global null model section ?**
+We used null models to test if observed correlation with Mantel statistic differed significantly from expectations under null hypothesis. $I_{st}$ correlation to environment and space was tested with 999 repetions of the model nul described by @myers_beta-diversity_2013 which randomizes individuals among subplots while preserving the regional abundance of species, and the number of individuals per community. $U st$ and $\tau st$ were tested by the nul model NM1 which randomizes traits among species. Finally $\beta st$ and $\pi st$ were tested against the nul model *"1s"* suggested by @hardy_testing_2008 which randomizes phylogenetic tree tips.
 
 
 All analysis were conducted using the R 3.3.0  software environment [@r_core_team_r:_2016] with packages 
@@ -146,9 +132,9 @@ and `vegan` [@oksanen_vegan:_2016].
 
 ## Traits variation and covariation
 
-We found a general increase of functional trait variation from intra-individual to inter-specific level (see table 2). Whereas LA shows already high variabililty at intra-individual level almost as strong as the intra-specific variation ($CV_{individual} = 0.20$ and $CV_{species} = 0.24$, wilcoxon rank test $p-value = 0.137$). **Conclude on low $cv_{intra}$ justifying species mean trait**. **Give Species example of extreme range and compare to litterature**.
+We found a general increase of functional trait variation from intra-individual to inter-specific level (see table 2). Whereas LA shows already high variabililty at intra-individual level almost as strong as the intra-specific variation ($CV_{individual} = 0.20$ and $CV_{species} = 0.24$, wilcoxon rank test $p-value = 0.137$). Finally the relatively low intra-individual variation ($cv_{intra}$ range from 0.06 to 0.09) allow us to consider the mean trait values per species for subsequent connumity-level analysis.
 
-Table 2: Coefficient of intra-individual, intra-specific and inter-specific trait variation. *Mean of coefficient of variation for leaves in all individuals (intra-individual), for trees in all species (intra-specific), and coefficient of variation for trees for all species. See table 1 for abbreviation.* **Move range, mean and sd columns here*
+Table 2: Coefficient of intra-individual, intra-specific and inter-specific trait variation. *Traits with their range of values, mean and standard deviation, mean of coefficient of variation for leaves in all individuals (intra-individual), for trees in all species (intra-specific), and coefficient of variation for trees for all species. See table 1 for abbreviation.*
 
 ```{r 2 CV}
 PFT_ind <- aggregate(PFT, by = list(PFT$Tree), FUN = mean, na.rm = T)
@@ -166,24 +152,46 @@ PFT_ind$Sp <- Sp[row.names(PFT_ind)]
 PFT_ind$SpCode <- SpCode[as.character(PFT_ind$Sp)]
 PFT_ind$CE <- CE[row.names(PFT_ind)]
 PFT_ind <- PFT_ind[-c(1:2)]
-cv <- data.frame(row.names = c('LT', 'LA', 'LDMC', 'SLA', 'WD'))
-cv$Individual <- unlist(lapply(
-  as.list(row.names(cv)),
-  function(y){mean(aggregate(PFT[which(names(PFT) ==  y)], by = list(PFT$Tree), function(x){sd(x, na.rm = T) / mean(x, na.rm = T)})[,2], na.rm = T)}))
-cv$Species <- unlist(lapply(
-  as.list(row.names(cv)),
-  function(y){mean(aggregate(PFT_ind[which(names(PFT_ind) ==  y)], by = list(PFT_ind$Sp), function(x){sd(x, na.rm = T) / mean(x, na.rm = T)})[,2], na.rm = T)}))
-cv$Community <- unlist(
-  lapply(as.list(row.names(cv)),
-         function(y){sd(PFT[,which(names(PFT) ==  y)], na.rm = T) /
-             mean(PFT[,which(names(PFT) ==  y)], na.rm = T)}))
-cv <- round(cv, 2)
+trait <- c('LT', 'LA', 'LDMC', 'SLA', 'WD')
+cv <- data.frame(
+  row.names = trait,
+  Range = c(paste(range(PFT$LT, na.rm = T), collapse = '-'),
+            paste(round(range(PFT$LA, na.rm = T)), collapse = '-'),
+            paste(round(range(PFT$LDMC, na.rm = T)), collapse = '-'),
+            paste(round(range(PFT$SLA, na.rm = T), 2), collapse = '-'),
+            paste(round(range(PFT$WD, na.rm = T), 2), collapse = '-')),
+  m = c(paste0(round(mean(PFT$LT, na.rm = T)), ' (',
+               round(sd(PFT$LT, na.rm = T)), ')'),
+        paste0(round(mean(PFT$LA, na.rm = T)), ' (',
+               round(sd(PFT$LA, na.rm = T)), ')'),
+        paste0(round(mean(PFT$LDMC, na.rm = T)), ' (',
+               round(sd(PFT$LDMC, na.rm = T)), ')'),
+        paste0(round(mean(PFT$SLA, na.rm = T),2), ' (',
+               round(sd(PFT$SLA, na.rm = T),2), ')'),
+        paste0(round(mean(PFT$WD, na.rm = T),2), ' (',
+               round(sd(PFT$WD, na.rm = T),2), ')')),
+  Individual = round(unlist(lapply(as.list(trait), function(y){
+    mean(aggregate(PFT[which(names(PFT) ==  y)], by = list(PFT$Tree), function(x){
+      sd(x, na.rm = T) / mean(x, na.rm = T)
+    })[,2], na.rm = T)
+  })) ,2),
+  Species = round(unlist(lapply(as.list(trait), function(y){
+    mean(aggregate(PFT_ind[which(names(PFT_ind) ==  y)], by = list(PFT_ind$Sp), function(x){
+      sd(x, na.rm = T) / mean(x, na.rm = T)
+    })[,2], na.rm = T)
+  })), 2),
+  Community = round(unlist(
+    lapply(as.list(trait), function(y){
+      sd(PFT[,which(names(PFT) ==  y)], na.rm = T) / mean(PFT[,which(names(PFT) ==  y)], na.rm = T)
+    })), 2)
+)
+names(cv)[2] <- 'Mean (sd)' 
 cv['WD','Individual'] <- ''
 kable(cv)
-rm(PFT, CET, cv, CE, Sp, SpT)
+rm(PFT, CET, cv, triat, CE, Sp, SpT)
 ```
 
-The principal component analysis (PCA) shows WD associated with structural leaf traits orthogonal to the SLA (figure 1). The first PCA axis (PCA1) covary mainly with LT, LDMC and WD; opposing thick big leaves and lightwood to dense leaves and hardwood. PCA1 axis associated WD to leaf structural traits linked to hydraulic conductive efficiency along the wood economic spectrum [WES, @chave_towards_2009]. The PCA2 covaried mainly positively with SLA and negatively with LDMC along a leaf economic spectrum [LES, @wright_worldwide_2004]. **Develop productive against persistent strategy**. **High WD LDMC relation indicating structural investment**.
+The principal component analysis (PCA) shows WD associated with structural leaf traits orthogonal to the SLA (figure 1). The first PCA axis (PCA1) covary mainly with LT, LA, LDMC and WD; opposing thick big leaves and lightwood to dense leaves and hardwood. PCA1 axis associated WD to leaf structural traits linked to hydraulic conductive efficiency along the wood economic spectrum [WES, @chave_towards_2009]. The PCA2 covaried mainly positively with SLA and negatively with LDMC along a leaf economic spectrum [LES, @wright_worldwide_2004]. The leaf econmic spectrum opposes high SLA leaves for a strong productivity capacity, with high phyotosynthesis compare to carbon investment, and high LDMC leaves to ensure persistence in time and against attacks. PCA also highlight the strong correlation between LDMC and WD (Pearson's correlation test, $r = 0.25$ with $p-value < 0.001$), indicating a coordinated structural investment of species among stem and leaf.
 
 ```{r 3 PCA PFT}
 library(vegan)
@@ -242,7 +250,7 @@ PFT_sp <- PFT_sp[-which(names(PFT_sp) == 'ID')]
 rm(PCAscores, PFT_ind, SpCodeT, lambda, pca, pca.var, Rot, XLIM)
 ```
 
-Figure 1: Principal Component Analysis (PCA) performed on species mean traot values. *The bottom right subplot represents the eigen values (grey bars) compare to a broken stick distribution for 5 components (red line). See table 1 for abbreviation.*
+Figure 1: Principal Component Analysis (PCA) performed on species mean trait values. *The bottom right subplot represents the eigen values (grey bars) compare to a broken stick distribution for 5 components (red line). See table 1 for abbreviation.*
 
 ```{r 4 env-com}
 library(raster)
@@ -252,7 +260,7 @@ Trees$ID <- row.names(Trees)
 Trees <- merge(Trees, PFT_sp)
 row.names(Trees) <- Trees$ID
 Trees <- Trees[-which(names(Trees) == 'ID')]
-com <- quadrats()
+com <- quadrats(cs = c(30,30))
 XY <- Trees[c('x', 'y')]
 coordinates(XY) <- ~ x + y
 proj4string(XY) <- crs(com)
@@ -285,7 +293,7 @@ rm(Deriv, XY, Env, sel, BA)
 
 ## Functional composition of local communities
 
-Community weighted means (CWM), for both abundant and rare species, showed some significant variations along environmental gradients (see table 3). Community mean values of WD significantly increased under south-west direction, both in abundance and presence-absence CWM,  whereas SLA and LA, in presence-absence only, decreased with curvature. In addition, LDMC in presence-absence was decreasing with canopy height. **Develop meaning of AB et PA, specifically in term of species**.
+Community weighted means (CWM), both in abundance or presence-absence, showed some significant variations along environmental gradients (see table 3). Community mean values of WD significantly increased under south-west direction, both in abundance and presence-absence CWM,  whereas SLA and LA, in presence-absence only, decreased with curvature. In addition, LDMC in presence-absence was decreasing with canopy height. Trait values that allow species existence is not always the same that trait values determining their ability to dominate a given environment. For instance here both abundant and less abundant species increased their WD under southwest orientation, whereas SLA and LA decrease with curvature is only affecting less abundant species ability to survive in concave environments.
 
 Table 3: Summary of linear models of community-level trait values. _The results are shown for either CWM values weighted either by species relative abundance (AB) or in presence-absence (PA) after stepwise selection of the predictors including slope, curvature, wetness, southwesterness (SW), canopy height (Canopy) and basal area (BA). Global and partial F-statistics of final models were compared to statistics of 999 null linear regressions built with null model NM1, which randomizes traits among species. See table 1 for abbreviations. The number of asterisk indicates the significance threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
 
@@ -339,7 +347,6 @@ Fval <- lapply(Fval, function(s){
   names(s) <- names(CWM.lm$C)
   return(s)
 })
-Fval$U <- Fval$U[c('LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'LT'),]
 ## Partial F
 pFval <- lapply(CWM.lm, function(s){
   lapply(s, function(y){
@@ -785,7 +792,6 @@ CVNND.pval.res <- lapply(CVNND.pval, function(s){data.frame(
 )})
 CVNND.pval.res <- do.call('cbind', CVNND.pval.res)
 names(CVNND.pval.res) <- names(CVNND.pval)
-print(round(CVNND.pval.res, 3))
 
 ## CVNND SES
 CVNND.ses <- mapply(function(CVNNDs, nCVNNDs){
@@ -863,20 +869,21 @@ CVNND.ses.res <- mapply(function(s, name){
   return(s)
 }, s = CVNND.ses.res, name = as.list(c('C', 'U')), SIMPLIFY = F)
 CVNND.ses.res <- do.call('rbind', CVNND.ses.res)
-rm(CVNND.pval, CVNND.pval.res, CVNND.ses.lm, nCVNND)
+rm(CVNND.pval, CVNND.ses.lm, nCVNND)
 invisible(gc())
 ```
 
 ```{r CWV & CVNND table}
+print(round(CVNND.pval.res, 3))
 res <- list(CWV = CWV.ses.res, CVNND = CVNND.ses.res)
 res <- mapply(function(s, name){
   s <- cbind(c(name, rep(' ', length(s[,1])-1)), s)
-  names(s)[1] <- 'Type'
+  names(s)[1:2] <- c('T', 'S')
   return(s)
 }, s = res, name = as.list(c('CWV', 'CVNND')), SIMPLIFY = F)
 res <- do.call('rbind', res)
 kable(bold(res), row.names = F)
-rm(CWV.ses.res, CVNND.ses.res, res)
+rm(CWV.ses.res, CVNND.ses.res, CVNND.pval.res, res)
 ```
 
 ## Taxonomic, functional and phylogenetic varitions among communities
@@ -1106,11 +1113,11 @@ Furthermore, our results are similar to the between-species variations found @fo
 
 ## Communtiy-level trait values
 
-We analyzed functional composition of $20*20m^2$ communities (CWM), as well as the variation of this composition with environment across the 10 ha forest plot. We found that the traits of the leaf economic spectrum (LES) were mainly affected by aspect with more convergent community composition (lower CWV) under south-west orientation, especially for LDMC of less common species. The influence of aspect is little documented in tropical forests, but still highlighted by @gunatilleke_specieshabitat_2006 in monsoon rainforests. @bunyan_effect_2015 also observed similar influence in mountain rainforests of Western Ghats, and suggested that it could result from monsoon winds. In our context, monsoon winds arise from south-west direction, and bring more stressful and disturbed conditions to species [@soman_aspects_1990] **To develop, see maxime disturbance hypothesis on opposite side**. Curvature is also affecting the variation of leaf economics in community. A locally convex context would accumulate more soil and attract more water, increasing soil fertility and allowing persistence of species investing more in leaf resource acquisition, with higher SLA and a convergence in LDMC values. The variation of SLA and LDMC with curvature, is consistent with the influence of changing soil fertility [@hodgson_is_2011]. 
+We analyzed functional composition of $20*20m^2$ communities (CWM), as well as the variation of this composition with environment across the 10 ha forest plot. We found that the traits of the leaf economic spectrum (LES) were mainly affected by aspect with more convergent community composition (lower CWV) under south-west orientation, especially for LDMC of less common species. The influence of aspect is little documented in tropical forests, but still highlighted by @gunatilleke_specieshabitat_2006 in monsoon rainforests. @bunyan_effect_2015 also observed similar influence in mountain rainforests of Western Ghats, and suggested that it could result from monsoon winds. In our context, monsoon winds arise from south-west direction, and could bring more stressful and disturbed conditions to species [@soman_aspects_1990]. Uppangala plot is situated inside a low elevation slope separated from west coast by a higher crest orientated toward southwest. In this context it is diffcult to predict wind flow and orientation inside the 10 ha plot topgraphy. We hyptohesis to explanation, hardwood could be selected for mechanical resistance in more disturbed souwhtwest oriented area or topography provoke a turbulences on northeast oriented areas responsible of more disturbance and death events in the forest history resulting in lightwood filtering [@larjavaara_rethinking_2010]. Curvature is also affecting the variation of leaf economics in community. A locally convex context would accumulate more soil and attract more water, increasing soil fertility and allowing persistence of species investing more in leaf resource acquisition, with higher SLA and a convergence in LDMC values. The variation of SLA and LDMC with curvature, is consistent with the influence of changing soil fertility [@hodgson_is_2011].
 
-Biotic factors also affected the LES through a negative effect of canopy height on LDMC. There was no effect of canopy height on understorey species, while it influenced leaf traits of canopy and emergent trees (results unshown **To include in the analysis**). A basic expectation is that understorey species would invest in higher LDMC for higher leaf lifespan and durability under limited light and water resources [@kitajima_tissue-level_2010]. But the Uppangala forest is characterized by heterogeneity of canopy height allowing light to penetrate more in lower strata and a dry season of 3.8 months. Comsequently leaf lifespan investment may not be so important resulting in a low-high light growth trade-off strategy instead of a growth-survival trade-off [@poorter_leaf_2009], affecting SLA but not LDMC. Emergent and high canopy species will have a lower LDMC, resulting from a more productive strategy toward leaf resource acquisition at the expense of leaf carbon investment in defense and resistance. **Second hyptohesis: canopy and emergent tree are more affected by water stress than understorey species preserved by microclimatic conditions buffered by canopy**. Thus canopy species with the lowest LDMC will grow more quickly and then reach the highest canopy. Measurement of LDMC on species classified as canopy and emergent were realized most of the time on shadow leaves from understorey individuals. Still we observed previous relationship indicating that species phylogenetic determinism is stronger than micro-environmental variation plasticity for LDMC, as suggested by the intra-specific variation of LDMC 1.5 times larger than intra-individuals variation.
+Biotic factors also affected the LES through a negative effect of canopy height on LDMC. There was no effect of canopy height on understorey species, while it influenced leaf traits of canopy and emergent trees. A basic expectation is that understorey species would invest in higher LDMC for higher leaf lifespan and durability under limited light and water resources [@kitajima_tissue-level_2010]. But the Uppangala forest is characterized by heterogeneity of canopy height allowing light to penetrate more in lower strata and a dry season of 3.8 months. Comsequently leaf lifespan investment may not be so important resulting in a low-high light growth trade-off strategy instead of a growth-survival trade-off [@poorter_leaf_2009], affecting SLA but not LDMC. Emergent and high canopy species will have a lower LDMC, resulting from a more productive strategy toward leaf resource acquisition at the expense of leaf carbon investment in defense and resistance. **Second hyptohesis: canopy and emergent tree are more affected by water stress than understorey species preserved by microclimatic conditions buffered by canopy**. Thus canopy species with the lowest LDMC will grow more quickly and then reach the highest canopy. Measurement of LDMC on species classified as canopy and emergent were realized most of the time on shadow leaves from understorey individuals. Still we observed previous relationship indicating that species phylogenetic determinism is stronger than micro-environmental variation plasticity for LDMC, as suggested by the intra-specific variation of LDMC 1.5 times larger than intra-individuals variation.
 
-The wood economic spectrum defined by WD, LA, and LT was mainly affected at community level by south-west orientation and curvature. South-west orientation, with probably more disturbance and stress due to exposure to monsoon winds **Maxime: counter effect by topo ?**, resulted in denser wood. However lower evenness than random could be related to multimodality. In addition, south-west orientation also related to a broader range of leaf sizes, which could be consistent with more diverse hydraulic strategies reflected by WD multimodality, as WD and LA are mechanically linked [@coomes_scaling_2008] **To develop, especially for a multimodality under southwest**. Decreasing fertility , with concavity was related to smaller leaves inside communities with a distribution broaden by multimodality reducing evenness **to develop, eventually illustrated with one example**. Wetness increased with higher curvature and lower LA evenness, indicating that multimodality is happening more in wettest low elevation area. Wetness could compensate water departure trigerred by positive curvature in lower elevation areas. **Repetition with first paragraph, to merge ?**.
+The wood economic spectrum defined by WD, LA, and LT was mainly affected at community level by south-west orientation and curvature. South-west orientation, with probably more disturbance and stress due to exposure to monsoon winds **Maxime: counter effect by topo ?**, resulted in denser wood. However lower evenness than random could be related to multimodality. In addition, south-west orientation also related to a broader range of leaf sizes, which could be consistent with more diverse hydraulic strategies reflected by WD multimodality, as WD and LA are mechanically linked [@coomes_scaling_2008]. Decreasing fertility , with concavity was related to smaller leaves inside communities with a distribution broaden by multimodality reducing evenness **to develop, eventually illustrated with one example**. Wetness increased with higher curvature and lower LA evenness, indicating that multimodality is happening more in wettest low elevation area. Wetness could compensate water departure trigerred by positive curvature in lower elevation areas. **Repetition with first paragraph, to merge ?**.
 
 ## Variations among communities
 
