@@ -98,7 +98,9 @@ The coefficient of variation of traits was investigated at three levels ($cv = \
 
 ### Community trait variability
 
-Across the whole 10 hectare plot, $30*30 m^2$ quadrats were defined and represented 110 local communities. Communities where split in two guilds representing canopy and emergent species and understorey species following their potential maximum strata as defined by **cite**. To investigate local functional composition of canopy and understorey communities we used community weighted means (CWM), community weighted variances (CWV), and coefficients of variation from the nearest neighbour distance (CVNND) [CWM and CWV, sensu @violle_let_2007; CVNND, @jung_intraspecific_2010]. CWM for each trait $t$ was calculated as the mean of species trait values, $t_{i}$, of the $S$ species in each community, with each species, $i$, weighted by its relative abundance, $p_{i}$:
+Across the whole 10 hectare plot, $30*30 m^2$ quadrats were defined and represented 110 local communities. @pascal_wet_1988 defined four categories of strata groups: emergent below 39m, canopy tree between 25 and 39m, sub-canopy tree between 15 and 25m, and understorey tree below 15m. Due to topography, sub-canopy tree from Uppangala are often under light exposure and participates to canopy, especially in slopes. We defined two guilds to represent vertical stratification called canopy (C), composed of emergent, canopy and sub-canopy tree, and understorey (U) trees. The 110 local communities where split by those two guilds and communities accounting for only one species were removed from the subsequent analysis.
+
+To investigate local functional composition of canopy and understorey communities we used community weighted means (CWM), community weighted variances (CWV), and coefficients of variation from the nearest neighbour distance (CVNND) [CWM and CWV, sensu @violle_let_2007; CVNND, @jung_intraspecific_2010]. CWM for each trait $t$ was calculated as the mean of species trait values, $t_{i}$, of the $S$ species in each community, with each species, $i$, weighted by its relative abundance, $p_{i}$:
 $$CWM = \sum_{i=1}^{S} p_{i} * t_{i} ~ (1)$$
 We also calculated the average of trait values based on species presence-absence, to further emphasize the contribution of less abundant and rare species in community trait distribution [@cingolani_filtering_2007]. CWV for each trait $t$ was calculated as the mean distance of trait values, $t_{i}$, to $CWM$, of the $S$ species in each community, with each species, $i$, weighted by its relative
 abundance, $p_{i}$:
@@ -137,6 +139,7 @@ We found a general increase of functional trait variation from intra-individual 
 Table 2: Coefficient of intra-individual, intra-specific and inter-specific trait variation. *Traits with their range of values, mean and standard deviation, mean of coefficient of variation for leaves in all individuals (intra-individual), for trees in all species (intra-specific), and coefficient of variation for trees for all species. See table 1 for abbreviation.*
 
 ```{r 2 CV}
+# Individual aggregation
 PFT_ind <- aggregate(PFT, by = list(PFT$Tree), FUN = mean, na.rm = T)
 row.names(PFT_ind) <- PFT_ind$Group.1
 SpT <- unique(PFT[1:2])
@@ -152,6 +155,16 @@ PFT_ind$Sp <- Sp[row.names(PFT_ind)]
 PFT_ind$SpCode <- SpCode[as.character(PFT_ind$Sp)]
 PFT_ind$CE <- CE[row.names(PFT_ind)]
 PFT_ind <- PFT_ind[-c(1:2)]
+PFT_ind$ID <- row.names(PFT_ind)
+row.names(PFT_ind) <- PFT_ind$ID
+PFT_ind <- PFT_ind[-which(names(PFT_ind) == 'ID')]
+# Species aggregation
+Species <- genSpecies()
+PFT_sp <- aggregate(PFT_ind, by = list(PFT_ind$Sp), FUN = mean, na.rm = T)
+row.names(PFT_sp) <- PFT_sp$Group.1
+PFT_sp$SpCode <- SpCode[row.names(PFT_sp)]
+PFT_sp <- PFT_sp[-c(1:2,4)]
+# Coefficient of variation
 trait <- c('LT', 'LA', 'LDMC', 'SLA', 'WD')
 cv <- data.frame(
   row.names = trait,
@@ -170,25 +183,25 @@ cv <- data.frame(
                round(sd(PFT$SLA, na.rm = T),2), ')'),
         paste0(round(mean(PFT$WD, na.rm = T),2), ' (',
                round(sd(PFT$WD, na.rm = T),2), ')')),
-  Individual = round(unlist(lapply(as.list(trait), function(y){
+  m1 = round(unlist(lapply(as.list(trait), function(y){
     mean(aggregate(PFT[which(names(PFT) ==  y)], by = list(PFT$Tree), function(x){
       sd(x, na.rm = T) / mean(x, na.rm = T)
     })[,2], na.rm = T)
   })) ,2),
-  Species = round(unlist(lapply(as.list(trait), function(y){
+  m2 = round(unlist(lapply(as.list(trait), function(y){
     mean(aggregate(PFT_ind[which(names(PFT_ind) ==  y)], by = list(PFT_ind$Sp), function(x){
       sd(x, na.rm = T) / mean(x, na.rm = T)
     })[,2], na.rm = T)
   })), 2),
-  Community = round(unlist(
+  m3 = round(unlist(
     lapply(as.list(trait), function(y){
-      sd(PFT[,which(names(PFT) ==  y)], na.rm = T) / mean(PFT[,which(names(PFT) ==  y)], na.rm = T)
+      sd(PFT_sp[,which(names(PFT_sp) ==  y)], na.rm = T) / mean(PFT_sp[,which(names(PFT_sp) ==  y)], na.rm = T)
     })), 2)
 )
-names(cv)[2] <- 'Mean (sd)' 
-cv['WD','Individual'] <- ''
+names(cv)[2:5] <- c('Mean (sd)' , 'Intra-individual', 'Intra-species', 'Inter-species')
+cv['WD','Intra-individual'] <- ''
 kable(cv)
-rm(PFT, CET, cv, triat, CE, Sp, SpT)
+rm(PFT, CET, cv, CE, Sp, SpT, SpCodeT)
 ```
 
 The principal component analysis (PCA) shows WD associated with structural leaf traits orthogonal to the SLA (figure 1). The first PCA axis (PCA1) covary mainly with LT, LA, LDMC and WD; opposing thick big leaves and lightwood to dense leaves and hardwood. PCA1 axis associated WD to leaf structural traits linked to hydraulic conductive efficiency along the wood economic spectrum [WES, @chave_towards_2009]. The PCA2 covaried mainly positively with SLA and negatively with LDMC along a leaf economic spectrum [LES, @wright_worldwide_2004]. The leaf econmic spectrum opposes high SLA leaves for a strong productivity capacity, with high phyotosynthesis compare to carbon investment, and high LDMC leaves to ensure persistence in time and against attacks. PCA also highlight the strong correlation between LDMC and WD (Pearson's correlation test, $r = 0.25$ with $p-value < 0.001$), indicating a coordinated structural investment of species among stem and leaf.
@@ -196,18 +209,20 @@ The principal component analysis (PCA) shows WD associated with structural leaf 
 ```{r 3 PCA PFT}
 library(vegan)
 
+# Indovidual to log
 PFT_ind$LA <- log(PFT_ind$LA)
 PFT_ind$SLA <- log(PFT_ind$SLA)
 PFT_ind$ID <- row.names(PFT_ind)
 row.names(PFT_ind) <- PFT_ind$ID
 PFT_ind <- PFT_ind[-which(names(PFT_ind) == 'ID')]
+# Species aggregation
 Species <- genSpecies()
 PFT_sp <- aggregate(PFT_ind, by = list(PFT_ind$Sp), FUN = mean, na.rm = T)
 row.names(PFT_sp) <- PFT_sp$Group.1
 PFT_sp$SpCode <- SpCode[row.names(PFT_sp)]
 PFT_sp <- PFT_sp[-c(1:2,4)]
+# PCA
 pca <- princomp(~ LA + WD + LT + LDMC + SLA, data = PFT_sp, cor = T)
-
 lambda <- pca$sdev * sqrt(nrow(pca$scores))
 pca.var = apply(pca$score, 2, var)
 PCAscores <- as.data.frame(pca$scores)[1:2]
@@ -240,6 +255,7 @@ Hmisc::subplot(function(){
 axis (3)
 axis (4)
 
+# LES and WES
 PCAscores <- as.data.frame(pca$scores)[1:2]
 names(PCAscores) <- c('WES', 'LES')
 PCAscores$ID <- row.names(PCAscores)
@@ -254,6 +270,8 @@ Figure 1: Principal Component Analysis (PCA) performed on species mean trait val
 
 ```{r 4 env-com}
 library(raster)
+
+# Building community and environmental datasets
 Env <- genEnv()
 Trees <- genTrees()
 Trees$ID <- row.names(Trees)
@@ -274,21 +292,24 @@ com@data$Canopy <- extract(Env$Canopy, as(com, "SpatialPolygons"), df = T, fun =
 BA <- aggregate(Trees$Girth, list(Trees$com), function(x){sum(pi*(x/(2*pi))^2, na.rm = T)})
 com@data$BA <- BA$x[match(com@data$id, BA$Group.1)]
 pca.env <- princomp(~ Elevation + Slope + Curvature + PlanCurvature + ProfileCurvature + Wetness + SW, data = com@data, cor = T)
+
+# Building RLQ matrices
 R <- com@data[c('Slope', 'Curvature', 'Wetness', 'SW', 'Canopy', 'BA')]
 row.names(R) <- com@data$id
 L <- data.frame(tapply(rep(1, length(Trees[,1])), list(Trees$com, Trees$SpCode), sum))
 L[is.na(L)] <- 0
 Q <- PFT_sp[c('LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'LT')]
 row.names(Q) <- PFT_sp$SpCode
-sel <- which(Species$Strata[match(PFT_sp$SpCode, Species$SpCode)] %in% c('ESI', 'ESII'))
-Q <- list(C = Q[sel,], U = Q[-sel,])
+sel <- which(Species$Strata[match(PFT_sp$SpCode, Species$SpCode)] == 3)
+Q <- list(C = Q[-sel,], U = Q[sel,])
 sel <- lapply(Q, function(q){intersect(row.names(q), names(L))})
 Q <- mapply(function(q,s){q[s,]}, q = Q, s = sel, SIMPLIFY = F)
 L <- lapply(sel, function(s){L[s]})
 R <- lapply(L, function(l){R[row.names(l),]})
 L <- lapply(L, function(l){list(abundance = l, `presence-absence` = l)})
 L <- lapply(L, function(l){l$`presence-absence`[l$`presence-absence` > 1]  <- 1 ; return(l)})
-rm(Deriv, XY, Env, sel, BA)
+
+rm(Deriv, XY, Env, sel, BA, s)
 ```
 
 ## Functional composition of local communities
@@ -312,47 +333,6 @@ CWM <- lapply(CWM, function(s){
   lapply(s, function(x){
     names(x) <- c('LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'LT')
     return(x)
-  })
-})
-## Regressions
-CWM.lm <- mapply(function(CWMs, Rs){
-  lapply(CWMs, function(p){
-    lapply(p, function(t){
-      lm(t ~., Rs)
-    })
-  })
-}, CWMs = CWM, Rs = R, SIMPLIFY = F)
-CWM.lm <- mapply(function(s, Rs){
-  lapply(s, function(p){
-    lapply(p, function(t){
-      step(t, direction = 'both', trace = 0)
-    })
-  })
-}, s = CWM.lm, Rs = R, SIMPLIFY = F)
-## Global F
-Fval <- lapply(CWM.lm, function(s){
-  lapply(s, function(y){
-    lapply(y, function(x){
-      summary(x)$fstatistic['value']
-    })
-  })
-})
-Fval <- lapply(Fval, function(s){
-  lapply(s, function(x){
-    do.call('rbind.data.frame', x)
-  })
-})
-Fval <- lapply(Fval, function(s){
-  s <- data.frame(s)
-  names(s) <- names(CWM.lm$C)
-  return(s)
-})
-## Partial F
-pFval <- lapply(CWM.lm, function(s){
-  lapply(s, function(y){
-    lapply(y, function(x){
-      car::Anova(x)['F value']
-    })
   })
 })
 
@@ -395,152 +375,129 @@ nCWM <- lapply(nCWM, function(s){
     })
   })
 })
-## Regressions
-nCWM.lm <- mapply(function(CWM.lms, nCWMs, Rs){
-  lapply(nCWMs, function(ncwm){
-    mapply(function(CWM.lmab, ncwmab){
-      mapply(function(CWM.lmt, ncwmt){
-        lm(formula(paste0('ncwmt ~ ', as.character(CWM.lmt$terms)[3])), cbind(ncwmt,Rs))
-      }, CWM.lmt = CWM.lmab, ncwmt = ncwmab, SIMPLIFY = F)
-    }, CWM.lmab = CWM.lms, ncwmab = ncwm, SIMPLIFY = F)
-  })
-}, CWM.lms = CWM.lm, nCWMs = nCWM, Rs = R, SIMPLIFY = F)
-rm(nCWM)
-invisible(gc())
-## Global F
-nFval <- lapply(nCWM.lm, function(nCWM.lms){
-  lapply(nCWM.lms, function(lm){
-    lapply(lm, function(y){
-      lapply(y, function(x){
-        summary(x)$fstatistic['value']
-      })
-    })
-  })
+nCWM <- lapply(nCWM, function(s){
+  lapply(s, `[`, names(s[[1]]))
+  apply(do.call(rbind, s), 2, as.list)
 })
-nFval <- lapply(nFval, function(x){
-  lapply(x, `[`, names(x[[1]]))
-  apply(do.call(rbind, x), 2, as.list)
-})
-nFval <- lapply(nFval, function(s){
-  lapply(s, function(x){
-    lapply(x, `[`, names(x[[1]]))
-    apply(do.call(rbind, x), 2, as.list)
-  })
-})
-nFval <- lapply(nFval, function(s){
+nCWM <- lapply(nCWM, function(s){
   lapply(s, function(ab){
-    lapply(ab, unlist)
+    lapply(ab, `[`, names(ab[[1]]))
+    apply(do.call(rbind, ab), 2, as.list)
   })
 })
-pval <- mapply(function(Fvals, nFvals){
-  1 -  mapply(function(Fvalab, nFvalab){
-    mapply(function(Fvalt,nFvalt){
-      if(!is.na(Fvalt))
-        rank(c(Fvalt, nFvalt))[1]/(n+1)
-      else
-        NA
-    }, Fvalt = Fvalab, nFvalt = nFvalab)
-  }, Fvalab = lapply(as.list(Fvals), as.list), nFvalab = nFvals)
-}, Fvals = Fval, nFvals = nFval, SIMPLIFY = F)
-pval <- lapply(pval, function(s){
-  row.names(s) <- row.names(Fval$C)
-  return(s)
-})
-rm(Fval, nFval)
-# Partial F
-npFval <- lapply(nCWM.lm, function(s){
-  lapply(s, function(lm){
-    lapply(lm, function(y){
-      lapply(y, function(x){
-        car::Anova(x)['F value']
-      })
-    })
-  })
-})
-npFval <- lapply(npFval, function(x){
-  lapply(x, `[`, names(x[[1]]))
-  apply(do.call(rbind, x), 2, as.list)
-})
-npFval <- lapply(npFval, function(s){
-  lapply(s, function(x){
-    lapply(x, `[`, names(x[[1]]))
-    apply(do.call(rbind, x), 2, as.list)
-  })
-})
-npFval <- lapply(npFval, function(s){
+nCWM <- lapply(nCWM, function(s){
   lapply(s, function(ab){
-    lapply(ab, function(t){
-      do.call('cbind', t)
+    lapply(ab, function(x){
+      do.call('cbind', x)
     })
   })
 })
-ppval <- mapply(function(pFvals, npFvals){
-  mapply(function(x,y){
-    mapply(function(r,s){
-      mapply(function(p,q){
-        rank(c(p,q))[1]/(n+1)
-      }, p = as.list(data.frame(t(r))), q = as.list(data.frame(t(s))))
-    }, r = x, s = y)
-  }, x = pFvals, y = npFvals, SIMPLIFY = F)
-}, pFvals = pFval, npFvals = npFval, SIMPLIFY = F)
-ppval <- lapply(ppval, function(s){
-  lapply(s, function(y){
-    lapply(y, function(x){
-      data.frame(t(x))
+nCWM <- lapply(nCWM, function(s){
+  lapply(s, function(ab){
+    lapply(ab, data.frame)
+  })
+})
+
+## CWM SES
+CWM.ses <- mapply(function(CWMs, nCWMs){
+  mapply(function(CWMab, nCWMab){
+    data.frame(
+      mapply(function(x,y){
+        mapply(function(p,q){
+          (p - mean(q))/sd(q)
+        }, p = as.list(x), q = as.list(data.frame(t(y))))
+      }, x = CWMab, y = nCWMab)
+    )
+  }, CWMab = CWMs, nCWMab = nCWMs, SIMPLIFY = F)
+}, CWMs = CWM, nCWMs = nCWM, SIMPLIFY = F)
+CWM.ses.lm <- mapply(function(s, Rs){
+  lapply(s, function(ab){
+    apply(ab, 2, function(y){
+      step(lm(y ~., Rs), direction = 'both', trace = 0)
+    })
+  })
+}, s = CWM.ses, Rs = R, SIMPLIFY = F)
+CWM.ses.res <- lapply(CWM.ses.lm, function(s){
+  lapply(s, function(ab){
+    lapply(ab, function(x){
+      summary(x)$coefficients
     })
   })
 })
-ppval <- lapply(ppval, function(s){
-  lapply(s, function(y){
-    data.frame(data.table::rbindlist(y, fill = T))
+CWM.ses.res <- lapply(CWM.ses.res, function(s){
+  lapply(s, function(ab){
+    lapply(ab, data.frame)
   })
 })
-ppval <- lapply(ppval, function(s){
-  lapply(s, function(y){
-    row.names(y) <- names(CWM.lm$C$abundance)
-    return(y)
+CWM.ses.res <- lapply(CWM.ses.res, function(s){
+  lapply(s, function(ab){
+    lapply(ab, function(x){
+      x$res <- paste(format(x$Estimate, scientific = T, digits = 2, trim = T), apply(x[4], 1, stars, ns = '   '))
+      return(x)
+    })
+  })
+})
+CWM.ses.res <- lapply(CWM.ses.res, function(s){
+  lapply(s, function(ab){
+    data.frame(data.table::rbindlist(lapply(ab, function(x){
+      data.frame(t(x[5]))
+    }), fill = T))
   })
 })
 var <- c('Slope', 'Curvature', 'Wetness', 'SW', 'Canopy', 'BA')
-ppval <- lapply(ppval, function(s){
+CWM.ses.res <- lapply(CWM.ses.res, function(s){
   lapply(s, function(ab){
-    ab[,setdiff(var, names(ab))] <- NA
-    ab <- ab[var]
+  ab[,setdiff(var, names(ab))] <- NA
+  ab <- ab[var]
+  ab <- apply(ab, 2, as.character)
+  row.names(ab) <- names(CWM.ses$C$abundance)
+  ab[is.na(ab)] <- ''
+  ab <- data.frame(ab)
+  return(ab)
+  })
+})
+CWM.ses.res <- mapply(function(s, CWM.ses.lms){
+  mapply(function(ab, CWM.ses.lmab){
+    ab$`$R^2$` <- round(unlist(lapply(CWM.ses.lmab, function(x){
+      summary(x)$r.squared
+    })),3)
+    return(ab)
+  }, ab = s, CWM.ses.lmab = CWM.ses.lms, SIMPLIFY = F)
+}, s = CWM.ses.res, CWM.ses.lms = CWM.ses.lm, SIMPLIFY = F)
+CWM.ses.res <- lapply(CWM.ses.res, function(s){
+  lapply(s, function(ab){
+    ab <- cbind(row.names(ab), ab)
+    names(ab)[1] <- 'Trait'
     return(ab)
   })
 })
-ppval <- lapply(ppval, function(s){
-  lapply(s, function(x){
-    1 - x
+# CWM.ses.res <- lapply(CWM.ses.res, function(s){
+#   lapply(s, function(ab){
+#     sel <- which(unlist(lapply(as.list(data.frame(t(ab))), function(t){
+#   any(grepl('*', t, fixed = T))
+# })))
+#   return(ab[sel,])
+#   })
+# })
+CWM.ses.res <- mapply(function(s, name){
+  lapply(s, function(ab){
+      ab <- cbind(c(name, rep(' ', length(ab[,1])-1)), ab)
+      names(ab)[1] <- 'T'
+      return(ab)
   })
-})
-rm(pFval, npFval)
-
-# Result tables
-reg <- paste('~', paste(names(R$C), collapse = ' + '))
-res <- mapply(function(CWM.lms, pvals, ppvals){
-  mapply(function(CWM.lmab, pvalab, ppvalab){
-    regression_table(CWM.lmab, reg, pvalab, ppvalab)
-  }, CWM.lmab = CWM.lms, pvalab = as.list(data.frame(pvals)), ppvalab = ppvals, SIMPLIFY = F)
-}, CWM.lms = CWM.lm, pvals = pval, ppvals = ppval, SIMPLIFY = F)
-res <- lapply(res, function(s){
-  mapply(function(ab, name){
-    ab <- cbind(c(name, rep(' ', length(ab[,1])-1)), ab)
-    names(ab)[1] <- 'Type'
-    return(ab)
-  }, ab = s, name = as.list(c('AB', 'PA')), SIMPLIFY = F)
-})
-res <- lapply(res, function(s){
+}, s = CWM.ses.res, name = as.list(c('AB', 'PA')), SIMPLIFY = F)
+CWM.ses.res <- lapply(CWM.ses.res, function(s){
   do.call('rbind', s)
 })
-res <- mapply(function(s, name){
+CWM.ses.res <- mapply(function(s, name){
   s <- cbind(c(name, rep(' ', length(s[,1])-1)), s)
-  names(s)[1] <- 'Strata'
+  names(s)[1] <- 'S'
   return(s)
-}, s = res, name = as.list(c('C', 'U')), SIMPLIFY = F)
-res <- do.call('rbind', res)
-kable(bold(res), row.names = F)
-rm(CWM.lm, nCWM.lm, pval, ppval, reg, res) ; invisible(gc())
+}, s = CWM.ses.res, name = as.list(c('C', 'U')), SIMPLIFY = F)
+CWM.ses.res <- do.call('rbind', CWM.ses.res)
+kable(bold(CWM.ses.res), row.names = F)
+rm(nCWM, CWM.ses, CWM.ses.lm, CWM.ses.res)
+invisible(gc())
 ```
 
 Traits convergence/divergence was measured with community weighted variances (CWV). Overall, observed CWVs did not differ from null expectations for all traits. We could found significant relationships between standardized effect size (SES) of CWVs and environmental variables (see table 4). Convergence of LES and LDMC and divergence of LA were found under south-west orientation. LA and LDMC values also diverged in communities with increasing curvature. Observed CVNNDs did not reveal niche differentiation among communities for all traits. But we also found significant relationships of their standardized effect size (SES) of CVNNDs with environmental variables (see table 4). niche differentiation of LA increased in lower curvature and wetness contexts, while differentiation of WD decreased in southwest orientation.
@@ -548,6 +505,17 @@ Traits convergence/divergence was measured with community weighted variances (CW
 Table 4: Summary of linear models of traits standardized effect size (SES) of CWVs and CVNNDs. _Linear regression results for each trait SES of CWVs and CVNNDs after stepwise selection of the predictors oncluding slope, curvature, wetness southwesterness (SW), canopy height (Canopy) and basal area (BA). See table 1 for abbreviations. The number of asterisk indicates the significance threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
 
 ```{r CWV}
+# Removing communities with only one species
+for(s in names(L)){
+  sel <- which(rowSums(L[[s]]$`presence-absence`) < 2)
+  if(length(sel) > 1){
+    L[[s]] <- lapply(L[[s]], function(ab){
+      return(ab <- ab[-sel,])
+    })
+    R[[s]] <- R[[s]][-sel,]
+  }
+}
+
 # Observed CWVs
 CWV <- mapply(function(Qs, CWMs, Ls){
   lapply(names(CWMs$abundance), function(v){
@@ -615,36 +583,17 @@ nCWV <- lapply(nCWV, function(s){
 })
 rm(nCWM.cwv, cl, nL)
 invisible(gc())
-## Non null CWVs
 nCWV <- lapply(nCWV, function(s){
   lapply(s, `[`, names(s[[1]]))
   apply(do.call(rbind, s), 2, as.list)
 })
 nCWV <- lapply(nCWV, function(s){
   lapply(s, function(x){
-    do.call('cbind', x)
+      do.call('cbind', x)
   })
 })
 nCWV <- lapply(nCWV, function(s){
-  lapply(s, data.frame)
-})
-CWV.pval <- mapply(function(CWVs, nCWVs){
-  data.frame(
-  mapply(function(x,y){
-    mapply(function(p,q){
-      rank(c(p,q))[1]/(n+1)
-    }, p = as.list(x), q = as.list(data.frame(t(y))))
-  }, x = CWVs, y = nCWVs)
-)
-}, CWVs = CWV, nCWVs = nCWV, SIMPLIFY = F)
-CWV.pval.res <- lapply(CWV.pval, function(s){
-  data.frame(
-    inf = apply(apply(s, 2, p.adjust, method = 'fdr'), 2, function(x){
-      length(which(x < 0.025))/length(x)
-    }), 
-    sup = apply(apply(1 - s, 2, p.adjust, method = 'fdr'), 2, function(x){
-      length(which(x < 0.025))/length(x)
-    }))
+    lapply(s, data.frame)
 })
 ## CWV SES
 CWV.ses <- mapply(function(CWVs, nCWVs){data.frame(
@@ -704,22 +653,35 @@ CWV.ses.res <- lapply(CWV.ses.res, function(s){
   names(s)[1] <- 'Trait'
   return(s)
 })
-CWV.ses.res <- lapply(CWV.ses.res, function(s){
-  sel <- which(unlist(lapply(as.list(data.frame(t(s))), function(t){
-  any(grepl('*', t, fixed = T))
-})))
-  return(s[sel,])
-})
+# CWV.ses.res <- lapply(CWV.ses.res, function(s){
+#   sel <- which(unlist(lapply(as.list(data.frame(t(s))), function(t){
+#   any(grepl('*', t, fixed = T))
+# })))
+#   return(s[sel,])
+# })
 CWV.ses.res <- mapply(function(s, name){
-  s <- cbind(c(name, rep(' ', length(s[,1])-1)), s)
-  names(s)[1] <- 'Strata'
-  return(s)
+  if(dim(s)[1] > 0){
+    s <- cbind(c(name, rep(' ', length(s[,1])-1)), s)
+    names(s)[1] <- 'Strata'
+    return(s) 
+  }
 }, s = CWV.ses.res, name = as.list(c('C', 'U')), SIMPLIFY = F)
 CWV.ses.res <- do.call('rbind', CWV.ses.res)
-rm(CWV.pval, CWV.pval.res, CWV.ses.lm, nCWV)
+rm(CWV.pval.res, CWV.ses.lm, nCWV)
 ```
 
 ```{r CVNND}
+# Removing communities with only two species
+for(s in names(L)){
+  sel <- which(rowSums(L[[s]]$`presence-absence`) < 3)
+  if(length(sel) > 1){
+    L[[s]] <- lapply(L[[s]], function(ab){
+      return(ab <- ab[-sel,])
+    })
+    R[[s]] <- R[[s]][-sel,]
+  }
+}
+
 # Observed CVNND
 CVNND <- mapply(function(Ls, Qs){
   apply(Ls$abundance, 1, function(l){
@@ -728,6 +690,10 @@ CVNND <- mapply(function(Ls, Qs){
     })
   })
 }, Ls = L, Qs = Q, SIMPLIFY = F)
+## NaN CVNND$U
+sel <- which(is.na(CVNND$U[1,]))
+CVNND$U <- CVNND$U[,-sel]
+R$U <- R$U[-sel,]
 
 # Simulated CVNNDs 
 cl <- makeCluster(cores)
@@ -744,19 +710,14 @@ nCVNND <- clusterMap(cl, function(nQs, Ls){
 stopCluster(cl)
 rm(cl, nQ)
 invisible(gc)
-
-## Non null CVNNDs
-nCVNND <- lapply(nCVNND, function(s){
-  lapply(s, function(x){
-    as.list(data.frame(t(x)))
-  })
+## NaN CVNND$U
+nCVNND$U <- lapply(nCVNND$U, function(x){
+  x <- x[,-sel]
 })
+
 nCVNND <- lapply(nCVNND, function(s){
   lapply(s, function(x){
-    lapply(x, function(y){
-      names(y) <- colnames(CVNND$C)
-      return(y)
-    })
+    x <- as.list(data.frame(t(x)))
   })
 })
 nCVNND <- lapply(nCVNND, function(s){
@@ -764,34 +725,11 @@ nCVNND <- lapply(nCVNND, function(s){
   apply(do.call(rbind, s), 2, as.list)
 })
 nCVNND <- lapply(nCVNND, function(s){
-  lapply(s, function(x){
-    do.call('cbind', x)
+  lapply(s, function(t){
+      t <- data.frame(lapply(t, cbind))
   })
 })
-nCVNND <- lapply(nCVNND, function(s){
-  lapply(s, data.frame)
-})
-CVNND.pval <- mapply(function(CVNNDs, nCVNNDs){
-  data.frame(
-    mapply(function(x,y){
-      mapply(function(p,q){
-        rank(c(p,q))[1]/(n+1)
-      }, p = as.list(x), q = as.list(data.frame(t(y))))
-    }, x = as.list(data.frame(t(CVNNDs))), y = nCVNNDs)
-  )
-}, CVNNDs = CVNND, nCVNNDs = nCVNND, SIMPLIFY = F)
-CVNND.pval <- lapply(CVNND.pval, function(s){
-  row.names(s) <- colnames(CVNND)
-  apply(s, 2, p.adjust, method = 'fdr')
-  return(s)
-})
-CVNND.pval.res <- lapply(CVNND.pval, function(s){data.frame(
-  inf = apply(s, 2, function(x){
-    length(which(x < 0.05))/length(x)
-  })
-)})
-CVNND.pval.res <- do.call('cbind', CVNND.pval.res)
-names(CVNND.pval.res) <- names(CVNND.pval)
+
 
 ## CVNND SES
 CVNND.ses <- mapply(function(CVNNDs, nCVNNDs){
@@ -809,14 +747,9 @@ CVNND.ses <- lapply(CVNND.ses, function(s){
 })
 CVNND.ses.lm <- mapply(function(s, Rs){
   apply(s, 2, function(y){
-    lm(y ~., Rs)
+    step(lm(y ~., Rs), direction = 'both', trace = 0)
   })
 }, s = CVNND.ses, Rs = R, SIMPLIFY = F)
-CVNND.ses.lm <- mapply(function(s, Rs){
-  lapply(s, function(x){
-    step(x, direction = 'both', trace = 0)
-  })
-}, s= CVNND.ses.lm, Rs = R, SIMPLIFY = F)
 CVNND.ses.res <- lapply(CVNND.ses.lm, function(s){
   lapply(s, function(x){
     summary(x)$coefficients
@@ -857,16 +790,18 @@ CVNND.ses.res <- lapply(CVNND.ses.res, function(s){
   names(s)[1] <- 'Trait'
   return(s)
 })
-CVNND.ses.res <- lapply(CVNND.ses.res, function(s){
-  sel <- which(unlist(lapply(as.list(data.frame(t(s))), function(t){
-  any(grepl('*', t, fixed = T))
-})))
-  return(s[sel,])
-})
+# CVNND.ses.res <- lapply(CVNND.ses.res, function(s){
+#   sel <- which(unlist(lapply(as.list(data.frame(t(s))), function(t){
+#   any(grepl('*', t, fixed = T))
+# })))
+#   return(s[sel,])
+# })
 CVNND.ses.res <- mapply(function(s, name){
-  s <- cbind(c(name, rep(' ', length(s[,1])-1)), s)
-  names(s)[1] <- 'Strata'
-  return(s)
+  if(dim(s)[1] > 0){
+    s <- cbind(c(name, rep(' ', length(s[,1])-1)), s)
+    names(s)[1] <- 'Strata'
+    return(s)
+  }
 }, s = CVNND.ses.res, name = as.list(c('C', 'U')), SIMPLIFY = F)
 CVNND.ses.res <- do.call('rbind', CVNND.ses.res)
 rm(CVNND.pval, CVNND.ses.lm, nCVNND)
@@ -874,7 +809,6 @@ invisible(gc())
 ```
 
 ```{r CWV & CVNND table}
-print(round(CVNND.pval.res, 3))
 res <- list(CWV = CWV.ses.res, CVNND = CVNND.ses.res)
 res <- mapply(function(s, name){
   s <- cbind(c(name, rep(' ', length(s[,1])-1)), s)
