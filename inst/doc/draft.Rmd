@@ -27,7 +27,7 @@ functional trait; rainforest; dry season; forest strata; Western Ghats; ...
 
 # Introduction
 
-Understanding the determinants of species occurrence and co-occurrence is a long standing issue in ecology [@diamond_ecology_1975]. Tropical rainforests have especially fascinated standing issue in ecology [@connell_diversity_1978]. Two concurrent theories have been proposed to explain how species coexistence can be maintained in ecological communities. Niche theory states that the niche differences of species determine wether they can establish and coexist in communities [@weiher_assembly_1995; @lortie_rethinking_2004], while neutral theory shows that species coexistence is possible even when species are functionaly equivalent, under the sole influence of stochasticity in life, death, reproduction and dispersal [@hubbell_unified_2001]. Both theory can provide realistic expectations of taxonomic diversity [@chave_comparing_2002], and some recent approaches have advocated investigating patterns of functional [@westoby_land-plant_2006; @mcgill_rebuilding_2006] and phylogenetic diversity [@mouquet_ecophylogenetics:_2012] to trace the signature of ecological processes related to specific biological attributes and adaptations. 
+Understanding the determinants of species occurrence and co-occurrence is a long standing issue in ecology [@diamond_ecology_1975]. Tropical rainforests have especially fascinated ecologists due to their outstanding diversity [@connell_diversity_1978]. Many theories have been proposed to explain how species coexistence can be maintained in ecological communities . Niche theory states that the niche differences of species determine wether they can establish and coexist in communities [@weiher_assembly_1995; @lortie_rethinking_2004], while neutral theory shows that species coexistence is possible even when species are functionaly equivalent, under the sole influence of stochasticity in life, death, reproduction and dispersal [@hubbell_unified_2001]. Both theory can provide realistic expectations of taxonomic diversity [@chave_comparing_2002], and some recent approaches have advocated investigating patterns of functional [@westoby_land-plant_2006; @mcgill_rebuilding_2006] and phylogenetic diversity [@mouquet_ecophylogenetics:_2012] to trace the signature of ecological processes related to specific biological attributes and adaptations. 
 These approaches have been applied to resolve the conundrum of high tree diversity in tropical forests [@kraft_functional_2010; @baraloto_using_2012; @hardy_phylogenetic_2012], but studies on these ecosystems still remain scarce. We here investigate taxonomic, functional and phylogenetic diversity in a low elevation rainforest of the Western Ghats biodiversity hotspot [@myers_biodiversity_2000], where no study has addressed the relative influence of neutral and niche-based dynamics on local forest composition.
 
 The variation of functional traits among species reflect different abilities to grow, survive and reproduce in a given environment [@violle_let_2007]. These variation thus reflect fundamental trade-offs in ecological strategies along environmental gradients [@mark_westoby_plant_2002]. For instance, specific leaf area varies along a soil fertility-shade index and represent a trade-off between resource acquisition by photosynthesis and leaf investment in defense and leaf lifespan [@hodgson_is_2011]. Due to common ecological strategies, functional traits will covary along basic leaf [@wright_worldwide_2004] and wood [@chave_towards_2009] economic spectra. The leaf economic spectrum opposes productive ecological strategy to conservative persistent strategy. The wood economic spectrum distinguish species strategies over three axes spanning the basic CSR strategies of @grime_evidence_1977 : (i) competitive species, wiht high conductive efficiency, (ii) stress tolerant species, resistant to embolism, and (iii) disturbance tolerant species, with high mechanical strength. @baraloto_decoupled_2010 highlighted decoupled wood and leaf strategies allowing independant variation of these strategies, but @reich_world-wide_2014 conversely advocated that the two spectra have to integrated in a comprehensive whole plant economic spectrum [@freschet_evidence_2010] opposing fast growing species to more conservative ones. Here we address how varying wood and leaf ecological strategies determine species community assembly in an Indian rainforest. 
@@ -112,16 +112,13 @@ To investigate functional composition of communities we used a null model approa
 where $I_{obs}$ was the observed metric and $I_{null}$ and $\sigma _{null}$ were the mean and standard deviation of null distributions of NM2 and NM1 for CWV and CVNND respectively.
 The influence of environment on SES values was investigated by linear regression with biotic and abiotic factors ($SES_{trait} = Slope + Curvature + Wetness + SW + Canopy + BA$). Analyses were conducted on the five functional traits and the species scores obtained on the 2 first PCA axes.
 
-### Taxonomic, functional and phylogenetic variation among communities
+### Taxonomic and functional variation among communities
 
-A phylogenetic tree of our 89 species was built with `S.PhyloMaker` function proposed by @qian_updated_2016-1. We assessed phylogenetic signal of each functional using the Moran's I statistic. Positive Moran's I value indicated convergence of trait values within the phylogeny whereas negative Moran's I will showed divergence.
-
-To investigate taxonomic, functional, and phylogenetic variation among communities we calculated $I_{st}$, for taxonomic composition, $U_{st}$ and $\tau _{st}$, for functional composition in abundance and presence-absence respectively, and $\beta _{st}$ and $\pi _{st}$, for phylogenetic composition in abundance and presence-absence respectively [@hardy_characterizing_2007]. $I_{st}$ measures species turnover accounting for local abundance. $U_{st}$ and $\beta _{st}$ integrate only phylogenetic and functional turnover, respectively, weighting species by their local abundances; whereas $\tau _{st}$ and $\pi _{st}$ express phylogenetic and functional turnover, respectively, without accounting for species local abundances.
+To investigate taxonomic and functional variation among communities we calculated $I_{st}$, for taxonomic composition and $U_{st}$ and $\tau _{st}$, for functional composition in abundance and presence-absence respectively [@hardy_characterizing_2007]. $I_{st}$ measures species turnover accounting for local abundance. $U_{st}$ integrate only functional turnover, weighting species by their local abundances; whereas $\tau _{st}$ express functional turnover, without accounting for species local abundances.
 
 Variation of composition between community pairs with those metrics was translated as a taxonomic, functional and phylogenetic distance, and compared to environmental and spatial distances among community pairs. Environmental distances were calculated as geometric distances between communities on the plan composed by the two first axes of environmental variables PCA (see supplementary material S1). Correlations with environment and space were assessed based on two Mantel tests successively with taxonomic, functional, and phylogenetic community compositions. A firt Mantel statistic assessed the correlation between each metric distance matrix and the environmental distance matrix (E). The second partial Mantel statistic assessed the correlation between each metric distance matrix and the spatial distance matrix knowing environmental distance matrix (E|S), to represent remaining spatial dependency in community composition once the influence of environmental variation is taken into account.
 
-We used null models to test if observed correlation with Mantel statistic differed significantly from expectations under null hypothesis. $I_{st}$ correlation to environment and space was tested with 999 repetions of the model nul described by @myers_beta-diversity_2013 which randomizes individuals among subplots while preserving the regional abundance of species, and the number of individuals per community. $U st$ and $\tau st$ were tested by the nul model NM1 which randomizes traits among species. Finally $\beta st$ and $\pi st$ were tested against the nul model *"1s"* suggested by @hardy_testing_2008 which randomizes phylogenetic tree tips.
-
+We used null models to test if observed correlation with Mantel statistic differed significantly from expectations under null hypothesis. $I_{st}$ correlation to environment and space was tested with 999 repetions of the model nul described by @myers_beta-diversity_2013 which randomizes individuals among subplots while preserving the regional abundance of species, and the number of individuals per community. $U st$ and $\tau st$ were tested by the nul model NM1 which randomizes traits among species.
 
 All analysis were conducted using the R 3.3.0  software environment [@r_core_team_r:_2016] with packages 
 `ade4` [@dray_ade4_2007], 
@@ -316,7 +313,7 @@ rm(Deriv, XY, Env, sel, BA, s)
 
 Community weighted means (CWM), both in abundance or presence-absence, showed some significant variations along environmental gradients (see table 3). Community mean values of WD significantly increased under south-west direction, both in abundance and presence-absence CWM,  whereas SLA and LA, in presence-absence only, decreased with curvature. In addition, LDMC in presence-absence was decreasing with canopy height. Trait values that allow species existence is not always the same that trait values determining their ability to dominate a given environment. For instance here both abundant and less abundant species increased their WD under southwest orientation, whereas SLA and LA decrease with curvature is only affecting less abundant species ability to survive in concave environments.
 
-Table 3: Summary of linear models of community-level trait values. _The results are shown for either CWM values weighted either by species relative abundance (AB) or in presence-absence (PA) after stepwise selection of the predictors including slope, curvature, wetness, southwesterness (SW), canopy height (Canopy) and basal area (BA). Global and partial F-statistics of final models were compared to statistics of 999 null linear regressions built with null model NM1, which randomizes traits among species. See table 1 for abbreviations. The number of asterisk indicates the significance threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
+Table 3: Summary of linear models of traits standardized effect size (SES) of CWMs. _Linear regression results for each trait SES of CWMs, for canopy (C) and understorey (U) guilds, in abundance (AB) and presence-absence (PA), after stepwise selection of the predictors including slope, curvature, wetness southwesterness (SW), canopy height (Canopy) and basal area (BA). See table 1 for abbreviations. The number of asterisk indicates the significance threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
 
 ```{r CWM}
 # Observed CWMs
@@ -500,9 +497,9 @@ rm(nCWM, CWM.ses, CWM.ses.lm, CWM.ses.res)
 invisible(gc())
 ```
 
-Traits convergence/divergence was measured with community weighted variances (CWV). Overall, observed CWVs did not differ from null expectations for all traits. We could found significant relationships between standardized effect size (SES) of CWVs and environmental variables (see table 4). Convergence of LES and LDMC and divergence of LA were found under south-west orientation. LA and LDMC values also diverged in communities with increasing curvature. Observed CVNNDs did not reveal niche differentiation among communities for all traits. But we also found significant relationships of their standardized effect size (SES) of CVNNDs with environmental variables (see table 4). niche differentiation of LA increased in lower curvature and wetness contexts, while differentiation of WD decreased in southwest orientation.
+Traits convergence/divergence was measured with community weighted variances (CWV). We could found significant relationships between standardized effect size (SES) of CWVs and environmental variables (see table 4). Convergence of WES and LDMC in the canopy guild  and convergence of LA in the undersotrey guild were found under concave areas. LDMC of the canopy guild converged also with canopy height. LES of understorey guild converged in slopes and SLA of understorey guild diverged with increasing BA. We also found significant relationships of their standardized effect size (SES) of CVNNDs with environmental variables (see table 4). Niche differentiation of WES and LDMC in canopy guild increased in lower basal area context. Differentiation of canopy guild LA increased in convex and high canopy contexts, whereas LT of the canopy guild differentiated in concave context. Niche differentiation of LES in understorey guild increased in concave areas, while differentiation of LT of the understorey guild increased in wet context with a high basal area.
 
-Table 4: Summary of linear models of traits standardized effect size (SES) of CWVs and CVNNDs. _Linear regression results for each trait SES of CWVs and CVNNDs after stepwise selection of the predictors oncluding slope, curvature, wetness southwesterness (SW), canopy height (Canopy) and basal area (BA). See table 1 for abbreviations. The number of asterisk indicates the significance threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
+Table 4: Summary of linear models of traits standardized effect size (SES) of CWVs and CVNNDs. _Linear regression results for each trait SES of CWVs and CVNNDs, for canopy (C) and understorey (U) guilds, after stepwise selection of the predictors including slope, curvature, wetness southwesterness (SW), canopy height (Canopy) and basal area (BA). See table 1 for abbreviations. The number of asterisk indicates the significance threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
 
 ```{r CWV}
 # Removing communities with only one species
@@ -817,224 +814,213 @@ res <- mapply(function(s, name){
 }, s = res, name = as.list(c('CWV', 'CVNND')), SIMPLIFY = F)
 res <- do.call('rbind', res)
 kable(bold(res), row.names = F)
-rm(CWV.ses.res, CVNND.ses.res, CVNND.pval.res, res)
+rm(CWV.ses.res, CVNND.ses.res, CVNND.pval.res, sel, res)
 ```
 
-## Taxonomic, functional and phylogenetic varitions among communities
+## Taxonomic and functional varitions among communities
 
-Taxonomic variation among communities was correlated significantly to environment variation (Mantel test, $r_{I_{st},E} = 0.23$ with $p-value < 0.001$), but not with remaining spatial dependency in community composition (Mantel test of space knowing environment, $r_{I_{st},S|E} = 0.01$ with $p-value > 0.1$).
+Taxonomic variation among communities was correlated significantly to environment variation for both canopy and understorey guilds (Mantel test for canopy and understorey guild, $r_{I_{st},E,C} = 0.22$ and $r_{I_{st},E,U} = 0.23$, respectively, with $p-value < 0.01$), but not with remaining spatial dependency in community composition for canopy guild (Mantel test of space knowing environment, $r_{I_{st},S|E,C} = 0.01$ with $p-value > 0.1$), whereas understorey guild taaxonomic variation was correlated to remaining spatial dependency in community composition (Mantel test of space knowing environment, $r_{I_{st},S|E,U} = 0.11$ with $p-value < 0.01$).
 
-Overall, the global functional variation among communities was neither correlated to environment nor to spactial distance knowing the environment effect (see table 5). However, the variation of WD, in abundance as well as in presence absence, was positively correlated to environmental variation and is negatively correlated in presence absence to the spatial structure knowing environment spatial effect. 
-
-While LDMC did not phylogenetic structure (Moran's I of 0 with a $p-value > 0.1$), LA and LT were phylogenetically clustered (Moran's I of 0.021 and 0.018 with a $p-value < 0.001$), and WD and SLA were weakly clustered (Moran's I of 0.005 and 0.003 with $p-value < 0.1$). Phylogenetic variation among communities was neither correlated to environmental variation (Mantel test, $r_{\beta_{st},E} = 0.02$ and $r_{\pi_{st},E} = 0.05$ with $p-value > 0.1$) nor to remaining spatial variation in partial Mantel test knowing environment ($r_{\beta_{st},S|E} = 0.01$ and $r_{\pi_{st},S|E} = -0.01$ with $p-value > 0.1$).
-
-```{r Ist}
+```{r Ist, eval=FALSE, include=FALSE}
 library(spacodiR)
 
-# R,L,Q wihtout strata
-R <- com@data[c('Slope', 'Curvature', 'Wetness', 'SW', 'Canopy', 'BA')]
-row.names(R) <- com@data$id
-L <- data.frame(tapply(rep(1, length(Trees[,1])), list(Trees$com, Trees$SpCode), sum))
-L[is.na(L)] <- 0
-Q <- PFT_sp[c('LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'LT')]
-row.names(Q) <- PFT_sp$SpCode
-sel <- intersect(row.names(Q), names(L))
-Q <- Q[sel,]
-L <- L[sel]
-R <- R[row.names(L),]
-L <- list(abundance = L, `presence-absence` = L)
-L$`presence-absence`[L$`presence-absence` > 1]  <- 1
-rm(com, Trees)
-invisible(gc())
-
 # Environmental matrices
-XY <- data.frame(as(quadrats(), 'SpatialPoints')@coords)
+XY <- data.frame(as(quadrats(c(30,30)), 'SpatialPoints')@coords)
 row.names(XY) <- paste0('C',row.names(XY))
-XY <- XY[row.names(L$abundance),]
-Ms <- dist(XY)
+XY <- lapply(L, function(s){
+  XY[row.names(s$abundance),]
+})
+Ms <- lapply(XY, function(s){
+  dist(s)
+})
 XY <- pca.env$scores[,1:2]
 row.names(XY) <- paste0('C',row.names(XY))
-XY <- XY[row.names(L$abundance),]
-Me <- dist(XY)
+XY <- lapply(L, function(s){
+  XY[row.names(s$abundance),]
+})
+Me <- lapply(XY, function(s){
+  dist(s)
+})
 rm(XY)
 
 # Observed Ist
-spaflo <- spacodi.calc(sp.plot = t(L$abundance), pairwise = T)$'pairwise.Ist'
+spaflo <- lapply(L, function(s){
+  spacodi.calc(sp.plot = t(s$abundance), pairwise = T)$'pairwise.Ist'
+})
 ## Mantel values
-spaflo.mantel <- list(`E` = vegan::mantel(spaflo, Me, permutations = 0)$statistic, 
-                      `S | E`= vegan::mantel.partial(spaflo, Ms, Me, permutations = 0)$statistic)
+spaflo.mantel <- mapply(function(s, Mes, Mss){
+  list(
+    `E` = vegan::mantel(s, Mes, permutations = 0)$statistic, 
+    `S | E`= vegan::mantel.partial(s, Mss, Mes, permutations = 0)$statistic
+  )
+}, s = spaflo, Mes = Me, Mss = Ms, SIMPLIFY = F)
 
 # Simulated mantel
-nL <- vegan::permatfull(L$abundance, fixedmar = 'both', mtype = 'count', times = n, shuffle = 'both')
-cl <- makeCluster(cores)
-clusterExport(cl, list('nL', 'spacodi.calc', 'Me', 'Ms'))
-nspaflo <- lapply(nL$perm, function(l){spacodi.calc(sp.plot = t(l), pairwise = T)$'pairwise.Ist'})
-nspaflo.mantel <- lapply(nspaflo, function(ns){
-  list(`E` = vegan::mantel(ns, Me, permutations = 0)$statistic, 
-       `S | E`= vegan::mantel.partial(ns, Ms, Me, permutations = 0)$statistic)})
-stopCluster(cl)
-rm(cl, nL) ; invisible(gc())
+nL <- lapply(L, function(s){
+  vegan::permatfull(s$abundance, fixedmar = 'both', mtype = 'count', times = n, shuffle = 'both')
+})
+nspaflo <- lapply(nL, function(s){
+  lapply(s$perm, function(l){
+    spacodi.calc(sp.plot = t(l), pairwise = T)$'pairwise.Ist'
+  })
+})
+nspaflo.mantel <- mapply(function(s, Mes, Mss){
+  lapply(s, function(x){
+    try(list(
+      `E` = vegan::mantel(x, Mes, permutations = 0)$statistic, 
+      `S | E`= vegan::mantel.partial(x, Mss, Mes, permutations = 0)$statistic
+    ))
+  })
+}, s = nspaflo, Mes = Me, Mss = Ms, SIMPLIFY = F)
+sel <- which(unlist(lapply(nspaflo.mantel$U, inherits, 'try-error')))
+nspaflo.mantel$U <- nspaflo.mantel$U[-sel]
 ## Non null mantels
-nspaflo.mantel <- lapply(nspaflo.mantel, `[`, names(nspaflo.mantel[[1]]))
-nspaflo.mantel <- apply(do.call(rbind, nspaflo.mantel), 2, as.list)
-nspaflo.mantel <- lapply(nspaflo.mantel, unlist)
+nspaflo.mantel <- lapply(nspaflo.mantel, function(s){
+  lapply(s, `[`, names(s[[1]]))
+  apply(do.call(rbind, s), 2, as.list)
+})
+nspaflo.mantel <- lapply(nspaflo.mantel, function(s){
+  lapply(s, unlist)
+})
 spaflo.res <- mapply(function(s, ns){
-    paste(format(s, scientific = T, digits = 3),
-          Uppangala::stars(min(1-rank(c(s,ns))[1]/(n+1),rank(c(s,ns))[1]/(n+1)), ns = '   '))
+  mapply(function(x, nx){
+    paste(format(x, scientific = T, digits = 3),
+          Uppangala::stars(min(1-rank(c(x,nx))[1]/(n+1),rank(c(x,nx))[1]/(n+1)), ns = '   '))
+  }, x =s, nx = ns)
 }, s = spaflo.mantel, ns = nspaflo.mantel)
-spaflo.res <- data.frame(spaflo.res)
-names(spaflo.res) <- c('$I_{st}$')
 
 # Result
-# kable(bold(spaflo.res))
-rm(mtest, spaflo.mantel, nspaflo, nspaflo.mantel, spaflo.res)
+kable(bold(spaflo.res))
+rm(spaflo.mantel, nspaflo, nspaflo.mantel, spaflo.res)
 ```
 
-Table 5: Summary of Mantel tests between functional composition, environment and spatial distances between communities. _$U st$ and $\tau st$ metric proposed by @hardy_characterizing_2007 were used to measure functional composition variation among communities. Observed values were compared to null values obtained with model NM1 randomizing traits among species (permuting raw in `Trait*Species` matrix). E is the Mantel test of this metric according to the environmental distance derived from communtiy scores in the environmental PCA (two first axes). S|E is the partial Mantel test of this metric according to spatial distance conditionally to environment variation. The number of asterisk indicates significance threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
+Most of trait functional variation among communities was neither correlated to environment nor to spactial distance knowing the environment effect (see table 5). However, the variation of WD, in abundance as well as in presence absence, was positively correlated to environmental variation and is negatively correlated in presence absence to the spatial structure knowing environment spatial effect. 
+
+Table 5: Summary of Mantel tests between functional composition, environment and spatial distances between communities. _$U st$ and $\tau st$ metric proposed by @hardy_characterizing_2007 were used to measure functional composition variation among communities, for canopy (C) and understorey (U) guilds. Observed values were compared to null values obtained with model NM1 randomizing traits among species (permuting raw in `Trait*Species` matrix). E is the Mantel test of this metric according to the environmental distance derived from communtiy scores in the environmental PCA (two first axes). S|E is the partial Mantel test of this metric according to spatial distance conditionally to environment variation. The number of asterisk indicates significance threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
 
 ```{r Ust & TAUst}
-# nQ without strata
-n = 999
-nQ <- rep(list(Q), n)
-nQ <- lapply(nQ, function(x){row.names(x) <- sample(row.names(x)) ; return(x)})
-nQ <- lapply(nQ, function(x){x[names(L$abundance),]})
-
 # Observed Hardys
-spafun <- lapply(as.list(1:length(Q)), function(i){
-  if (length(which(is.na(Q[i]))) > 0) {
-    sel <- intersect(names(L$abundance), row.names(Q[-which(is.na(Q[i])),]))
-    return(spacodi.calc(sp.plot = t(L$abundance[sel]), sp.traits = data.frame(Q[sel,i], row.names = sel), pairwise = T)[c('pairwise.Ust', 'pairwise.TAUst')])
-  } else {
-    return(spacodi.calc(sp.plot = t(L$abundance), sp.traits = Q, pairwise = T)[c('pairwise.Ust', 'pairwise.TAUst')])
-  }
+spafun <- mapply(function(s, Ls){
+  lapply(as.list(1:length(s)), function(i){
+    if (length(which(is.na(s[i]))) > 0) {
+      sel <- intersect(names(Ls$abundance), row.names(s[-which(is.na(s[i])),]))
+      return(spacodi.calc(sp.plot = t(Ls$abundance[sel]), sp.traits = data.frame(s[sel,i], row.names = sel), pairwise = T)[c('pairwise.Ust', 'pairwise.TAUst')])
+    } else {
+      return(spacodi.calc(sp.plot = t(Ls$abundance), sp.traits = s, pairwise = T)[c('pairwise.Ust', 'pairwise.TAUst')])
+    }
+  })
+}, s = Q, Ls = L, SIMPLIFY = F)
+spafun <- lapply(spafun, function(s){
+  names(s) <- names(Q$C)
+  return(s)
 })
-names(spafun) <- names(Q)
 ## Mantel values
-spafun.mantel <- lapply(spafun, function(t){list(`E` = lapply(t, function(M){vegan::mantel(M, Me, permutations = 0)$statistic}), `S | E` = lapply(t, function(M){vegan::mantel.partial(M, Ms, Me, permutations = 0)$statistic}))})
-
+spafun.mantel <- mapply(function(s, Mes, Mss){
+  lapply(s, function(t){
+    list(
+      `E` = lapply(t, function(M){
+        vegan::mantel(M, Mes, permutations = 0)$statistic
+      }), 
+      `S | E` = lapply(t, function(M){
+        vegan::mantel.partial(M, Mss, Mes, permutations = 0)$statistic
+      })
+    )
+  })
+}, s = spafun, Mes = Me, Mss = Ms, SIMPLIFY = F)
 
 # Simulated mantel
 cl <- makeCluster(cores)
 clusterExport(cl, list('nQ', 'L', 'Me', 'Ms', 'spacodi.calc'))
-nspafun.mantel <- clusterApply(cl, nQ, function(q){
-  s <- lapply(as.list(1:length(q)), function(i){
-    if (length(which(is.na(q[i]))) > 0) {
-      sel <- intersect(names(L$abundance), row.names(q[-which(is.na(q[i])),]))
-      return(spacodi.calc(sp.plot = t(L$abundance[sel]), sp.traits = data.frame(q[sel,i], row.names = sel), pairwise = T)[c('pairwise.Ust', 'pairwise.TAUst')])
-    } else {
-      return(spacodi.calc(sp.plot = t(L$abundance), sp.traits = q, pairwise = T)[c('pairwise.Ust', 'pairwise.TAUst')])
-    }
-  })
-  names(s) <- names(q)
-  res <- list(
-    `E` = lapply(s, function(t){
-      lapply(t, function(M){
-        try(vegan::mantel(M, Me, permutations = 0)$statistic)
+nspafun.mantel <- clusterMap(cl, function(nQs, Ls, Mes, Mss){ 
+  lapply(nQs, function(q){
+    s <- lapply(as.list(1:length(q)), function(i){
+      if (length(which(is.na(q[i]))) > 0) {
+        sel <- intersect(names(Ls$abundance), row.names(q[-which(is.na(q[i])),]))
+        return(spacodi.calc(sp.plot = t(Ls$abundance[sel]), sp.traits = data.frame(q[sel,i], row.names = sel), pairwise = T)[c('pairwise.Ust', 'pairwise.TAUst')])
+      } else {
+        return(spacodi.calc(sp.plot = t(Ls$abundance), sp.traits = q, pairwise = T)[c('pairwise.Ust', 'pairwise.TAUst')])
+      }
+    })
+    names(s) <- names(q)
+    res <- list(
+      `E` = lapply(s, function(t){
+        lapply(t, function(M){
+          try(vegan::mantel(M, Mes, permutations = 0)$statistic)
         })
       }),
-    `S | E` = lapply(s, function(t){
-      lapply(t, function(M){
-        try(vegan::mantel.partial(M, Ms, Me, permutations = 0)$statistic)
+      `S | E` = lapply(s, function(t){
+        lapply(t, function(M){
+          try(vegan::mantel.partial(M, Mss, Mes, permutations = 0)$statistic)
         })
       })
     )
-  res <- lapply(res, function(r){names(r) <- names(q) ; return(r)})
-  res <- lapply(res, `[`, names(res[[1]]))
-  res <- apply(do.call(rbind, res), 2, as.list)
-  return(res)
-})
+    res <- lapply(res, function(r){names(r) <- names(q) ; return(r)})
+    res <- lapply(res, `[`, names(res[[1]]))
+    res <- apply(do.call(rbind, res), 2, as.list)
+    return(res)
+  })
+}, nQs = nQ, Ls = L, Mes = Me, Mss = Ms, SIMPLIFY = F)
 stopCluster(cl)
 rm(cl, nQ) ; invisible(gc())
 
 ## Non null mantels
-nspafun.mantel <- lapply(nspafun.mantel, `[`, names(nspafun.mantel[[1]]))
-nspafun.mantel <- apply(do.call(rbind, nspafun.mantel), 2, as.list)
-nspafun.mantel <- lapply(nspafun.mantel, function(s){lapply(s, `[`, names(s[[1]]))})
-nspafun.mantel <- lapply(nspafun.mantel, function(s){apply(do.call(rbind, s), 2, as.list)})
-nspafun.mantel <- lapply(nspafun.mantel, function(s){lapply(s, function(m){lapply(m, `[`, names(m[[1]]))})})
-nspafun.mantel <- lapply(nspafun.mantel, function(s){lapply(s, function(m){apply(do.call(rbind, m), 2, as.list)})})
-nspafun.mantel <- lapply(nspafun.mantel, function(s){lapply(s, function(x){lapply(x, function(x){as.numeric(unlist(x))})})})
-spafun.res <- data.frame(mapply(function(x,y){
-  mapply(function(r,s){
-    mapply(function(p,q){
-      paste(round(p, 3), Uppangala::stars(min(rank(c(p,q))[1]/(n+1), 1-rank(c(p,q))[1]/(n+1)), ns = '   '))
-    }, p = r, q = s, SIMPLIFY = F)
-  }, r = x, s= y)
-}, x = spafun.mantel, y = nspafun.mantel))
-spafun.res <- cbind(data.frame('Mantel statistic' = c('E', ' ', 'S|E', ' '), 'Metric' = rep(c('$U_{st}$', '$\\tau _{st}$'), 2)), spafun.res)
+nspafun.mantel <- lapply(nspafun.mantel, function(s){
+  lapply(s, `[`, names(s[[1]]))
+  apply(do.call(rbind, s), 2, as.list)
+})
+nspafun.mantel <- lapply(nspafun.mantel, function(s){
+  lapply(s, function(m){
+    lapply(m, `[`, names(m[[1]]))
+    apply(do.call(rbind, m), 2, as.list)
+  })
+})
+nspafun.mantel <- lapply(nspafun.mantel, function(s){
+  lapply(s, function(m){
+    lapply(m, function(u){
+      lapply(u, `[`, names(u[[1]]))
+      apply(do.call(rbind, u), 2, as.list)
+    })
+  })
+})
+nspafun.mantel <- lapply(nspafun.mantel, function(s){
+  lapply(s, function(m){
+    lapply(m, function(u){
+      lapply(u, unlist)
+    })
+  })
+})
+
+spafun.res <- mapply(function(s, ns){
+  mapply(function(t, nt){
+    mapply(function(m, nm){
+      mapply(function(u, nu){
+        paste(round(u, 3), Uppangala::stars(min(rank(c(u,nu))[1]/(n+1), 1-rank(c(u,nu))[1]/(n+1)), ns = '   '))
+      }, u = m, nu = nm)
+    }, m = t, nm = nt)
+  }, t = s, nt = ns, SIMPLIFY = F)
+}, s = spafun.mantel, ns = nspafun.mantel, SIMPLIFY = F)
+trait <- names(spafun.res$C)
+spafun.res <- lapply(spafun.res, function(s){
+  mapply(function(t, tr){
+    t <- data.frame(t)
+    t <- cbind(c(tr, ' '), c('$U_{st}$', '$\\tau _{st}$'),  t)
+    names(t) <- c('T', 'M', 'E', 'S|E')
+    return(t)
+  }, t = s, tr = trait, SIMPLIFY = F)
+})
+spafun.res <-lapply(spafun.res, function(s){
+  s <- do.call('rbind', s)
+})
+spafun.res <- mapply(function(s, str){
+  s <- cbind(c(str, rep(' ', dim(s)[1]-1)), s)
+  names(s)[1] <- 'S'
+  return(s)
+}, s = spafun.res, str = c('C', 'U'), SIMPLIFY = F)
+spafun.res <- do.call('rbind', spafun.res)
 
 # Result
-kable(bold(spafun.res))
+kable(bold(spafun.res), row.names = F)
 rm(spafun.mantel, nspafun.mantel, spafun.res)
-```
-
-```{r PhyloMaker, include=FALSE}
-library(phylosignal)
-library(phytools)
-library(phylobase)
-path <- system.file('phylogeny', package = 'Uppangala')
-source(file.path(path, 'R_codes for function S.PhyloMaker.txt'))
-phylo <- read.tree(file.path(path, 'PhytoPhylo.tre'))
-nodes <- read.csv(file.path(path, 'nodes.csv'), h = T)
-sp <- Species[which(Species$LatinName %in% row.names(PFT_sp)), c('LatinName', 'Genus', 'Family')]
-names(sp) <- c('species', 'genus', 'family')
-results <- invisible(S.PhyloMaker(sp, phylo, nodes)) # Humboldtia_brunonis unmatched
-tree <- results$Scenario.1
-rm(phylo, results, modes, sp, S.PhyloMaker, path)
-```
-
-```{r Phylosignal}
-data <- PFT_sp
-row.names(data) <- gsub(' ', '_', row.names(data), fixed = T)
-tips <- row.names(data)[which(is.na(data$WD))]
-phy <- drop.tip(tree, tips)
-data <- data[phy$tip.label,c(2:5,7)]
-p4d <- phylo4d(phy,data)
-phyloS <- phyloSignal(p4d, methods = 'I') 
-phyloS <- data.frame(paste(round(phyloS$stat[,1], 3), 
-                           unlist(lapply(as.list(phyloS$pvalue[,1]), stars, ns = ' '))),
-                     row.names = row.names(phyloS$stat))
-names(phyloS) <- 'Moran\'s I'
-# kable(bold(phyloS))
-rm(data, tips, p4d, phyloS, phy)
-```
-
-```{r BETAst $ PIst}
-# Observed Hardys
-phy <- tree
-phy$tip.label <- Species$SpCode[match(gsub('_', ' ',phy$tip.label), Species$LatinName)]
-tips <- c(setdiff(phy$tip.label, names(L$abundance)), setdiff(names(L$abundance), phy$tip.label))
-phy <- drop.tip(phy, tips)
-phy$node.label <- NULL
-spaphy <- spacodi.calc(sp.plot = t(L$abundance), phy = phy, pairwise = T)[c('pairwise.Bst', 'pairwise.PIst')]
-## Mantel values
-spaphy.mantel <- list(`E` = lapply(spaphy, function(m){vegan::mantel(m, Me, permutations = 0)$statistic}), 
-                      `S | E`= lapply(spaphy, function(m){vegan::mantel.partial(m, Ms, Me, permutations = 0)$statistic}))
-
-# Simulated mantel
-nphy <- rep(list(phy), 999)
-cl <- makeCluster(cores)
-clusterExport(cl, list('nphy', 'L', 'spacodi.calc', 'Ntip', 'resamp.phy', 'branching.times'))
-nphy <- clusterApply(cl, nphy, resamp.phy)
-stopCluster(cl)
-nspaphy <- lapply(nphy, function(p){spacodi.calc(sp.plot = t(L$abundance), phy = p, pairwise = T)[c('pairwise.Bst', 'pairwise.PIst')]})
-rm(cl, nphy) ; invisible(gc())
-nspaphy.mantel <- list(`E` =lapply(nspaphy, function(x){lapply(x, function(M){vegan::mantel(M, Me, permutations = 0)$statistic})}), `S | E` = lapply(nspaphy, function(x){lapply(x, function(M){vegan::mantel.partial(M, Ms, Me, permutations = 0)$statistic})}))
-## Non null mantels
-nspaphy.mantel <- lapply(nspaphy.mantel, function(s){lapply(s, `[`, names(s[[1]]))})
-nspaphy.mantel <- lapply(nspaphy.mantel, function(s){apply(do.call(rbind, s), 2, as.list)})
-nspaphy.mantel <- lapply(nspaphy.mantel, function(s){lapply(s, unlist)})
-spaphy.res <- mapply(function(s, ns){
-  mapply(function(x,y){
-    paste(format(x, scientific = T, digits = 3), 
-          Uppangala::stars(min(1-rank(c(x,y))[1]/(n+1),rank(c(x,y))[1]/(n+1)), ns = '   '))
-  }, x = s, y = ns)
-}, s = spaphy.mantel, ns = nspaphy.mantel)
-row.names(spaphy.res) <- c('$\\beta_{st}$', '$\\pi_{st}$')
-  
-# Result
-# kable(bold(spaphy.res))
-rm(mtest, spaphy.mantel, nspaphy, nspaphy.mantel, spaphy.res)
 ```
 
 # Discussion
@@ -1106,5 +1092,140 @@ axis (4)
 Supplementary material S1: Principal component analysis (PCA) performed on topgraphical variables. *Botom left corner subplot represents the eigen values (grey bars) compare to a broken stick distribution for 7 components (red line). SW stand for southwesterness.*
 
 Curvature covaries with profile curvature, plan curvature, distance to potential rivers and the PCA first axis. Elevation and wetness are opposed in the principal component analysis and slope and south-westerness does not seem to covary much with other variables **Not precise**.
+
+## S2: Phylogenetic varitions among communities
+
+A phylogenetic tree of our 89 species was built with `S.PhyloMaker` function proposed by @qian_updated_2016-1. We assessed phylogenetic signal of each functional using the Moran's I statistic. Positive Moran's I value indicated convergence of trait values within the phylogeny whereas negative Moran's I will showed divergence.
+
+To investigate phylogenetic variation among communities we calculated $\beta _{st}$ and $\pi _{st}$, for phylogenetic composition in abundance and presence-absence respectively [@hardy_characterizing_2007]. $\beta _{st}$ integrate only phylogenetic turnover, weighting species by their local abundances; whereas $\pi _{st}$ express phylogenetic turnover, without accounting for species local abundances.
+
+Variation of composition between community pairs with those metrics was translated as a taxonomic, functional and phylogenetic distance, and compared to environmental and spatial distances among community pairs. Environmental distances were calculated as geometric distances between communities on the plan composed by the two first axes of environmental variables PCA (see supplementary material S1). Correlations with environment and space were assessed based on two Mantel tests successively with taxonomic, functional, and phylogenetic community compositions. A firt Mantel statistic assessed the correlation between each metric distance matrix and the environmental distance matrix (E). The second partial Mantel statistic assessed the correlation between each metric distance matrix and the spatial distance matrix knowing environmental distance matrix (E|S), to represent remaining spatial dependency in community composition once the influence of environmental variation is taken into account.
+
+We used null models to test if observed correlation with Mantel statistic differed significantly from expectations under null hypothesis. $\beta st$ and $\pi st$ were tested against the nul model *"1s"* suggested by @hardy_testing_2008 which randomizes phylogenetic tree tips.
+
+```{r PhyloMaker, include=FALSE}
+library(phylosignal)
+library(phytools)
+library(phylobase)
+path <- system.file('phylogeny', package = 'Uppangala')
+source(file.path(path, 'R_codes for function S.PhyloMaker.txt'))
+phylo <- read.tree(file.path(path, 'PhytoPhylo.tre'))
+nodes <- read.csv(file.path(path, 'nodes.csv'), h = T)
+sp <- Species[which(Species$LatinName %in% row.names(PFT_sp)), c('LatinName', 'Genus', 'Family')]
+names(sp) <- c('species', 'genus', 'family')
+results <- invisible(S.PhyloMaker(sp, phylo, nodes)) # Humboldtia_brunonis unmatched
+tree <- results$Scenario.1
+rm(phylo, results, modes, sp, S.PhyloMaker, path)
+```
+
+```{r Phylosignal}
+data <- PFT_sp
+row.names(data) <- gsub(' ', '_', row.names(data), fixed = T)
+tips <- row.names(data)[which(is.na(data$WD))]
+phy <- drop.tip(tree, tips)
+data <- data[phy$tip.label,c(2:5,7)]
+p4d <- phylo4d(phy,data)
+phyloS <- phyloSignal(p4d, methods = 'I') 
+phyloS <- data.frame(paste(round(phyloS$stat[,1], 3), 
+                           unlist(lapply(as.list(phyloS$pvalue[,1]), stars, ns = ' '))),
+                     row.names = row.names(phyloS$stat))
+names(phyloS) <- 'Moran\'s I'
+# kable(bold(phyloS))
+rm(data, tips, p4d, phyloS, phy)
+```
+
+```{r BETAst $ PIst}
+# Observed Hardys
+phy <- tree
+phy$tip.label <- Species$SpCode[match(gsub('_', ' ',phy$tip.label), Species$LatinName)]
+tips <- lapply(L, function(s){
+  c(setdiff(phy$tip.label, names(s$abundance)), setdiff(names(s$abundance), phy$tip.label))
+})
+phy <- lapply(tips, function(s){
+  drop.tip(phy, s)
+})
+phy <- lapply(phy, function(s){
+  s$node.label <- NULL
+  return(s)
+})
+spaphy <- mapply(function(Ls, phys){
+  spacodi.calc(sp.plot = t(Ls$abundance), phy = phys, pairwise = T)[c('pairwise.Bst', 'pairwise.PIst')]
+}, Ls = L, phys = phy, SIMPLIFY = F)
+## Mantel values
+spaphy.mantel <- mapply(function(s, Mes, Mss){
+  list(
+    `E` = lapply(s, function(m){
+      vegan::mantel(m, Mes, permutations = 0)$statistic
+      }), 
+    `S | E`= lapply(s, function(m){
+      vegan::mantel.partial(m, Mss, Mes, permutations = 0)$statistic
+      })
+    )
+}, s = spaphy, Mes = Me, Mss = Ms, SIMPLIFY = F)
+
+# Simulated mantel
+nphy <- lapply(phy, function(s){
+  rep(list(s), 999)
+})
+cl <- makeCluster(cores)
+clusterExport(cl, list('nphy', 'L', 'spacodi.calc', 'Ntip', 'resamp.phy', 'branching.times'))
+nphy <- clusterApply(cl, nphy, function(s){
+  lapply(s, resamp.phy)
+})
+stopCluster(cl)
+nspaphy <- mapply(function(s, Ls){
+  lapply(s, function(p){
+  spacodi.calc(sp.plot = t(Ls$abundance), phy = p, pairwise = T)[c('pairwise.Bst', 'pairwise.PIst')]
+  })
+}, s = nphy, Ls = L, SIMPLIFY = F)
+rm(cl, nphy)
+invisible(gc())
+nspaphy.mantel <- mapply(function(s, Mes, Mss){
+  list(
+    `E` =lapply(s, function(x){
+      lapply(x, function(M){
+        vegan::mantel(M, Mes, permutations = 0)$statistic})}), 
+    `S | E` = lapply(s, function(x){
+      lapply(x, function(M){
+        vegan::mantel.partial(M, Mss, Mes, permutations = 0)$statistic
+      })
+    })
+  )
+}, s = nspaphy, Mes = Me, Mss = Ms, SIMPLIFY = F)
+## Non null mantels
+names(nspaphy.mantel) <- c('C', 'U')
+nspaphy.mantel <- lapply(nspaphy.mantel, function(s){
+  lapply(s, function(m){
+    lapply(m, `[`, names(m[[1]]))
+    apply(do.call(rbind, m), 2, as.list)
+  })
+})
+nspaphy.mantel <- lapply(nspaphy.mantel, function(s){
+  lapply(s, function(m){
+    lapply(m, unlist)
+  })
+})
+spaphy.res <- mapply(function(s, ns){
+  mapply(function(m, nm){
+    mapply(function(b, nb){
+      paste(format(b, scientific = T, digits = 3), 
+            Uppangala::stars(min(1-rank(c(b,nb))[1]/(n+1),rank(c(b,nb))[1]/(n+1)), ns = '   '))
+    }, b = m, nb = nm, SIMPLIFY = T)
+  }, m = s, nm = ns, SIMPLIFY = F)
+}, s = spaphy.mantel, ns = nspaphy.mantel, SIMPLIFY = F)
+spaphy.res <- mapply(function(s, str){
+  s <- data.frame(s)
+  s <- cbind(c(str, ' '), c('$U_{st}$', '$\\tau _{st}$'), s)
+  names(s) <- c('S', 'M', 'E', 'S|E')
+  return(s)
+}, s = spaphy.res, str = c('C', 'U'), SIMPLIFY = F)
+spaphy.res <- do.call('rbind', spaphy.res)
+
+# Result
+kable(bold(spaphy.res), row.names = F)
+rm(mtest, spaphy.mantel, nspaphy, nspaphy.mantel, spaphy.res)
+```
+
+While LDMC did not phylogenetic structure (Moran's I of 0 with a $p-value > 0.1$), LA and LT were phylogenetically clustered (Moran's I of 0.021 and 0.018 with a $p-value < 0.001$), and WD and SLA were weakly clustered (Moran's I of 0.005 and 0.003 with $p-value < 0.1$). Phylogenetic variation among communities was neither correlated to environmental variation (Mantel test, $r_{\beta_{st},E} = 0.02$ and $r_{\pi_{st},E} = 0.05$ with $p-value > 0.1$) nor to remaining spatial variation in partial Mantel test knowing environment ($r_{\beta_{st},S|E} = 0.01$ and $r_{\pi_{st},S|E} = -0.01$ with $p-value > 0.1$).
 
 # References
