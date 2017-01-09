@@ -3,7 +3,6 @@
 .RData
 .Ruserdata
 inst/extdata/*
-inst/doc/*.bib
 inst/doc/*.pdf
 inst/doc/*.docx
 inst/doc/*.html
@@ -14,3 +13,4 @@ inst/doc/*_files
 inst/doc/*_cache
 inst/phylogeny
 inst/doc/*.csl
+inst/extdata.zip
