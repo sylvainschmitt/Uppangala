@@ -1,0 +1,626 @@
+---
+title: Decoupled wood and leaf strategies among canopy and understorey tree in a low-elevation
+  rainforest of India
+author: "Sylvain Schmitt sylvain.schmitt@agroparistech.fr"
+date: '`r Sys.Date()`'
+output: pdf_document
+csl: mee.csl
+bibliography: refs.bib
+---
+
+```{r config, message=FALSE, warning=FALSE, include=FALSE}
+library(knitr)
+library(parallel)
+cores <- detectCores() - 1
+library(Uppangala)
+opts_chunk$set(
+  echo = F, message = F, warning = F, fig.height = 8, fig.width = 8,
+  cache = T, cache.lazy = F)
+```
+
+Built with `Uppangala` package version `r packageVersion('Uppangala')`.
+
+# Abstract
+
+## Keywordsand supplementary materials S2
+
+functional trait; rainforest; vertical forest strata; Western Ghats; environmental filtering; niche differentiation; ecological guild
+
+# Introduction
+
+Understanding the determinants of species occurrence and co-occurrence is a long standing issue in ecology [@diamond_ecology_1975]. Tropical rainforests have especially fascinated ecologists due to their outstanding diversity [@connell_diversity_1978]. Niche theory explains species coexistence through niche differences that limit competitive exclusion [@weiher_assembly_1995; @lortie_rethinking_2004], while neutral theory shows that maintenance of high diversity is possible even for functionally equivalent species, under the influence of stochastic life, death, reproduction and dispersal dynamics [@hubbell_unified_2001]. Both theories can provide realistic expectations of taxonomic diversity [@chave_comparing_2002] so that inferring ecological processes from taxonomical composition pattern is challenging in community ecology.
+
+Investigating patterns of functional or phylogenetic diversity may reveal signatures of ecological processes that are specific to the niche theory [@mcgill_rebuilding_2006; @westoby_land-plant_2006; @mouquet_ecophylogenetics:_2012]. Indeed, if taxonomic composition is expected to be spatially structured in both theories, due to the spatial structure of environment or to dispersal limitation, functional or phylogenetic assemblage are expected to be spatially structured only under the niche theory [@kraft_functional_2010; @baraloto_using_2012; @hardy_phylogenetic_2012; @parmentier_prevalence_2014].
+
+The variation in functional traits among species is expected to reflect different abilities to grow, survive and reproduce in a given environment [@violle_let_2007] and expresses fundamental trade-offs along environmental gradients [@mark_westoby_plant_2002]. For instance, specific leaf area varies along the soil fertility-shade gradient and represents a trade-off between resource acquisition by photosynthesis and investment in leaf defense and durability [@hodgson_is_2011]. Fundamental trade-offs entail functional traits covariation along basic leaf [@wright_worldwide_2004 but see @osnas_global_2013 and @lloyd_photosynthetically_2013] and wood [@chave_towards_2009] economics spectra. The leaf economics spectrum opposes acquisitive to conservative ecological strategies, basically expressed at leaf level. The wood economics spectrum distinguishes species strategies over three axes spanning the basic CSR strategies of @grime_evidence_1977 : (i) competitive species, with high conductive efficiency, (ii) stress tolerant species, resistant to embolism, and (iii) disturbance tolerant species, with high mechanical strength [@chave_towards_2009]. @baraloto_decoupled_2010 found decoupled wood and leaf economics of trees in neotropical forest, but @reich_world-wide_2014 conversely posited that both spectra have to be integrated in a comprehensive whole plant economics spectrum [@freschet_evidence_2010] opposing fast growing acquisitive species to slow growing and more conservative ones.
+
+The trait values of coexisting species represent a non-random sample of trait values found in a broader area, du to specific niche-based dynamics in the local community [@lortie_rethinking_2004; @bernard-verdier_community_2012]. Then the signature of local niche-based dynamics can be gasped by assessing the deviation of local community structure from a larger "species pool", classicaly using null models [@kraft_functional_2008]. In addition, the nature of functional traits and ecological strategies driving species coexistence can change across scales. For instance, @messier_trait_2016 have underlined that the leaf economics spectrum basically expresses changes in ecological strategies along broad-scale environmental gradients, while it is not necessarily a primary driver of local coexistence.
+
+The concept of guilds refer to groups of functionally similar species [@wilson_guilds_1999]. Ecological guilds can coexist and occupy distinct niches within communities [@vergnon_niches_2009]. In tropical forests, the assembly of tree communities has been mostly studied irrespectivelly of guilds of canopy and understorey tree [@wright2002plant]. However, distinctive ecological constraints are expected to drive different resource use strategies and biotic interactions in these guilds, which should translate into different functional composition and response to environmental factors. For instance, in Colombian Amazonie, @duque2002different found some contrasted response of the composition of canopy and understorey guilds along environmental gradients.
+
+In this paper, we used a trait-based approach to study separately the assembly of canopy and understorey tree species along topographical and biotic gradients in a large forest plot (10ha) loacted in Western Ghats biodiversity hotspot [@myers_biodiversity_2000], India. Low elevation rainforests in South India are remarkably heterogeneous in vertical structure and encompass distinctive guilds across the vertical strata [@pascal_wet_1988]. It thus provides an appropriate context to adress guild-dependent assembly rules and ecological strategies in tropical rainforests. Although considered as wet evergreen, the forest undergoes contrasted long dry and intense rainy seasons under the influence of monsoon. In this context, we expected water stress and competition for resource to be important drivers of tree functional composition. We investigated how both canopy and understorey tree species composition varied with local environmental conditions, using appropriate null models. We specifically addressed the following questions:
+
+- Does functional traits variation and covariation reflect basic dimensions of ecological strategy in the rainforest ?
+- Does the local functional composition reflect the influence of abiotic and biotic drivers of community dynamics within guilds ?
+
+# Material and methods
+
+## Study site
+
+The study was carried out in a 10-ha permanent plot established in 1990 by the French Institute of Pondicherry in an undisturbed, old-growth wet evergreen Dipterocarp forest [@pascal_structure_1996]. The plot is located in the Kadamakal Reserve Forest (Kodagu District, Karnataka State, India), near the Uppangala village, and thus refers to as "Uppangala plot". Annual precipitation averages 5108 mm per year but is highly variable in time with heavy rainfall from June to October (90% of the rainfall during the monsoon) and a severe dry season (monthly rainfall $\leq 45$ mm) lasting 3.8 months [@pelissier_twenty_2011]. Mean annual temperature in the station of Sampaji (15 km from Uppangala) is about 27$^\circ C$, with a mean minimum about 25$^\circ C$ during July rainfall pick and a maximum mean temperature of 29$^\circ C$ in April [@pascal_structure_1996]. Climate and geology of the 10-ha plot can be considered as homogeneous. The topography of the site is highly heterogeneous with regular east-west alternation of thalwegs and ridges separated by steep slopes, so that topography is expected to be a major component of environmental variation within the forest plot [@gimaret-carpentier_sampling_1998]. Therefore, we hypothesized that topographic variation should influence community assembly and yield changing ecological strategies and functional composition [@condit_spatial_2000].
+
+## Taxonomic composition and trait sampling
+
+From 1989 to 2014, the trees $\geq 10$ cm in diameter at breast height (dbh) were identified to species level, tagged, mapped and monitored in an area progressively extended to a contiguous $300 * 330 m^2$ (ca. 10-ha) plot [@pelissier_twenty_2011]. The plot included 111 different tree species. We collected trait data from 89 over 111 (80.1%) species, which represented 99.0% of tree individuals present in the plot. Note that the 32 most abundant species represented more than 80% of tree individuals. We sampled five individuals per species for these 32 species, and sampled one to five individuals for the remaining species (in total 267 individuals). For each individual we collected 5 mature shadow leaves and one branch sample with a diameter close to 1 cm following recommendation of @perez-harguindeguy_new_2013. Individuals and leaves were selected in consistent light conditions, development stage and sanitary state. Dawkins crown exposure index [@dawkins_management_1958] was recorded for each tree sampled to control for any sun-exposure effect. Leaf and branch samples were kept in humidified ziplock filled with enriched $CO_{2}$ air inside a black bag until measurement within the next 24 hours. For some individuals, we were unable to collect suitable branch sample, i.e. with a diameter $\leq 1$ cm (11 missing species over 89 representing 1% of individuals present).
+
+## Trait measurements
+
+Leaf petioles, rachis and petiolules were removed for all measurements. Leaf fresh weights, thickness and area were measured, using a weighing scale (**add detail on brand and precision**), a micrometer (**add detail on brand and precision**) and a bend scanner with ImageJ software [**ref**] respectively. Leaves were first kept in herbarium and then dried in an oven for at least 72 hours at 60 $^\circ C$. Once dried, the leaves were weighted directly after been extracted from the oven to avoid any humidity bias. The bark and pit of branch samples were removed in order to keep only branch wood with no soft tissues. Branch wood samples were immersed in water to evaluate their volume by water displacement. Wood samples were then dried for 48 hours at 80 $^\circ C$ and weighted. 
+
+We calculated five functional traits of leaf and wood samples: leaf thickness (LT in $\mu m$ ), leaf area measured from scans (LA in $mm^2$), leaf dry matter content as the leaf dry weight divided by the leaf fresh weight (LDMC in $mg.g^-1$), specific leaf area as the leaf area divided by the leaf dry mass (SLA in $m^2.kg^-1$), and branch wood density  as the the wood sample dry weight divided by its volume (WD in $g.cm^-3$, see table 1). We choose those five traits because they proved to be good proxies of the major dimensions of ecological strategies in plants [@mark_westoby_plant_2002; @diaz_global_2015] and were relatively easy to measure on the field.
+
+Table 1: Functional traits measured. *Traits with their abbreviation, standard unit, and associated species strategy for functioning, survival and reproduction [@baraloto_decoupled_2010].*
+
+```{r 1 Traits}
+rm(list = ls()[-which(ls() == "cores")]); invisible(gc())
+PFT <- genPFT()
+table <- data.frame(
+  Trait = c('Leaf thickness', 'Leaf area', 'Leaf dry matter content', 'Specific leaf area', 'Wood density'),
+  Abbreviation = c('LT', 'LA', 'LDMC', 'SLA', 'WD'),
+  Unit = c('$\\mu m$', '$mm^2$', '$mg.g^-1$', '$m^2.kg^-1$', '$g.cm^-3$'),
+  Strategy = c('Leaf defense and investment',
+        'Leaf resource capture vs.investment',
+        'Leaf defense and investment',
+        'Leaf resource acquisiton vs. defense',
+        'Stem transport, structure and defense')
+)
+kable(table, row.names = F)
+rm(table)
+```
+
+## Environmental variables
+
+Topography was expected to be a major environmental factor influencing the assemby of tree communities [@gimaret-carpentier_sampling_1998]. We selected 8 topographical variables representing the abiotic environment: elevation, slope, curvature, plan curvature, profile curvature, wetness (function of both slope and elevation representing water flow and accumulation areas), southwesterness (SW, aspect in direction of south-west: $cos(aspect~in~degres + 225)$) derived from elevation data available within the plot using the RSAGA package [@brenning_statistical_2008], and distance to the nearest potential river computed in ArcGis [**ref**]. 
+
+In order to identify the main sources of environmental variation and to avoid multi-colinearity in subsequent analyses, we performed a principal component analysis (PCA) of the abiotic environmental variables (see Supplementary Materials S1). We selected four little-correlated variables: curvature representing local water flow paths and soil accumulation areas, wetness highlighting water accumulation areas over the whole study area, southwesterness representing aspect [@bunyan_effect_2015] and slope, which may have both a strong effect on forest dynamics and on nutrient/water availability [@ferry2010higher].
+
+In addition, we selected two biotic factors related to local forest structure: canopy height and basal area. Canopy height, i.e. the maximum local height of the canopy, was calculated from a 1-m resolution digital canopy model built from a LiDAR (Light Detection And Ranging) dataset acquired in 2013 over the Uppangala plot. Basal area was calculated from the girth measurements taken within the 10-ha plot (censuses done in 2013 and 2014) for stems $\geq 10$ cm dbh. 
+
+## Analyses
+
+### Guilds
+
+@pascal_wet_1988 defined four vertical strata attained by adult trees: emergent above 39m, canopy trees between 25 and 39m, sub-canopy trees between 15 and 25m, and understorey trees below 15m. Despite the vertical hierarchy, steep topography could allow sub-canopy trees receiving more light, especially in slopes, and thus participates to canopy. We thus defined two basic guilds called canopy (C), composed of emergent, canopy and sub-canopy species (n = 55), and understorey (U) species (n = 34).
+
+### Traits variation and covariation
+
+We first calculated the coefficient of variation (ratio of the standard deviation to the mean) of trait values among leaves of the same individual (intra-individual), among trees of the same species (intra-specific for species with more than one individual), and among species (inter-specific). We then performed a principal component analysis (PCA) of the mean value of traits per species to identify main dimensions of ecological strategies along which traits can covary among guilds. We tested more specifically association of tree species from each guild to identified ecological strategies. To do so, we compared variance of the mean value of traits per species between main ecological strategies with Levene's test **ref**. Subsequent community-level analyses were based on trait values averaged per species.
+
+### Drivers of community dynamics within guilds
+
+We subdivided the 10-ha plot into $30*30 m^2$ quadrats leading to 110 local communities. We analyze the functionnal composition of the guilds in the 110 communities. Guilds in the communities have a mean number of 28 individuals representing 10 species, with less in understorey than in canopy. We calculated weighted mean [GWM, where G stands for "guild"; @violle_let_2007] for each guild in each community. In the quadrat $j$, GWM of trait $t$ was the mean of trait values $t_{i}$ of species $i$ weighted by species relative abundance $p_{i}$:
+$$GWM_{j} = \sum_{i=1}^{S} p_{i,j} * t_{i,j} ~ (1)$$
+where $S$ is the number of species in the quadrat $j$. We also calculated the average trait values based on presence-absence values to assess the influence of less abundant and rare species on community trait composition [@cingolani_filtering_2007]. 
+
+To test for any significant changes in functional composition among guilds, we devised a null model approach. A null model (NM1) randomized trait values among species in the whole plot (permuting raw in `Trait*Species` matrix) [@bernard-verdier_community_2012]. Note that, spatial correlations in tree abundance are conserved limiting associated type I error. We performed 999 randomizations of null model NM1 and we derived a two-tailed test of the proportion of guilds deviating from the null expectation, with adjusted p-values by Benjamini-Hochberg correction **ref**. Shifts in GWM values with changing environmental conditions could reflect the shift of species strategies across assemblages [@ackerly_trait-based_2007].
+
+To characterize the patterns of deviation from the null model, we also calculated standardized effect sizes (SES) as
+$$SES = \frac{(I_{obs} - I_{null})}{\sigma _{null}} (2)$$
+where $I_{obs}$ was the observed metric and $I_{null}$ and $\sigma _{null}$ were the mean and standard deviation of the corresponding null distribution. The influence of environment on SES values was investigated by linear regression with biotic and abiotic factors ($SES_{trait} = Slope + Curvature + Wetness + SW + Canopy + BA$). Analyses were conducted on the five functional traits and the species scores obtained on the two first PCA axes done on the `Trait*Species` matrix .
+
+All analyses were conducted using the R 3.3.0  software [@r_core_team_r:_2016] with packages 
+`ade4` [@dray_ade4_2007],
+and `vegan` [@oksanen_vegan:_2016].
+
+# Results
+
+## Traits variation and covariation
+
+We found an overall increase of functional trait variation from intra-individual to inter-specific levels (see table 2), even though LA showed almost as large variability at intra-individual than at intra-specific levels ($CV_{individual} = 0.20$ and $CV_{species} = 0.24$, wilcoxon rank test $p-value = 0.137$). given the relatively low intra-individual and intra species variation, compared to inter-species variation, using species trait average values for community analyses is warranted.
+
+Table 2: Intra-individual, intra-specific and inter-specific component of trait variation. *The overall range, mean and standard deviation are provided for each trait. The remaining columns represent the coefficient of variation of trait values among leaves per individuals (intra-individual), among trees per species (intra-specific), and among trees of different species. See table 1 for abbreviation.*
+
+```{r 2 CV}
+# Individual aggregation
+PFT_ind <- aggregate(PFT, by = list(PFT$Tree), FUN = mean, na.rm = T)
+row.names(PFT_ind) <- PFT_ind$Group.1
+SpT <- unique(PFT[1:2])
+Sp <- SpT$Sp
+names(Sp) <- SpT$Tree
+SpCodeT <- unique(PFT[2:3])
+SpCode <- SpCodeT$SpCode
+names(SpCode) <- SpCodeT$Sp
+CET <- unique(PFT[c(1,4)])
+CE <- CET$CE
+names(CE) <- CET$Tree
+PFT_ind$Sp <- Sp[row.names(PFT_ind)]
+PFT_ind$SpCode <- SpCode[as.character(PFT_ind$Sp)]
+PFT_ind$CE <- CE[row.names(PFT_ind)]
+PFT_ind <- PFT_ind[-c(1:2)]
+PFT_ind$ID <- row.names(PFT_ind)
+row.names(PFT_ind) <- PFT_ind$ID
+PFT_ind <- PFT_ind[-which(names(PFT_ind) == 'ID')]
+# Species aggregation
+Species <- genSpecies()
+PFT_sp <- aggregate(PFT_ind, by = list(PFT_ind$Sp), FUN = mean, na.rm = T)
+row.names(PFT_sp) <- PFT_sp$Group.1
+PFT_sp$SpCode <- SpCode[row.names(PFT_sp)]
+PFT_sp <- PFT_sp[-c(1:2,4)]
+# Coefficient of variation
+trait <- c('LT', 'LA', 'LDMC', 'SLA', 'WD')
+cv <- data.frame(
+  row.names = trait,
+  Range = c(paste(range(PFT$LT, na.rm = T), collapse = '-'),
+            paste(round(range(PFT$LA, na.rm = T)), collapse = '-'),
+            paste(round(range(PFT$LDMC, na.rm = T)), collapse = '-'),
+            paste(round(range(PFT$SLA, na.rm = T), 2), collapse = '-'),
+            paste(round(range(PFT$WD, na.rm = T), 2), collapse = '-')),
+  m = c(paste0(round(mean(PFT$LT, na.rm = T)), ' (',
+               round(sd(PFT$LT, na.rm = T)), ')'),
+        paste0(round(mean(PFT$LA, na.rm = T)), ' (',
+               round(sd(PFT$LA, na.rm = T)), ')'),
+        paste0(round(mean(PFT$LDMC, na.rm = T)), ' (',
+               round(sd(PFT$LDMC, na.rm = T)), ')'),
+        paste0(round(mean(PFT$SLA, na.rm = T),2), ' (',
+               round(sd(PFT$SLA, na.rm = T),2), ')'),
+        paste0(round(mean(PFT$WD, na.rm = T),2), ' (',
+               round(sd(PFT$WD, na.rm = T),2), ')')),
+  m1 = round(unlist(lapply(as.list(trait), function(y){
+    mean(aggregate(PFT[which(names(PFT) ==  y)], by = list(PFT$Tree), function(x){
+      sd(x, na.rm = T) / mean(x, na.rm = T)
+    })[,2], na.rm = T)
+  })) ,2),
+  m2 = round(unlist(lapply(as.list(trait), function(y){
+    mean(aggregate(PFT_ind[which(names(PFT_ind) ==  y)], by = list(PFT_ind$Sp), function(x){
+      sd(x, na.rm = T) / mean(x, na.rm = T)
+    })[,2], na.rm = T)
+  })), 2),
+  m3 = round(unlist(
+    lapply(as.list(trait), function(y){
+      sd(PFT_sp[,which(names(PFT_sp) ==  y)], na.rm = T) / mean(PFT_sp[,which(names(PFT_sp) ==  y)], na.rm = T)
+    })), 2)
+)
+names(cv)[2:5] <- c('Mean (sd)' , 'Intra-individual', 'Intra-species', 'Inter-species')
+cv['WD','Intra-individual'] <- ''
+kable(cv)
+rm(PFT, CET, cv, CE, Sp, SpT, SpCodeT)
+```
+
+The first axis of the principal component  analysis (PCA) of mean species trait values was basically related to wood density and structural leaf trait variations (LT, LA, LDMC), thus opposing species with thick, big leaves and lightwood to species with dense leaves and hardwood. The second axis mostly opposed SLA to LDMC, and to a less extent to wood density. However, wood density was orthogonal to SLA in the plan 1-2 of the PCA indicating independence between those two traits.
+
+```{r 3 PCA PFT}
+library(vegan)
+
+# Individual to log
+PFT_ind$LA <- log(PFT_ind$LA)
+PFT_ind$SLA <- log(PFT_ind$SLA)
+PFT_ind$ID <- row.names(PFT_ind)
+row.names(PFT_ind) <- PFT_ind$ID
+PFT_ind <- PFT_ind[-which(names(PFT_ind) == 'ID')]
+# Species aggregation
+Species <- genSpecies()
+PFT_sp <- aggregate(PFT_ind, by = list(PFT_ind$Sp), FUN = mean, na.rm = T)
+row.names(PFT_sp) <- PFT_sp$Group.1
+PFT_sp$SpCode <- SpCode[row.names(PFT_sp)]
+PFT_sp <- PFT_sp[-c(1:2,4)]
+sel <- which(Species$Strata[match(PFT_sp$SpCode, Species$SpCode)] == 3)
+PFT_sp$strata <- NA
+PFT_sp[-sel,'strata'] <- 'C'
+PFT_sp[sel,'strata'] <- 'U'
+
+# PCA
+pca <- princomp(~ LA + WD + LT + LDMC + SLA, data = PFT_sp, cor = T)
+lambda <- pca$sdev * sqrt(nrow(pca$scores))
+pca.var = apply(pca$score, 2, var)
+PCAscores <- as.data.frame(pca$scores)[1:2]
+names(PCAscores) <- c('WES', 'LES')
+PCAscores$ID <- row.names(PCAscores)
+plot(t(t(pca$scores)/lambda),pch=16, col = c('green','red')[as.factor(PFT_sp[row.names(PCAscores),'strata'])],
+     xlab = paste('Axe 1 -', round(pca.var[1]/sum(pca.var)*100, 2), '%'),
+     ylab = paste('Axe 2 -', round(pca.var[2]/sum(pca.var)*100, 2), '%'))
+par(new=T)
+Rot <- t(t(pca$loadings)*lambda)
+XLIM <- c(-max(abs(Rot[,1])),max(abs(Rot[,1])))
+XLIM <- XLIM+(XLIM*0.2)
+plot(Rot,col=4,axes=FALSE,xlim=XLIM,ylim=XLIM,pch="",xlab = "", ylab = "")
+lines(XLIM, c(0,0), lty = 2, col = 'firebrick', lwd = 2)
+lines(c(0,0), XLIM, lty = 2, col = 'green', lwd = 2)
+legend('topright', c('Understorey', 'Canopy'),
+      fill = c("green", "red"))
+
+arrows (rep(0,nrow(pca$loadings)),rep(0,nrow(pca$loadings)),Rot[,1],Rot[,2],lwd=2)
+text (Rot[,1:2], pos = c(4, 2, 4, 2, 3), rownames(Rot),cex=1.2)
+Hmisc::subplot(function(){
+  b <- barplot((pca.var / sum(pca.var)), las = 2, ylim = c(0,range(bstick(7))[2]),
+               cex.names = 0.7, axes = T, names.arg = NA) ;
+  # lines(b, bstick(length(pca.var)), col = 'red') ;
+  legend('topright', c('Eigen values', 'broken stick'), fill = c('grey', 'red'), cex = 0.6,
+         box.col = 'white')},
+  x=grconvertX(c(0.75,1), from='npc'),
+  y=grconvertY(c(0.05,0.30), from='npc')
+)
+axis (3)
+axis (4)
+
+# LES and WES
+PCAscores <- as.data.frame(pca$scores)[1:2]
+names(PCAscores) <- c('WES', 'LES')
+PCAscores$ID <- row.names(PCAscores)
+PFT_sp$ID <- row.names(PFT_sp)
+PFT_sp <- merge(PFT_sp, PCAscores, all = T)
+row.names(PFT_sp) <- PFT_sp$ID
+PFT_sp <- PFT_sp[-which(names(PFT_sp) == 'ID')]
+rm(PCAscores, PFT_ind, SpCodeT, lambda, pca, pca.var, Rot, XLIM)
+```
+
+Figure 1: Principal Component Analysis (PCA) of species mean trait values. *The bottom right subplot represents the eigen values (grey bars) of the five components. First axis, in red, is named wood economic spectrum (WES) ; whereas second axis, in green, is named leaf economic spectrum (LES). See table 1 for abbreviation.*
+
+Leven's tests revealed a significantly higher variance for canopy tree species on PCA first axis than second axis ($table~3$). Variance of canopy tree species is also significantly higher than variance of understorey species on PCA first axis. Other differences of variance were not significant.
+
+Table 3: Leven's test of PCA's guilds variance. *Guilds variance inside the principal component analysis (PCA) were compared with Leven's test on PCA first and second axes.*
+
+```{r variance PCA}
+PCAscores1 <- ade4::dudi.pca(PFT_sp[-which(is.na(PFT_sp$WD)), c('LA', 'WD', 'LT', 'LDMC', 'SLA')], scannf = F)$l1
+names(PCAscores1) <- c('WES', 'LES')
+sel <- which(PFT_sp[row.names(PCAscores1),'strata'] == 'C')
+groups <- list(C.WES = PCAscores1$WES[sel],
+               U.WES = PCAscores1$WES[-sel],
+               C.LES = PCAscores1$LES[sel],
+               U.LES = PCAscores1$LES[-sel])
+tests <- list(WES = car::leveneTest(c(groups$C.WES, groups$U.WES), 
+                               c(rep(1, length(groups$C.WES)), rep(2, length(groups$U.WES)))),
+              LES = car::leveneTest(c(groups$C.LES, groups$U.LES), 
+                               c(rep(1, length(groups$C.LES)), rep(2, length(groups$U.LES)))),
+              C = car::leveneTest(c(groups$C.WES, groups$C.LES), 
+                             c(rep(1, length(groups$C.WES)), rep(2, length(groups$C.LES)))),
+              U = car::leveneTest(c(groups$U.WES, groups$U.LES), 
+                             c(rep(1, length(groups$U.WES)), rep(2, length(groups$U.LES)))))
+tests <- lapply(tests, function(x) paste(round(x$`Pr(>F)`[1],3), stars(x$`Pr(>F)`[1])))
+
+table <- aggregate.data.frame(PCAscores1[1:2], by = list(PFT_sp[row.names(PCAscores1),'strata']), FUN = var)
+table[2:3] <- round(table[2:3], 3)
+names(table) <- c('Variance', 'PCA 1', 'PCA 2')
+table$Variance <- c('Canopy', 'Understorey')
+table[3,] <- c('Levene\'s test', tests$WES, tests$LES)
+table[4] <- c(tests$C, tests$U, '')
+names(table)[4] <- 'Levene\'s test' 
+kable(bold(table), row.names = F, digits = 3)
+```
+
+```{r 4 env-com}
+library(raster)
+
+# Building community and environmental datasets
+Env <- genEnv()
+Trees <- genTrees()
+Trees$ID <- row.names(Trees)
+Trees <- merge(Trees, PFT_sp)
+row.names(Trees) <- Trees$ID
+Trees <- Trees[-which(names(Trees) == 'ID')]
+com <- quadrats(cs = c(30,30))
+XY <- Trees[c('x', 'y')]
+coordinates(XY) <- ~ x + y
+proj4string(XY) <- crs(com)
+Trees$com <- (XY %over% com)[,1]
+com@data$Elevation <- extract(Env$DEM, as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
+Deriv <- DEMderiv(raster(com, 'Elevation'), c('slope', 'curvature', 'plancurvature', 'profcurvature', 'cosaspect'), path = '/usr/share/applications')
+names(Deriv)[5] <- 'SW'
+com@data <- cbind(com@data, extract(Deriv, as(com, "SpatialPolygons"), df = T, fun = mean)[-1])
+com@data$Wetness <- extract(DEMderiv(Env$DEM, 'wetness'), as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
+com@data$Canopy <- extract(Env$Canopy, as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
+BA <- aggregate(Trees$Girth, list(Trees$com), function(x){sum(pi*(x/(2*pi))^2, na.rm = T)})
+com@data$BA <- BA$x[match(com@data$id, BA$Group.1)]
+pca.env <- princomp(~ Elevation + Slope + Curvature + PlanCurvature + ProfileCurvature + Wetness + SW, data = com@data, cor = T)
+
+# Building RLQ matrices
+R <- com@data[c('Slope', 'Curvature', 'Wetness', 'SW', 'Canopy', 'BA')]
+row.names(R) <- com@data$id
+L <- data.frame(tapply(rep(1, length(Trees[,1])), list(Trees$com, Trees$SpCode), sum))
+L[is.na(L)] <- 0
+Q <- PFT_sp[c('LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'LT')]
+row.names(Q) <- PFT_sp$SpCode
+sel <- which(Species$Strata[match(PFT_sp$SpCode, Species$SpCode)] == 3)
+Q <- list(C = Q[-sel,], U = Q[sel,])
+sel <- lapply(Q, function(q){intersect(row.names(q), names(L))})
+Q <- mapply(function(q,s){q[s,]}, q = Q, s = sel, SIMPLIFY = F)
+L <- lapply(sel, function(s){L[s]})
+R <- lapply(L, function(l){R[row.names(l),]})
+L <- lapply(L, function(l){list(abundance = l, `presence-absence` = l)})
+L <- lapply(L, function(l){l$`presence-absence`[l$`presence-absence` > 1]  <- 1 ; return(l)})
+
+rm(Deriv, XY, Env, sel, BA, s)
+```
+
+## Functional composition of guilds
+
+The guild weighted trait means (GWM) varied weakly but significantly along the environmental gradients for both canopy (C) and understorey (U) guilds (see table 4). Results in presence-absence are in adequation with observed results in abundance (see supplementary materials S2). Functional traits of canopy and understorey tree species were both influenced by curvature, but not for the same traits, and two major differences were observed between the two guilds. The effect of south-west orientation on functional composition was observed only for canopy tree species, while the effect of canopy height affected only understory guild composition.
+
+Focusing on canopy tree species, we found an increase in wood density under south-west orientation, both in abundance and presence-absence (WES provided consistent results, Table 4). We also observed a decrease in leaf area and thickness under the south-west orientation, but only in abundance and presence-absence respectively. Leaf area decreased with curvature in both abundance and presence-absence, while wood density and LDMC increased and decreased respectively with curvature in presence-absence only.
+
+For understorey tree species, SLA significantly decreased and wood density and leaf thickness significantly increased with curvature, both in abundance and presence-absence. We also detected a significant increase and decrease in wood economic spectrum and leaf area respectively with curvature in abundance. SLA in both abundance and presence-absence significantly increased with canopy height, while LDMC and wood density decreased with canopy height in abundance only.
+
+Table 4: Linear models of the standardized effect size (SES) for each trait of GWMs, for canopy (C) and understorey (U) guilds, in abundance. _We performed stepwise selection of the predictors including slope, curvature, wetness southwesterness (SW), canopy height (Canopy) and basal area (BA), and only the selected predictors are shown. See table 1 for abbreviations. Bold and number of asterisk indicates the significance threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
+
+```{r CWM}
+# Observed CWMs
+CWM <- mapply(function(Ls,Qs){
+  lapply(Ls, function(l){
+    lapply(as.list(c('LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'LT')), function(v){
+      apply(l, 1, function(x){
+        weighted.mean(Qs[,v], x, na.rm=T)
+      })
+    })
+  })
+}, Ls = L, Qs = Q, SIMPLIFY = F)
+CWM <- lapply(CWM, function(s){
+  lapply(s, function(x){
+    names(x) <- c('LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'LT')
+    return(x)
+  })
+})
+
+# Simulated CWMs
+n = 999
+nQ <- lapply(Q, function(s){
+  rep(list(s), n)
+})
+nQ <- lapply(nQ, function(s){ 
+  lapply(s, function(nq){
+      row.names(nq) <- sample(row.names(nq))
+      return(nq)
+  })
+})
+nQ <- mapply(function(nQs, Ls){
+  lapply(nQs, function(nq){
+    nq[names(Ls$abundance),]
+  })
+}, nQs = nQ, Ls = L, SIMPLIFY = F)
+cl <- makeCluster(cores)
+clusterExport(cl, list('L', 'nQ'))
+nCWM <- clusterMap(cl, function(nQs, Ls){
+  lapply(nQs, function(nq){
+    lapply(Ls, function(l){
+      lapply(as.list(c('LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'LT')), function(v){
+        apply(l, 1, function(x){
+          weighted.mean(nq[,v], x, na.rm=T)
+        })
+      })
+    })
+  })
+}, Ls = L, nQs = nQ)
+stopCluster(cl)
+rm(cl)
+nCWM <- lapply(nCWM, function(s){
+  lapply(s, function(ns){
+  lapply(ns,function(ab){
+    names(ab) <- c('LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'LT')
+    return(ab)
+    })
+  })
+})
+nCWM <- lapply(nCWM, function(s){
+  lapply(s, `[`, names(s[[1]]))
+  apply(do.call(rbind, s), 2, as.list)
+})
+nCWM <- lapply(nCWM, function(s){
+  lapply(s, function(ab){
+    lapply(ab, `[`, names(ab[[1]]))
+    apply(do.call(rbind, ab), 2, as.list)
+  })
+})
+nCWM <- lapply(nCWM, function(s){
+  lapply(s, function(ab){
+    lapply(ab, function(x){
+      do.call('cbind', x)
+    })
+  })
+})
+nCWM <- lapply(nCWM, function(s){
+  lapply(s, function(ab){
+    lapply(ab, data.frame)
+  })
+})
+
+## CWM SES
+CWM.ses <- mapply(function(CWMs, nCWMs){
+  mapply(function(CWMab, nCWMab){
+    data.frame(
+      mapply(function(x,y){
+        mapply(function(p,q){
+          (p - mean(q))/sd(q)
+        }, p = as.list(x), q = as.list(data.frame(t(y))))
+      }, x = CWMab, y = nCWMab)
+    )
+  }, CWMab = CWMs, nCWMab = nCWMs, SIMPLIFY = F)
+}, CWMs = CWM, nCWMs = nCWM, SIMPLIFY = F)
+CWM.ses.lm <- mapply(function(s, Rs){
+  lapply(s, function(ab){
+    apply(ab, 2, function(y){
+      step(lm(y ~., Rs), direction = 'both', trace = 0)
+    })
+  })
+}, s = CWM.ses, Rs = R, SIMPLIFY = F)
+CWM.ses.res <- lapply(CWM.ses.lm, function(s){
+  lapply(s, function(ab){
+    lapply(ab, function(x){
+      summary(x)$coefficients
+    })
+  })
+})
+CWM.ses.res <- lapply(CWM.ses.res, function(s){
+  lapply(s, function(ab){
+    lapply(ab, data.frame)
+  })
+})
+CWM.ses.res <- lapply(CWM.ses.res, function(s){
+  lapply(s, function(ab){
+    lapply(ab, function(x){
+      x$res <- paste(format(x$Estimate, scientific = T, digits = 2, trim = T), apply(x[4], 1, stars, ns = '   '))
+      return(x)
+    })
+  })
+})
+CWM.ses.res <- lapply(CWM.ses.res, function(s){
+  lapply(s, function(ab){
+    data.frame(data.table::rbindlist(lapply(ab, function(x){
+      data.frame(t(x[5]))
+    }), fill = T))
+  })
+})
+var <- c('Slope', 'Curvature', 'Wetness', 'SW', 'Canopy', 'BA')
+CWM.ses.res <- lapply(CWM.ses.res, function(s){
+  lapply(s, function(ab){
+  ab[,setdiff(var, names(ab))] <- NA
+  ab <- ab[var]
+  ab <- apply(ab, 2, as.character)
+  row.names(ab) <- names(CWM.ses$C$abundance)
+  ab[is.na(ab)] <- ''
+  ab <- data.frame(ab)
+  return(ab)
+  })
+})
+CWM.ses.res <- mapply(function(s, CWM.ses.lms){
+  mapply(function(ab, CWM.ses.lmab){
+    ab$`$R^2$` <- round(unlist(lapply(CWM.ses.lmab, function(x){
+      summary(x)$r.squared
+    })),3)
+    return(ab)
+  }, ab = s, CWM.ses.lmab = CWM.ses.lms, SIMPLIFY = F)
+}, s = CWM.ses.res, CWM.ses.lms = CWM.ses.lm, SIMPLIFY = F)
+CWM.ses.res <- lapply(CWM.ses.res, function(s){
+  lapply(s, function(ab){
+    ab <- cbind(row.names(ab), ab)
+    names(ab)[1] <- 'Trait'
+    return(ab)
+  })
+})
+CWM.ses.res <- lapply(CWM.ses.res, function(s){
+  mapply(function(ab, name){
+      ab <- cbind(c(name, rep(' ', length(ab[,1])-1)), ab)
+      names(ab)[1] <- 'T'
+      return(ab)
+  },ab = s, name = as.list(c('AB', 'PA')), SIMPLIFY = F)
+})
+CWM.ses.res <- lapply(CWM.ses.res, function(s){
+  do.call('rbind', s)
+})
+CWM.ses.res <- mapply(function(s, name){
+  s <- cbind(c(name, rep(' ', length(s[,1])-1)), s)
+  names(s)[1] <- 'S'
+  return(s)
+}, s = CWM.ses.res, name = as.list(c('C', 'U')), SIMPLIFY = F)
+CWM.ses.res <- do.call('rbind', CWM.ses.res)
+rm(nCWM, CWM.ses.lm)
+invisible(gc())
+```
+
+```{r CWM AB}
+kable(bold(CWM.ses.res[c(1:7,15:21),-2]), row.names = F)
+```
+
+# Discussion
+
+## **"Take home messages" to add :**
+
+- **Pantropical and multiscale WES and LES ?**
+- **Decoupled wood and leaf strategies among canopy and understorey tree species**
+- **WES among canopy tree species**
+- **LES among understorey tree species**
+
+We found back economics spectra evidenced by @wright_worldwide_2004 and @chave_towards_2009 at finer scale than @messier_trait_2016 suggested (figure 1). This result advocate for a pantropical and multiscale oganisation of tropical plant strategies in two separated economics spectra. Still our results suggest that this two spectra are decoupled between canopy and understorey tree species, whereas existing in both guilds. Canopy tree species being the first layer of forest ecosystem interacting with external abiotic environment shows major variation in wood economics spectrum (table 3). Indeed wood economic spectrum is related to mechanical resistance, disturbance tolerance and water conductivity efficiency. Thus understorey tree will benefit from a mircoclimate **[ref?]** generated by the presence of the canopy tree. In this microclimate, leaf economics spectrum is then a major axis of strategy to answer to a changing light environment and soil fertility.
+
+## Wood and leaf economics hold at the local scale
+
+We found an increasing trait variation within individuals, within species, and between species (table 2). Our analyses thus reveal that the primary source of trait variation within and among communities is the inter-species variation, justifying the use of species mean traits for the study of tropical tree guild assembly. The PCA of functional trait variation among species displayed two main dimensions (figure 1), very similar to the ones found by @baraloto_decoupled_2010 and @fortunel_leaf_2012. Those authors interpreted these axes as independent wood and leaf economics spectra. We found that SLA and LDMC tend to covary negatively along the leaf economics spectrum, which be seen as a trade-off between productivity, with less carbon investment and higher photosynthesis rates, and persistence, with more leaf defense and investment [@wright_worldwide_2004]. A second major axis of trait variation opposed wood density to leaf area and thickness. It may be interpreted as an axis opposing stress tolerant species, with denser wood, to competitive species, with thicker and larger leaves, conferring a higher efficiency in water conductivity **[ref?]**. It may thus be interpreted as the wood economics spectrum firstly introduced by @chave_towards_2009, and then discussed by @baraloto_decoupled_2010. Interestingly, @baraloto_decoupled_2010 found an independence between the leaf and wood economics spectra and their wood economics spectrum also showed an opposition between hardwood species having small thin leaves and light wood species having large thick leaves.
+
+Furthermore, our results are similar to the ones found by @fortunel_leaf_2012, where basic PCA axes also represented leaf and wood economics spectra (inverted compare to us). Noticeably, our analysis integrated less traits (5 against 14), less species (89 against 758), and considered a set of species found in a local forest-plot while @fortunel_leaf_2012 considered a regional set of species from French Guiana and Peru (i.e. the opposite ends of Amazonia). Therefore, our results shows that the economics spectra found at a regional scale in the Neotropics are also valid at a far more local scale in an Indian rainforest. This result does support the arguments by @messier_trait_2016 and suggests that the two observed spectra underline major ecological strategies in tropical forests, even locally.
+
+## Canopy and understorey species assembly rely on different economics spectra
+
+We found a significanlty higher variance of canopy tree species around the wood economic spectrum (WES) rather than the leaf economic spectrum (LES). Similarly understorey tree species seemed to have higher variance around leaf economic spectra (LES) rather than wood economics spectra (WES), besides it was not significant at a level $\alpha = 0.05$ (table 3). Those results advocates for decoupled strategies between species of understorey and canopy guilds [@duque2002different]. Indeed canopy tree species could deploy strategies to endorse the role of first layer against external abiotic environment. Those strategies will come through wood economic spectrum (WES) to ensure mechanical resistance, disturbance tolerance and water conductivity efficiency **[biblio ?]**. On the other hand, understorey tree species will encounter constraints directly linked to canopy guild limiting light availability. Thus they will need to deploy strategies linked to ressource acquisition coming through leaf economics spectrum (LES) **[biblio ?]**. 
+
+Furthermore, we analyzed functional composition of $30*30m^2$ guilds from canopy and understorey, as well as the variation of this composition with environment across a 10-ha forest plot. We foud that the variations in trait composition along the environmental gradients differ between canopy and understorey species, with a marked variation in traits associated to the leaf economic spectrum (LES) for understorey species and to the wood economics scpectrum (WES) for canopy species. In the former case, the curvature and the canopy height both had a significant effect on the LES-based composition of understorey tree species, whereas southwest orientation and curvature both had a significant effect on the WES-based composition of canopy tree species (table 4).
+
+## Environment influence guild-level functionnal composition
+
+We should note that relations found between guilds weighted means (GWM) and environment are globally weak (table 4, most of $R^2 \leq 0.1$, and see supplementary materials S4). This low explanatory power is advocating for underlying null process related to neutral theory [@hubbell_unified_2001]. Null process can effectivelly be responsible for the majority of observed variance in functionnal composition at a such fine scale **[ref?]**. Studies highlighting environmental filtering effect often present a higher environmental variation than in our study site [@bernard-verdier_community_2012]. In parallel, the 10*ha plot scale is really low and partially responsible for the small environmental variation. @kraft_functional_2008 detected topographical filtering on functional trait and @gunatilleke_specieshabitat_2006 observed niche differentiation on 25 ha tropical forest plots including large flat valleys.
+
+Curvature is affecting the variation of leaf economics in understorey species and the variation of wood economics in canopy tree species. A locally convex context would accumulate more soil and attract more water, increasing soil fertility and allowing persistence of species investing more in leaf resource acquisition in understorey with higher SLA and lower LDMC, or less in wood ressources in canopy with lighter wood and bigger leaves converging more toward an homogeneous guild composition (lower CWV, unshown result). Curvature for some functional traits, as wood density, LDMC and SLA, is also doubled by a similar effect of the wetness variable expressing also the water accumulation in convex context resulting in increased soil fertility. Economics spectra are not perfectly divided between canopy and understorey, with wood and leaf respectivelly, for instance LDMC of canopy species also decreased with curvature whereas WD increased in understorey.
+
+The influence of aspect on forest composition is little documented in tropical forests. In a similar context that our study site, @gunatilleke_specieshabitat_2006 gave some intuitive insights on the effect of aspect on forest composition: he suggested that aspect through monsoon had a potential effect on rainforests. @bunyan_effect_2015 tested the effect of aspect on the occurence of forest fragments in a forest-grassland mosaic and foud that southwest orientation strongly determined the presence of forest in mountain rainforests of Western Ghats. They suggested that it could result from monsoon winds. In our context, monsoon winds are south-west oriented, and are expected to be a major source of disturbance in forests [@soman_aspects_1990]. 
+
+The Uppangala plot is situated in a topographically complex area with steep slopes mostly organized along southwest-oriented crests. In this context it is diffcult to predict wind flow and orientation inside the 10-ha plot topography. We propose two explanation, hardwood could be selected for mechanical resistance in more disturbed souwhtwest oriented area or topography provoke a turbulences on northeast oriented areas responsible of more disturbance and death events in the forest history resulting in lightwood filtering [@larjavaara_rethinking_2010]. In both case it seems reasonable that canopy tree species are the most influenced by disturbance events linked to monsoon, and may even buffer the effect on understorey species.
+
+Biotic factors, illustrated here by the canopy height and the basal area, also had a significant effect on the LES-based composition of understorey tree species. We indeed found higher SLA values and lower LDMC values in understorey assemblages that are located under stands characterized by a tall canopy and a high basal area. This results contrasts with the expectation that understorey species invest in higher LDMC for higher leaf lifespan, at the expense of SLA, unde light-limited conditions [@kitajima_tissue-level_2010]. The Uppangala forest is characterized by a large heterogeneity of canopy height allowing light to penetrate more in lower strata, maybe especially more in high canopy context covering less closely understorey, resulting in those observation on the leaf economics variation of understorey species. **Not convincing, better explanation ?**
+
+# *Acknowledgement*
+
+* French Institute of Pondicherry (FIP)
+* Cedric Vega for the extension of the plot
+
+# Supplementary materials
+
+## S1: Principal component analysis of topographical variables
+
+```{r PCA Env}
+lambda <- pca.env$sdev * sqrt(nrow(pca.env$scores))
+pca.env.var = apply(pca.env$score, 2, var)
+plot(t(t(pca.env$scores)/lambda),pch=16, col = 'lightgrey',
+     xlab = paste('Axe 1 -', round(pca.env.var[1]/sum(pca.env.var)*100, 2), '%'),
+     ylab = paste('Axe 2 -', round(pca.env.var[2]/sum(pca.env.var)*100, 2), '%'))
+Hmisc::subplot(function(){
+  b <- barplot((pca.env.var / sum(pca.env.var)), las = 2,
+          cex.names = 0.7, axes = T, names.arg = NA) ;
+  lines(b, bstick(length(pca.env.var)), col = 'red') ;
+  legend('topright', c('Eigen values', 'broken stick'), fill = c('grey', 'red'), cex = 0.6,
+         box.col = 'white')},
+  x=grconvertX(c(0.07,0.37), from='npc'),
+  y=grconvertY(c(0.025,0.30), from='npc')
+)
+par(new=T)
+Rot <- t(t(pca.env$loadings)*lambda)
+XLIM <- c(-max(abs(Rot[,1])),max(abs(Rot[,1])))
+XLIM <- XLIM+(XLIM*0.2)
+plot(Rot,col=4,axes=FALSE,xlim=XLIM,ylim=XLIM,pch="",xlab = "", ylab = "")
+lines(XLIM, c(0,0), lty = 2, lwd = 2)
+lines(c(0,0), XLIM, lty = 2, lwd = 2)
+col <- c("#1874CD", "#008B00", "#CD3700", "#9400D3")[c(2, 3, 1, 1, 1,  2, 1, 4)]
+arrows (rep(0,nrow(pca.env$loadings)),rep(0,nrow(pca.env$loadings)),
+        Rot[,1],Rot[,2],lwd=2,col=col)
+legend('topright', c('Elevation', 'Slope', 'Water flow', 'South-West'),
+       text.col = col, cex = 1.2)
+text (Rot[,1:2], pos = c(2, 2, 2, 1, 1, 3, 3, 4), rownames(Rot),cex=1.2,col=col)
+axis (3)
+axis (4)
+```
+
+Supplementary material S1: Principal component analysis (PCA) performed on topgraphical variables. *Botom left corner subplot represents the eigen values (grey bars) compare to a broken stick distribution for 7 components (red line). SW stand for southwesterness.*
+
+Curvature covaries with profile curvature, plan curvature, distance to potential rivers and the PCA first axis. Elevation and wetness are opposed in the principal component analysis and slope and south-westerness does not seem to covary much with other variables **Not precise**.
+
+## S2: Linear models of the standardized effect size (SES) for each trait of GWMs, for canopy (C) and understorey (U) guilds, in presence-absence
+
+```{r CWM PA}
+kable(bold(CWM.ses.res[c(8:14,22:28),-2]), row.names = F)
+```
+
+Supplementary material S2: Linear models of the standardized effect size (SES) for each trait of GWMs, for canopy (C) and understorey (U) guilds, in presence-absence _We performed stepwise selection of the predictors including slope, curvature, wetness southwesterness (SW), canopy height (Canopy) and basal area (BA), and only the selected predictors are shown. See table 1 for abbreviations. Bold and number of asterisk indicates the significance threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001)._
+
+## S3: Standard effect size (SES) of wood density  (WD) for canopy (C) tree species
+
+```{r WD}
+data <- cbind(CWM.ses$C$abundance$WD, R$C)
+names(data)[1] <- 'WD'
+par(mfrow = c(3,2)) # Affichage des relations individuelles
+plot(WD ~ Slope, data) ; abline(h = c(0.95, 0, -0.95), lty = c(2, 1, 2))
+plot(WD ~ Curvature, data) ; abline(h = c(0.95, 0, -0.95), lty = c(2, 1, 2))
+plot(WD ~ Wetness, data) ; abline(h = c(0.95, 0, -0.95), lty = c(2, 1, 2))
+plot(WD ~ SW, data) ; abline(h = c(0.95, 0, -0.95), lty = c(2, 1, 2))
+plot(WD ~ Canopy, data) ; abline(h = c(0.95, 0, -0.95), lty = c(2, 1, 2))
+plot(WD ~ BA, data) ; abline(h = c(0.95, 0, -0.95), lty = c(2, 1, 2))
+rm(data, CWM.ses)
+```
+
+Supplementary materials S3 : Standard effect size (SES) of wood density  (WD) for canopy (C) tree species. *Each subplot show  standard effect size (SES) of wood density (WD) for canopy (C) tree species along one environmental variable gradient. Continuous line represents a null SES, whereas dashed line represents limits of the confidence interval above which SES are considered as significant. See table 1 for abbreviation.*
+
+# References
