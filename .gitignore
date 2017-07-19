@@ -12,5 +12,7 @@ inst/doc/*.png
 inst/doc/*_files
 inst/doc/*_cache
 inst/phylogeny
-inst/doc/*.csl
+*.csl
 inst/extdata.zip
+inst/doc/draft/_*
+inst/doc/draft_save/

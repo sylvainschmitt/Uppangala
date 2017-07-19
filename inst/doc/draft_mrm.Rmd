@@ -259,6 +259,17 @@ Leven's tests revealed a significantly higher variance for canopy tree species o
 
 Table 3: Leven's test of PCA's guilds variance. *Guilds variance inside the principal component analysis (PCA) were compared with Leven's test on PCA first and second axes.*
 
+```{r hypervolume}
+data <- PFT_sp[-which(is.na(PFT_sp$WD)), c('LA', 'WD', 'LT', 'LDMC', 'SLA', 'strata')]
+bd <- estimate_bandwidth(data[-6])
+C <- hypervolume(subset(data, strata == 'C')[-6], bandwidth = bd, name = 'C')
+U <- hypervolume(subset(data, strata == 'U')[-6], bandwidth = bd, name = 'U')
+UC <- new("HypervolumeList", HVList = list(C = C, U = U))
+set <- hypervolume_set(C, U, check_memory = F)
+hypervolume_sorensen_overlap(set)
+get_volume(set)
+```
+
 ```{r variance PCA}
 PCAscores1 <- ade4::dudi.pca(PFT_sp[-which(is.na(PFT_sp$WD)), c('LA', 'WD', 'LT', 'LDMC', 'SLA')], scannf = F)$l1
 names(PCAscores1) <- c('WES', 'LES')
