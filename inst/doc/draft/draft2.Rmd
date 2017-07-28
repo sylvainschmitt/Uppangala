@@ -6,8 +6,7 @@ csl: mee.csl
 bibliography: refs.bib
 knit: "bookdown::render_book"
 output:
-  bookdown::gitbook:
-    split_by: none
+  bookdown::gitbook
 ---
 
 ```{r config, message=FALSE, warning=FALSE, include=FALSE}
@@ -28,12 +27,23 @@ opts_chunk$set(
 cv <- function(x, na.rm = T)
   sd(x, na.rm = na.rm)/mean(x, na.rm = na.rm)
 path <- '~/Documents/IFP/Uppangala/inst/doc/draft_save/'
-n = 9 # Random repetitions
+n = 999 # Random repetitions
 ```
 
 # Introduction {-}
 
+In this study, we used a trait-based approach to study separately the assembly of canopy and understorey tree species along topographical and biotic gradients in a large forest plot (10ha) loacted in Western Ghats biodiversity hotspot (Myers et al. 2000), India. Low elevation rainforests in South India are remarkably heterogeneous in vertical structure and encompass distinctive guilds across the vertical strata (Pascal 1988). It thus provides an appropriate context to adress guild-dependent assembly rules and ecological strategies in tropical rainforests. Although considered as wet evergreen, the forest undergoes contrasted long dry and intense rainy seasons under the influence of monsoon. In this context, we expected water stress and competition for resource to be important drivers of tree functional composition. We investigated how both canopy and understorey tree species composition varied with local environmental conditions, using appropriate null models. We specifically addressed the following questions:
+
+* Does functional traits variation and covariation reflect basic dimensions of ecological strategy in the
+rainforest ?
+* Does the local functional composition reflect the influence of abiotic and biotic drivers of community
+dynamics within guilds ?
+
+In this document I will only briefly present all analysis, one by one, with their methods and results but without any discussion.
+
 # Data
+
+We used functional traits describe in table \@ref(tab:Traits) gathered in Uppangala forest among 89 species. In subsequent analysis we used log transformation of LA and SLA.
 
 ```{r Traits}
 PFT <- genPFT()
@@ -52,6 +62,11 @@ kable(data.frame(
 # Trait variation and covariation
 
 ## Coefficients of variation
+
+We calculated coefficient of variations of trait values among leaves of the same individual (intra-individual), among trees of the same species (intra-specific for species with more than one individual), and among species (inter-specific) with following formula :
+$$Coefficient~of~Variation = \frac{standard~deviation}{mean} $$
+
+We found an overall increase of functional trait variation from intra-individual to inter-specific levels (see table \@ref(tab:CV)), even though LA showed almost as large variability at intra-individual than at intra-specific levels (CV individual = 0.20 and CV species = 0.24, wilcoxon rank test p − value = 0.137).
 
 ```{r CV}
 PFT %>% 
@@ -100,6 +115,10 @@ PFT %>%
 ```
 
 ## Principal component analysis
+
+We then performed a principal component analysis (PCA) of the mean value of traits per species to identify main dimensions of ecological strategies along which traits can covary among guilds (see figure \@ref(fig:PCA)).
+
+The first axis of the principal component analysis (PCA) of mean species trait values was basically related to wood density and structural leaf trait variations (LT, LA, LDMC), thus opposing species with thick, big leaves and lightwood to species with dense leaves and hardwood. The second axis mostly opposed SLA to LDMC, and to a less extent to wood density. However, wood density was orthogonal to SLA in the plan 1-2 of the PCA indicating independence between those two traits.
 
 ```{r PCA,  fig.cap='Principal Component Analysis (PCA) of species mean trait values. First axis, in red, is named wood economic spectrum (WES) ; whereas second axis, in green, is named leaf economic spectrum (LES). See table \\@ref(tab:Traits) for abbreviation.'}
 PFT <- PFT %>% 
@@ -189,6 +208,8 @@ rm(PFT, PFT_sp, trait)
 load(file.path(path, 'envcom.Rdata'))
 ```
 
+Finally we calculated hypervolume of functional traits for each guilds and their overlap. We also calculated 999 nul hypervolumes randomizing species strata. Contrarily to a previous document, observed hypervolume overlap between the two guilds was not significantly lower than null expectations ($p = 0.165$, see figure \@ref(fig:hypervolume)). This could be explained by the change of formula used to calcul hypervolume overlap in the last version of the hypervolume R package (sorensen overlap changed in version 2.1). We still have a methodological question, the hypervolume is built on unnormalized traits values. Traits standrad deviation is used to sample around the species points, so there is no issu around the bandwidth. But we still can question the fact that variable with higher value variations can diminish the overlap signal.
+
 ```{r hypervolume, fig.cap='Functional hypervolume overlap of canopy and understorey species.'}
 bd <- Q %>% 
   filter(!is.na(WES)) %>% 
@@ -226,10 +247,12 @@ data.frame(x = n_overlap) %>%
   geom_vline(xintercept = overlap,
              col = 'red') +
   ggtitle(paste('pvalue =', 
-                round((rank(c(overlap, n_overlap))/(n+1))[1], 2))) +
+                round((rank(c(overlap, n_overlap))/(n+1))[1], 3))) +
   xlab('Overlap null distribution')
 ```
 
+ Effectivelly some traits seems to show strong differentation between guilds (see figure and table \@ref(tab:hypervolume2)).
+ 
 ```{r hypervolume2}
 data <- Q %>% 
   filter(!is.na(WES)) %>% 
@@ -258,7 +281,23 @@ rm(hv, set, data, CalcOverlap, bd)
 
 # Functional composition of guilds
 
+We subdivided the 10-ha plot into $30*30 m^2$ quadrats leading to 110 local communities. We analyze the functionnal composition of the guilds in the 110 communities. We calculated weighted mean [GWM, where G stands for "guild"; @violle_let_2007] for each guild in each community. In the quadrat $j$, GWM of trait $t$ was the mean of trait values $t_{i}$ of species $i$ weighted by species relative abundance $p_{i}$:
+$$GWM_{j} = \sum_{i=1}^{S} p_{i,j} * t_{i,j} ~ (1)$$
+where $S$ is the number of species in the quadrat $j$. We also calculated the average trait values based on presence-absence values to assess the influence of less abundant and rare species on community trait composition [@cingolani_filtering_2007]. 
+
+To test for any significant changes in functional composition among guilds, we devised a null model approach. We described further each null moels when introducing GWM or GWV results. We performed 999 randomizations of null models and we derived a two-tailed test of the proportion of guilds deviating from the null expectation, with adjusted p-values by Benjamini-Hochberg correction. Shifts in GWM or GWV values with changing environmental conditions could reflect the shift of species strategies across assemblages [@ackerly_trait-based_2007].
+
+To characterize the patterns of deviation from the null model, we also calculated standardized effect sizes (SES) as
+$$SES = \frac{(I_{obs} - I_{null})}{\sigma _{null}} (2)$$
+where $I_{obs}$ was the observed metric and $I_{null}$ and $\sigma _{null}$ were the mean and standard deviation of the corresponding null distribution. The influence of environment on SES values was investigated by linear regression with biotic and abiotic factors ($SES_{trait} = Slope + Curvature + Wetness + SW + Canopy + BA$). Analyses were conducted on the five functional traits and the species scores obtained on the two first PCA axes done on the `Trait*Species` matrix .
+
 ## Guild weighted means : nul model 1
+
+We used a null model (NM1) which randomized trait values among species in the whole plot (permuting raw in `Trait*Species` matrix) [@bernard-verdier_community_2012].
+
+We foud back the results of previous documents (see table \@ref(tab:GWM1)). The guild weighted trait means (GWM) varied weakly but significantly along the environmental gradients for both canopy (C) and understorey (U) guilds. Functional traits of canopy and understorey tree species were both influenced by curvature, but not for the same traits, and two major differences were observed between the two guilds. The effect of south-west orientation on functional composition was observed only for canopy tree species, while the effect of canopy height affected mostly understory guild composition.
+
+I did not detailed back specific trait results. And the question to keep or not economics spectrum in the table is opened ?
 
 ```{r GWM1}
 GWM <- L %>% 
@@ -343,6 +382,10 @@ GWM_ses %>%
 
 ## Guild weighted means : nul model 3
 
+We used a null model (NM3) which randomized species among guilds in the whole plot (see table \@ref(tab:GWM3)).
+
+We found that **curvature** was responsible for the guilds differenciation for most of the traits. Increased curvature resulted in denser lwood and leaves with high SLA in canopy, against lighter wood, low SLA, but bigger and thicker leaves in understorey. Some curvature results were congruent with **Wetness** variable. **South-West** orientation diminished the leaf area while increasing leaf density for canopy tree species. Finally, **Canopy** height and **basal area** affected in opposite ways SLA. Increased canopy height and decreased basal area resulted in lower SLA in canopy and increased SLA in understorey.
+
 ```{r GWM3}
 GWM <- L %>% 
   t() %>% 
@@ -408,6 +451,10 @@ GWM_ses %>%
 ```
 
 ## Guild weighted variances : nul model 2
+
+The second model (NM2) randomized abundances among species within each guild but kept the observed list of species and trait values unchanged inside guilds [@bernard-verdier_community_2012].
+
+We found significant relationships between the standardized effect size (SES) of GWVs and the environmental predictors (see table \@ref(tab:GWV3)). **Wetness** decreased variance of wood density in canopy and all traits in understorey. **Curvature** increased LDMC variance in canopy. **Sout-West** orientation results in decreased variance of density of wood and leaf in understorey. Finally, **Canopy** hieght diminished variance of leaf are and density in canopy whereas **basal aea** increased variance of SLA in both strata and increased leaf area variance in canopy. 
 
 ```{r GWV3}
 GWV <- L %>% 
@@ -487,6 +534,8 @@ GWV_ses %>%
 # Supplementary materials
 
 ## Principal component analysis of environment
+
+No comment yet.
 
 ```{r PCAenv, fig.cap='Principal component analysis (PCA) performed on topgraphical variables. SW stand for southwesterness.'}
 pca.env %>% 
