@@ -7,7 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Decoupled wood and leaf strategies among canopy and understorey tree in a low-elevation rainforest of India</title>
   <meta name="description" content="Decoupled wood and leaf strategies among canopy and understorey tree in a low-elevation rainforest of India">
-  <meta name="generator" content="bookdown 0.4 and GitBook 2.6.7">
+  <meta name="generator" content="bookdown 0.5 and GitBook 2.6.7">
 
   <meta property="og:title" content="Decoupled wood and leaf strategies among canopy and understorey tree in a low-elevation rainforest of India" />
   <meta property="og:type" content="book" />
@@ -25,7 +25,7 @@
 <meta name="author" content="Sylvain Schmitt sylvain.schmitt@agroparistech.fr">
 
 
-<meta name="date" content="2017-07-28">
+<meta name="date" content="2017-09-30">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -105,7 +105,7 @@
 <div id="header">
 <h1 class="title">Decoupled wood and leaf strategies among canopy and understorey tree in a low-elevation rainforest of India</h1>
 <h4 class="author"><em>Sylvain Schmitt <a href="mailto:sylvain.schmitt@agroparistech.fr">sylvain.schmitt@agroparistech.fr</a></em></h4>
-<h4 class="date"><em>2017-07-28</em></h4>
+<h4 class="date"><em>2017-09-30</em></h4>
 </div>
 <div id="introduction" class="section level1 unnumbered">
 <h1>Introduction</h1>
@@ -242,7 +242,7 @@
 <p>We then performed a principal component analysis (PCA) of the mean value of traits per species to identify main dimensions of ecological strategies along which traits can covary among guilds (see figure <a href="#fig:PCA">2.1</a>).</p>
 <p>The first axis of the principal component analysis (PCA) of mean species trait values was basically related to wood density and structural leaf trait variations (LT, LA, LDMC), thus opposing species with thick, big leaves and lightwood to species with dense leaves and hardwood. The second axis mostly opposed SLA to LDMC, and to a less extent to wood density. However, wood density was orthogonal to SLA in the plan 1-2 of the PCA indicating independence between those two traits.</p>
 <div class="figure"><span id="fig:PCA"></span>
-<img src="Uppangala-draft_files/figure-html/PCA-1.png" alt="Principal Component Analysis (PCA) of species mean trait values. First axis, in red, is named wood economic spectrum (WES) ; whereas second axis, in green, is named leaf economic spectrum (LES). See table \@ref(tab:Traits) for abbreviation." width="768" />
+<img src="draft2_files/figure-html/PCA-1.png" alt="Principal Component Analysis (PCA) of species mean trait values. First axis, in red, is named wood economic spectrum (WES) ; whereas second axis, in green, is named leaf economic spectrum (LES). See table \@ref(tab:Traits) for abbreviation." width="768" />
 <p class="caption">
 Figure 2.1: Principal Component Analysis (PCA) of species mean trait values. First axis, in red, is named wood economic spectrum (WES) ; whereas second axis, in green, is named leaf economic spectrum (LES). See table <a href="#tab:Traits">1.1</a> for abbreviation.
 </p>
@@ -250,75 +250,8 @@ Figure 2.1: Principal Component Analysis (PCA) of species mean trait values. Fir
 </div>
 <div id="hypervolumes" class="section level2">
 <h2><span class="header-section-number">2.3</span> Hypervolumes</h2>
-<p>Finally we calculated hypervolume of functional traits for each guilds and their overlap. We also calculated 999 nul hypervolumes randomizing species strata. Contrarily to a previous document, observed hypervolume overlap between the two guilds was not significantly lower than null expectations (<span class="math inline">\(p = 0.165\)</span>, see figure <a href="#fig:hypervolume">2.2</a>). This could be explained by the change of formula used to calcul hypervolume overlap in the last version of the hypervolume R package (sorensen overlap changed in version 2.1). We still have a methodological question, the hypervolume is built on unnormalized traits values. Traits standrad deviation is used to sample around the species points, so there is no issu around the bandwidth. But we still can question the fact that variable with higher value variations can diminish the overlap signal.</p>
-<pre><code>## Choosing repsperpoint=2500 (use a larger value for more accuracy.)
-## Choosing repsperpoint=2500 (use a larger value for more accuracy.)
-## Choosing npoints_max=17221 (use a larger value for more accuracy.)
-## Using minimum density of 2.143917</code></pre>
-<div class="figure"><span id="fig:hypervolume"></span>
-<img src="Uppangala-draft_files/figure-html/hypervolume-1.png" alt="Functional hypervolume overlap of canopy and understorey species." width="768" />
-<p class="caption">
-Figure 2.2: Functional hypervolume overlap of canopy and understorey species.
-</p>
-</div>
-<p>Effectivelly some traits seems to show strong differentation between guilds (see figure and table <a href="#tab:hypervolume2">2.2</a>).</p>
-<pre><code>## Choosing repsperpoint=2500 (use a larger value for more accuracy.)
-## Choosing repsperpoint=2500 (use a larger value for more accuracy.)</code></pre>
-<pre><code>## Choosing npoints_max=17221 (use a larger value for more accuracy.)
-## Using minimum density of 2.154135</code></pre>
-<pre><code>## Showing 2000 random points of 10772 for Unique component of (untitled) relative to (untitled)
-## Showing 0 data points of 0 for Unique component of (untitled) relative to (untitled)
-## Showing 2000 random points of 6653 for Unique component of (untitled) relative to (untitled)
-## Showing 0 data points of 0 for Unique component of (untitled) relative to (untitled)</code></pre>
-<p><img src="Uppangala-draft_files/figure-html/hypervolume2-1.png" width="768" /></p>
-<pre><code>## Retaining 10772 points for 24 inclusion tests.
-## Building tree... done.
-## Querying tree... 0.0416667  done.
-## Retaining 6653 points for 17 inclusion tests.
-## Building tree... done.
-## Querying tree... 0.0588235  done.
-## Retaining 12292 points for 41 inclusion tests.
-## Building tree... done.
-## Querying tree... 0.0243902  done.</code></pre>
-<table>
-<caption><span id="tab:hypervolume2">Table 2.2: </span>means of hypervolumes functional traits</caption>
-<thead>
-<tr class="header">
-<th></th>
-<th align="right">SLA</th>
-<th align="right">WD</th>
-<th align="right">LDMC</th>
-<th align="right">LA</th>
-<th align="right">LT</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>C</td>
-<td align="right">2.583896</td>
-<td align="right">0.5502202</td>
-<td align="right">351.6138</td>
-<td align="right">9.762452</td>
-<td align="right">26.65487</td>
-</tr>
-<tr class="even">
-<td>U</td>
-<td align="right">2.801975</td>
-<td align="right">0.5278438</td>
-<td align="right">309.9395</td>
-<td align="right">8.669367</td>
-<td align="right">26.62143</td>
-</tr>
-<tr class="odd">
-<td>Intersect</td>
-<td align="right">2.641043</td>
-<td align="right">0.6060690</td>
-<td align="right">386.7059</td>
-<td align="right">9.068614</td>
-<td align="right">23.45333</td>
-</tr>
-</tbody>
-</table>
+<p>Finally we calculated hypervolume of functional traits for each guilds and their overlap. We also calculated 999 nul hypervolumes randomizing species strata. Contrarily to a previous document, observed hypervolume overlap between the two guilds was not significantly lower than null expectations (<span class="math inline">\(p = 0.165\)</span>, see figure <a href="#fig:hypervolume"><strong>??</strong></a>). This could be explained by the change of formula used to calcul hypervolume overlap in the last version of the hypervolume R package (sorensen overlap changed in version 2.1). We still have a methodological question, the hypervolume is built on unnormalized traits values. Traits standrad deviation is used to sample around the species points, so there is no issu around the bandwidth. But we still can question the fact that variable with higher value variations can diminish the overlap signal.</p>
+<p>Effectivelly some traits seems to show strong differentation between guilds (see figure and table <a href="#tab:hypervolume2"><strong>??</strong></a>).</p>
 </div>
 </div>
 <div id="functional-composition-of-guilds" class="section level1">
@@ -489,7 +422,7 @@ Figure 2.2: Functional hypervolume overlap of canopy and understorey species.
 </tbody>
 </table>
 <div class="figure"><span id="fig:WD"></span>
-<img src="Uppangala-draft_files/figure-html/WD-1.png" alt="Exemple of standard effect size (SES) of wood density  (WD) for canopy (C) tree species. Each subplot show  standard effect size (SES) of wood density (WD) for canopy (C) tree species along one environmental variable gradient. Continuous line represents a null SES, whereas dashed line represents limits of the confidence interval above which SES are considered as significant. See table \@ref(tab:Traits) for abbreviation." width="768" />
+<img src="draft2_files/figure-html/WD-1.png" alt="Exemple of standard effect size (SES) of wood density  (WD) for canopy (C) tree species. Each subplot show  standard effect size (SES) of wood density (WD) for canopy (C) tree species along one environmental variable gradient. Continuous line represents a null SES, whereas dashed line represents limits of the confidence interval above which SES are considered as significant. See table \@ref(tab:Traits) for abbreviation." width="768" />
 <p class="caption">
 Figure 3.1: Exemple of standard effect size (SES) of wood density (WD) for canopy (C) tree species. Each subplot show standard effect size (SES) of wood density (WD) for canopy (C) tree species along one environmental variable gradient. Continuous line represents a null SES, whereas dashed line represents limits of the confidence interval above which SES are considered as significant. See table <a href="#tab:Traits">1.1</a> for abbreviation.
 </p>
@@ -826,7 +759,7 @@ Figure 3.1: Exemple of standard effect size (SES) of wood density (WD) for canop
 <h2><span class="header-section-number">4.1</span> Principal component analysis of environment</h2>
 <p>No comment yet.</p>
 <div class="figure"><span id="fig:PCAenv"></span>
-<img src="Uppangala-draft_files/figure-html/PCAenv-1.png" alt="Principal component analysis (PCA) performed on topgraphical variables. SW stand for southwesterness." width="768" />
+<img src="draft2_files/figure-html/PCAenv-1.png" alt="Principal component analysis (PCA) performed on topgraphical variables. SW stand for southwesterness." width="768" />
 <p class="caption">
 Figure 4.1: Principal component analysis (PCA) performed on topgraphical variables. SW stand for southwesterness.
 </p>
@@ -835,7 +768,6 @@ Figure 4.1: Principal component analysis (PCA) performed on topgraphical variabl
 </div>
 <div id="references" class="section level1 unnumbered">
 <h1>References</h1>
-
 <div id="refs" class="references">
 <div id="ref-ackerly_trait-based_2007">
 <p>Ackerly, D.D. &amp; Cornwell, W.K. (2007). A trait-based approach to community assembly: Partitioning of species trait values into within- and among-community components. <em>Ecology Letters</em>, <strong>10</strong>, 135–145.</p>
@@ -871,7 +803,7 @@ Figure 4.1: Principal component analysis (PCA) performed on topgraphical variabl
 <script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
 <script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
 <script>
-require(["gitbook"], function(gitbook) {
+gitbook.require(["gitbook"], function(gitbook) {
 gitbook.start({
 "sharing": {
 "github": false,
@@ -895,7 +827,8 @@ gitbook.start({
 "download": null,
 "toc": {
 "collapse": "subsection"
-}
+},
+"search": false
 });
 });
 </script>

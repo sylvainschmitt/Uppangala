@@ -7,6 +7,8 @@ bibliography: refs.bib
 knit: "bookdown::render_book"
 output:
   bookdown::gitbook
+  # bookdown::pdf_book
+  # word_document
 ---
 
 ```{r config, message=FALSE, warning=FALSE, include=FALSE}
@@ -210,7 +212,7 @@ load(file.path(path, 'envcom.Rdata'))
 
 Finally we calculated hypervolume of functional traits for each guilds and their overlap. We also calculated 999 nul hypervolumes randomizing species strata. Contrarily to a previous document, observed hypervolume overlap between the two guilds was not significantly lower than null expectations ($p = 0.165$, see figure \@ref(fig:hypervolume)). This could be explained by the change of formula used to calcul hypervolume overlap in the last version of the hypervolume R package (sorensen overlap changed in version 2.1). We still have a methodological question, the hypervolume is built on unnormalized traits values. Traits standrad deviation is used to sample around the species points, so there is no issu around the bandwidth. But we still can question the fact that variable with higher value variations can diminish the overlap signal.
 
-```{r hypervolume, fig.cap='Functional hypervolume overlap of canopy and understorey species.'}
+```{r hypervolume, eval=FALSE, fig.cap='Functional hypervolume overlap of canopy and understorey species.'}
 bd <- Q %>% 
   filter(!is.na(WES)) %>% 
   select(-LES, -WES, -SpCode, -strata) %>% 
@@ -218,9 +220,9 @@ bd <- Q %>%
   unlist()
 CalcOverlap <- function(traits_strata){
   hv <- lapply(traits_strata, function(strata) 
-    hypervolume::hypervolume(strata[names(bd)], bandwidth = bd, verbose = F))
-  set <- hypervolume::hypervolume_set(hv$C, hv$U, check_memory = F, verbose = F)
-  hypervolume::hypervolume_sorensen_overlap(set)
+    hypervolume::hypervolume(strata[names(bd)], kde.bandwidth = bd, verbose = F))
+  set <- hypervolume::hypervolume_set(hv$C, hv$U, check.memory = F, verbose = F)
+  hypervolume::hypervolume_overlap_statistics(set)
 }
 overlap <- Q %>% 
   filter(!is.na(WES)) %>% 
@@ -231,11 +233,11 @@ overlap <- Q %>%
 # clusterExport(cl, list('Q', 'CalcOverlap', 'bd'))
 # n_overlap <- parSapply(cl, 1:n, function(i) {
 #   library(dplyr)
-#   Q %>% 
-#     filter(!is.na(WES)) %>% 
-#     select(-LES, -WES, -SpCode) %>% 
-#     mutate(strata = sample(strata)) %>% 
-#     split(., .$strata) %>% 
+#   Q %>%
+#     filter(!is.na(WES)) %>%
+#     select(-LES, -WES, -SpCode) %>%
+#     mutate(strata = sample(strata)) %>%
+#     split(., .$strata) %>%
 #     CalcOverlap()
 # })
 # stopCluster(cl)
@@ -249,11 +251,13 @@ data.frame(x = n_overlap) %>%
   ggtitle(paste('pvalue =', 
                 round((rank(c(overlap, n_overlap))/(n+1))[1], 3))) +
   xlab('Overlap null distribution')
+summary(overlap$C)
+CalcOverlap(overlap$C, overlap$U)
 ```
 
  Effectivelly some traits seems to show strong differentation between guilds (see figure and table \@ref(tab:hypervolume2)).
  
-```{r hypervolume2}
+```{r hypervolume2, eval=FALSE}
 data <- Q %>% 
   filter(!is.na(WES)) %>% 
   select(-LES, -WES, -SpCode) %>% 
