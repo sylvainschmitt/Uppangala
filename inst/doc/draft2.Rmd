@@ -25,14 +25,14 @@ library(dplyr)
 library(reshape2)
 library(ggplot2)
 library(ggfortify)
-cores <- 3
+cores <- 16
 opts_chunk$set(
   echo = F, message = F, warning = F, fig.height = 8, fig.width = 8,
   cache = T, cache.lazy = F)
 cv <- function(x, na.rm = T)
   sd(x, na.rm = na.rm)/mean(x, na.rm = na.rm)
 path <- '~/Documents/IFP/Uppangala/inst/doc/draft_save/'
-n = 3 # Random repetitions
+n = 999 # Random repetitions
 ```
 
 # Abstract
@@ -397,10 +397,11 @@ GWM <- L %>%
 # save(GWM_ses, file = file.path(path, 'GWM_NM1_ses.Rdata'))
 load(file.path(path, 'GWM_NM1_ses.Rdata'))
 GWM_ses %>% 
-  select(-community) %>% 
+  select(-community, -LES, -WES) %>% 
   group_by(strata) %>% 
-  summarise_all(mean, na.rm = T) %>% 
-   kable(caption = 'Mean of the standardized effect size (SES) with null model NM1 for each trait of GWMs, for canopy (C) and understorey (U) guilds, in abundance. See table \\@ref(tab:Traits) for abbreviations. Bold and number of asterisk indicates the significance threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001).')
+  mutate_all(function(x) abs(x) > 0.95) %>% 
+  summarise_all(function(x) sum(x, na.rm = T)/length(x)*100) %>% 
+  kable(caption = 'Percentage of community significantly (p-value<0.05) different from null expectations with null model NM1 for each trait of GWMs, for canopy (C) and understorey (U) guilds, in abundance. See table \\@ref(tab:Traits) for abbreviations.')
 ```
 
 #### H1b. Environmental filtering differ in selection of local functional composition between canopy and understorey species
@@ -462,11 +463,12 @@ GWV <- L %>%
 # rm(cl, nL, nGWV)
 # save(GWV_ses, file = file.path(path, 'GWV_NM3_ses.Rdata'))
 load(file.path(path, 'GWV_NM3_ses.Rdata'))
-GWM_ses %>% 
-  select(-community) %>% 
+GWV_ses %>% 
+  select(-community, -LES, -WES) %>% 
   group_by(strata) %>% 
-  summarise_all(mean, na.rm = T) %>% 
-   kable(caption = 'Mean of the standardized effect size (SES) with null model NM3 for each trait of GWVs, for canopy (C) and understorey (U) guilds, in abundance. See table \\@ref(tab:Traits) for abbreviations. Bold and number of asterisk indicates the significance threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001).')
+  mutate_all(function(x) abs(x) > 0.95) %>% 
+  summarise_all(function(x) sum(x, na.rm = T)/length(x)*100) %>% 
+  kable(caption = 'Percentage of community significantly (p-value<0.05) different from null expectations with null model NM3 for each trait of GWVs, for canopy (C) and understorey (U) guilds, in abundance. See table \\@ref(tab:Traits) for abbreviations.')
 ```
 
 ### *Does the local functional composition reflect the influence of abiotic and biotic drivers of community dynamics within guilds ?*
@@ -629,6 +631,7 @@ GWV_ses %>%
   transmute(value = paste(format(estimate, scientific = T, digits = 2, trim = T), 
                           stars(p.value, ns = '   '))) %>% 
   dcast(strata + trait ~ term) %>% 
+  {if(!("Slope" %in% names(.))) mutate(., Slope = NA)} %>% 
   select(strata, trait, Slope, Curvature, Wetness, SW, Canopy, BA) %>% 
   mutate_each(funs(replace(., is.na(.), ' '))) %>% 
   filter(trait != 'LES') %>% 
