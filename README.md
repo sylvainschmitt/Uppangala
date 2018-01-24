@@ -6,7 +6,7 @@ Description
 
 Uppangala tree functionnal traits analysis package
 
-Installation
-------------
+Documents
+---------
 
-Please check `?extdata` and `?phylogeny` to correctly install the package
+-   [draft](http://sylvainschmitt.github.io/Uppangala/draft2)
