@@ -352,15 +352,15 @@ rm(hv, set, data, CalcOverlap, bd)
 #### H1a. Environmental filtering differ in selection of local functional composition between canopy and understorey species
 
 ```{r GWMH1a}
-GWM <- L %>% 
-  t() %>% 
-  data.frame() %>% 
-  mutate(SpCode = row.names(.)) %>% 
-  left_join(Q) %>% 
-  select(-SpCode) %>% 
+GWM <- L %>%
+  t() %>%
+  data.frame() %>%
+  mutate(SpCode = row.names(.)) %>%
+  left_join(Q) %>%
+  select(-SpCode) %>%
   melt(id.vars = c('strata', 'LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'LT'),
-       variable.name = 'community', value.name = 'abundance') %>% 
-  group_by(strata, community) %>% 
+       variable.name = 'community', value.name = 'abundance') %>%
+  group_by(strata, community) %>%
   summarise_each(funs(weighted.mean(., abundance, na.rm = T)), -abundance)
 # nQ <- array(rep(as.matrix(Q), n),
 #             c(dim(Q), n),
@@ -391,15 +391,17 @@ GWM <- L %>%
 # nGWM <- array(unlist(lapply(nGWM, function(x) as.matrix(x[3:9]))),
 #               c(dim(GWM[3:9]), n),
 #               list(row.names(GWM), names(GWM[3:9]), 1:n))
-# GWM_ses <- GWM
-# GWM_ses[3:9] <- (GWM[3:9] - apply(nGWM, 1:2, mean, na.rm = T))/apply(nGWM, 1:2, sd, na.rm = T)
-# rm(cl, nQ, nGWM)
-# save(GWM_ses, file = file.path(path, 'GWM_NM1_ses.Rdata'))
-load(file.path(path, 'GWM_NM1_ses.Rdata'))
-GWM_ses %>% 
+# rm(cl, nQ)
+# save(nGWM, file = file.path(path, 'nGWM_NM1.Rdata'))
+load(file.path(path, 'nGWM_NM1.Rdata'))
+GWM_pval <- GWM
+GWM_pval[3:9] <- apply(
+  array(c(as.matrix(GWM[3:9]), nGWM), c(dim(GWM[3:9]), n+1)), 
+  1:2, function(x) rank(x)[1]/(n+1))
+GWM_pval %>% 
   select(-community, -LES, -WES) %>% 
   group_by(strata) %>% 
-  mutate_all(function(x) abs(x) > 0.95) %>% 
+  mutate_all(function(x) findInterval(x, c(0.05, 0.95)) == 1) %>% 
   summarise_all(function(x) sum(x, na.rm = T)/length(x)*100) %>% 
   kable(caption = 'Percentage of community significantly (p-value<0.05) different from null expectations with null model NM1 for each trait of GWMs, for canopy (C) and understorey (U) guilds, in abundance. See table \\@ref(tab:Traits) for abbreviations.')
 ```
@@ -407,23 +409,23 @@ GWM_ses %>%
 #### H1b. Environmental filtering differ in selection of local functional composition between canopy and understorey species
 
 ```{r GWVH1b}
-GWV <- L %>% 
-  t() %>% 
-  data.frame() %>% 
-  filter(sum(.) > 2) %>% 
-  mutate(SpCode = row.names(.)) %>% 
-  left_join(Q) %>% 
-  select(-SpCode) %>% 
+GWV <- L %>%
+  t() %>%
+  data.frame() %>%
+  filter(sum(.) > 2) %>%
+  mutate(SpCode = row.names(.)) %>%
+  left_join(Q) %>%
+  select(-SpCode) %>%
   melt(id.vars = c('strata', 'LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'LT'),
-       variable.name = 'community', value.name = 'abundance') %>% 
+       variable.name = 'community', value.name = 'abundance') %>%
   melt(id.vars = c('strata', 'community', 'abundance'),
-       variable.name = 'trait', value.name = 'trait_value') %>% 
+       variable.name = 'trait', value.name = 'trait_value') %>%
   left_join(melt(GWM, id.vars = c('strata', 'community'),
-                 variable.name = 'trait', value.name = 'GWM')) %>% 
-  group_by(strata, community, trait) %>% 
-  mutate(GWV = (trait_value - GWM)^2) %>% 
-  select(-trait_value, -GWM) %>% 
-  summarise_each(funs(weighted.mean(., abundance, na.rm = T)), -abundance) %>% 
+                 variable.name = 'trait', value.name = 'GWM')) %>%
+  group_by(strata, community, trait) %>%
+  mutate(GWV = (trait_value - GWM)^2) %>%
+  select(-trait_value, -GWM) %>%
+  summarise_each(funs(weighted.mean(., abundance, na.rm = T)), -abundance) %>%
   dcast(strata + community ~ trait)
 # nL <- array(replicate(n, t(apply(L, 1, function(x){
 #   x[Q[which(Q$strata == "C"), "SpCode"]][x[Q[which(Q$strata == "C"), "SpCode"]] != 0] <- sample(x[Q[which(Q$strata == "C"), "SpCode"]][x[Q[which(Q$strata == "C"), "SpCode"]] != 0])
@@ -458,12 +460,14 @@ GWV <- L %>%
 # nGWV <- array(unlist(lapply(nGWV, function(x) as.matrix(x[3:9]))),
 #               c(dim(GWV[3:9]), n),
 #               list(row.names(GWV), names(GWV[3:9]), 1:n))
-# GWV_ses <- GWV
-# GWV_ses[3:9] <- (GWV[3:9] - apply(nGWV, 1:2, mean, na.rm = T))/apply(nGWV, 1:2, sd, na.rm = T)
-# rm(cl, nL, nGWV)
-# save(GWV_ses, file = file.path(path, 'GWV_NM3_ses.Rdata'))
-load(file.path(path, 'GWV_NM3_ses.Rdata'))
-GWV_ses %>% 
+# rm(cl, nL)
+# save(nGWV, file = file.path(path, 'nGWV_NM3.Rdata'))
+load(file.path(path, 'nGWV_NM3.Rdata'))
+GWV_pval <- GWV
+GWV_pval[3:9] <- apply(
+  array(c(as.matrix(GWV[3:9]), nGWV), c(dim(GWV[3:9]), n+1)), 
+  1:2, function(x) rank(x)[1]/(n+1))
+GWV_pval %>% 
   select(-community, -LES, -WES) %>% 
   group_by(strata) %>% 
   mutate_all(function(x) abs(x) > 0.95) %>% 
@@ -516,11 +520,11 @@ GWM <- L %>%
 # nGWM <- array(unlist(lapply(nGWM, function(x) as.matrix(x[3:9]))),
 #               c(dim(GWM[3:9]), n),
 #               list(row.names(GWM), names(GWM[3:9]), 1:n))
-# GWM_ses <- GWM
-# GWM_ses[3:9] <- (GWM[3:9] - apply(nGWM, 1:2, mean, na.rm = T))/apply(nGWM, 1:2, sd, na.rm = T)
-# rm(cl, nQ, nGWM)
-# save(GWM_ses, file = file.path(path, 'GWM_NM2_ses.Rdata'))
-load(file.path(path, 'GWM_NM2_ses.Rdata'))
+# rm(cl, nQ)
+# save(nGWM, file = file.path(path, 'nGWM_NM2.Rdata'))
+load(file.path(path, 'nGWM_NM2.Rdata'))
+GWM_ses <- GWM
+GWM_ses[3:9] <- (GWM[3:9] - apply(nGWM, 1:2, mean, na.rm = T))/apply(nGWM, 1:2, sd, na.rm = T)
 GWM_ses %>% 
   melt(id.vars = c('strata', 'community')) %>% 
   rename(trait = variable) %>% 
@@ -580,43 +584,9 @@ GWV <- L %>%
   select(-trait_value, -GWM) %>% 
   summarise_each(funs(weighted.mean(., abundance, na.rm = T)), -abundance) %>% 
   dcast(strata + community ~ trait)
-# nL <- array(replicate(n, t(apply(L, 1, function(x){
-#   x[Q[which(Q$strata == "C"), "SpCode"]][x[Q[which(Q$strata == "C"), "SpCode"]] != 0] <- sample(x[Q[which(Q$strata == "C"), "SpCode"]][x[Q[which(Q$strata == "C"), "SpCode"]] != 0])
-#   x[Q[which(Q$strata == "U"), "SpCode"]][x[Q[which(Q$strata == "U"), "SpCode"]] != 0] <- sample(x[Q[which(Q$strata == "U"), "SpCode"]][x[Q[which(Q$strata == "U"), "SpCode"]] != 0])
-#   return(x)
-#   }))), c(dim(L), n), list(row.names(L), names(L), 1:n))
-# cl <- makeCluster(cores)
-# clusterExport(cl, list('nL', 'Q', 'GWM'))
-# nGWV <- parApply(cl, nL, 3, function(x){
-#   library(dplyr)
-#   library(reshape2)
-#   x %>%
-#     t() %>%
-#     data.frame() %>%
-#     filter(sum(.) > 2) %>%
-#     mutate(SpCode = row.names(.)) %>%
-#     left_join(Q) %>%
-#     select(-SpCode) %>%
-#     melt(id.vars = c('strata', 'LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'LT'),
-#          variable.name = 'community', value.name = 'abundance') %>%
-#     melt(id.vars = c('strata', 'community', 'abundance'),
-#          variable.name = 'trait', value.name = 'trait_value') %>%
-#     left_join(melt(GWM, id.vars = c('strata', 'community'),
-#                    variable.name = 'trait', value.name = 'GWM')) %>%
-#     group_by(strata, community, trait) %>%
-#     mutate(GWV = (trait_value - GWM)^2) %>%
-#     select(-trait_value, -GWM) %>%
-#     summarise_each(funs(weighted.mean(., abundance, na.rm = T)), -abundance) %>%
-#     dcast(strata + community ~ trait)
-# })
-# stopCluster(cl)
-# nGWV <- array(unlist(lapply(nGWV, function(x) as.matrix(x[3:9]))),
-#               c(dim(GWV[3:9]), n),
-#               list(row.names(GWV), names(GWV[3:9]), 1:n))
-# GWV_ses <- GWV
-# GWV_ses[3:9] <- (GWV[3:9] - apply(nGWV, 1:2, mean, na.rm = T))/apply(nGWV, 1:2, sd, na.rm = T)
-# rm(cl, nL, nGWV)
-# save(GWV_ses, file = file.path(path, 'GWV_NM3_ses.Rdata'))
+load(file.path(path, 'nGWV_NM3.Rdata'))
+GWV_ses <- GWV
+GWV_ses[3:9] <- (GWV[3:9] - apply(nGWV, 1:2, mean, na.rm = T))/apply(nGWV, 1:2, sd, na.rm = T)
 load(file.path(path, 'GWV_NM3_ses.Rdata'))
 GWV_ses %>% 
   melt(id.vars = c('strata', 'community')) %>% 
