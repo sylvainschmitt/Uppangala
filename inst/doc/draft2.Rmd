@@ -351,7 +351,7 @@ rm(hv, set, data, CalcOverlap, bd)
 
 #### H1a. Environmental filtering differ in selection of local functional composition between canopy and understorey species
 
-```{r GWMH1a}
+```{r GWMH1a, fig.cap="Number of communities significantly (p-value<0.05) different from null expectations with null model NM1 for each trait of GWMs, for canopy (C) and understorey (U) guilds, in abundance. See table \\@ref(tab:Traits) for abbreviations.", fig.height=4}
 GWM <- L %>%
   t() %>%
   data.frame() %>%
@@ -401,14 +401,21 @@ GWM_pval[3:9] <- apply(
 GWM_pval %>% 
   select(-community, -LES, -WES) %>% 
   group_by(strata) %>% 
-  mutate_all(function(x) findInterval(x, c(0.05, 0.95)) == 1) %>% 
-  summarise_all(function(x) sum(x, na.rm = T)/length(x)*100) %>% 
-  kable(caption = 'Percentage of community significantly (p-value<0.05) different from null expectations with null model NM1 for each trait of GWMs, for canopy (C) and understorey (U) guilds, in abundance. See table \\@ref(tab:Traits) for abbreviations.')
+  mutate_all(function(x) findInterval(x, c(0.05, 0.95)) != 1) %>% 
+  melt(id.vars = "strata", variable.name = "trait") %>% 
+  filter(value == TRUE) %>% 
+  ggplot(aes(x = factor(trait), 
+             fill = factor(strata))) +
+  geom_bar(position = "dodge") +
+  scale_fill_discrete("Guild") +
+  xlab("Functional trait") +
+  ylab("Number of communities") +
+  ylim(c(0,dim(L)[1]))
 ```
 
 #### H1b. Environmental filtering differ in selection of local functional composition between canopy and understorey species
 
-```{r GWVH1b}
+```{r GWVH1b, fig.cap="Number of communities significantly (p-value<0.05) different from null expectations with null model NM3 for each trait of GWVs, for canopy (C) and understorey (U) guilds, in abundance. See table \\@ref(tab:Traits) for abbreviations.", fig.height=4}
 GWV <- L %>%
   t() %>%
   data.frame() %>%
@@ -470,9 +477,16 @@ GWV_pval[3:9] <- apply(
 GWV_pval %>% 
   select(-community, -LES, -WES) %>% 
   group_by(strata) %>% 
-  mutate_all(function(x) abs(x) > 0.95) %>% 
-  summarise_all(function(x) sum(x, na.rm = T)/length(x)*100) %>% 
-  kable(caption = 'Percentage of community significantly (p-value<0.05) different from null expectations with null model NM3 for each trait of GWVs, for canopy (C) and understorey (U) guilds, in abundance. See table \\@ref(tab:Traits) for abbreviations.')
+  mutate_all(function(x) findInterval(x, c(0.05, 0.95)) != 1) %>% 
+  melt(id.vars = "strata", variable.name = "trait") %>% 
+  filter(value == TRUE) %>% 
+  ggplot(aes(x = factor(trait), 
+             fill = factor(strata))) +
+  geom_bar(position = "dodge") +
+  scale_fill_discrete("Guild") +
+  xlab("Functional trait") +
+  ylab("Number of communities") +
+  ylim(c(0,dim(L)[1]))
 ```
 
 ### *Does the local functional composition reflect the influence of abiotic and biotic drivers of community dynamics within guilds ?*
