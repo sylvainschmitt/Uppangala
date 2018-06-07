@@ -1,18 +1,19 @@
 ---
 title: Decoupled wood and leaf strategies among canopy and understorey tree in a low-elevation rainforest of India
-author: "Sylvain Schmitt sylvain.schmitt@agroparistech.fr"
+author: "Sylvain Schmitt, Maxime Réjou-Méchain, Valérie Raevel, Ayyappan N, Balachandran N., Barathan N., and François Munoz"
 date: '`r Sys.Date()`'
 output:
+  bookdown::word_document2: default
+  bookdown::html_document2:
+    number_sections: false
+    toc: true
+    toc_float: yes
   bookdown::pdf_document2:
     includes:
       before_body: ./template/doc_prefix.tex
       in_header: ./template/preamble.tex
     number_sections: false
     toc: false
-  bookdown::html_document2:
-    number_sections: false
-    toc: true
-    toc_float: yes
 linestretch: 1.5
 csl: mee.csl
 bibliography: refs.bib
@@ -30,6 +31,7 @@ library(dplyr)
 library(reshape2)
 library(ggplot2)
 library(ggfortify)
+theme_set(bayesplot::theme_default())
 cores <- 16
 opts_chunk$set(
   echo = F, message = F, warning = F, fig.height = 8, fig.width = 8,
@@ -58,7 +60,7 @@ The trait values of coexisting species represent a non-random sample of trait va
 
 The concept of guilds refer to groups of functionally similar species [@wilson_guilds_1999]. Ecological guilds can coexist and occupy distinct niches within communities [@vergnon_niches_2009]. In tropical forests, the assembly of tree communities has been mostly studied irrespectivelly of guilds of canopy and understorey tree [@wright2002plant]. However, distinctive ecological constraints are expected to drive different resource use strategies and biotic interactions in these guilds, which should translate into different functional composition and response to environmental factors. For instance, in Colombian Amazonie, @duque2002different found some contrasted response of the composition of canopy and understorey guilds along environmental gradients.
 
-In this paper, we used a trait-based approach to study separately the assembly of canopy and understorey tree species along topographical and biotic gradients in a large forest plot (10ha) loacted in Western Ghats biodiversity hotspot [@myers_biodiversity_2000], India. Low elevation rainforests in South India are remarkably heterogeneous in vertical structure and encompass distinctive guilds across the vertical strata [@pascal_wet_1988]. It thus provides an appropriate context to adress guild-dependent assembly rules and ecological strategies in tropical rainforests. Although considered as wet evergreen, the forest undergoes contrasted long dry and intense rainy seasons under the influence of monsoon. In this context, we expected water stress and competition for resource to be important drivers of tree functional composition. We investigated how both canopy and understorey tree species composition varied with local environmental conditions, using appropriate null models. We specifically addressed the following questions:
+In this paper, we used a trait-based approach to study separately the assembly of canopy and understorey tree species along topographical and biotic gradients in a large forest plot (10ha) located in Western Ghats biodiversity hotspot [@myers_biodiversity_2000], India. Low elevation rainforests in South India are remarkably heterogeneous in vertical structure and encompass distinctive guilds across the vertical strata [@pascal_wet_1988]. It thus provides an appropriate context to adress guild-dependent assembly rules and ecological strategies in tropical rainforests. Although considered as wet evergreen, the forest undergoes contrasted long dry and intense rainy seasons under the influence of monsoon. In this context, we expected water stress and competition for resource to be important drivers of tree functional composition. We investigated how both canopy and understorey tree species composition varied with local environmental conditions, using appropriate null models. We specifically addressed the following questions:
 
 - Does functional traits variation and covariation reflect basic dimensions of ecological strategy in the rainforest ?
 - Does local functional composition from guilds differ ?
@@ -78,7 +80,7 @@ From 1989 to 2014, the trees $\geq 10$ cm in diameter at breast height (dbh) wer
 
 Leaf petioles, rachis and petiolules were removed for all measurements. Leaf fresh weights, thickness and area were measured, using a weighing scale (**add detail on brand and precision**), a micrometer (**add detail on brand and precision**) and a bend scanner with ImageJ software [**ref**] respectively. Leaves were first kept in herbarium and then dried in an oven for at least 72 hours at 60 $^\circ C$. Once dried, the leaves were weighted directly after been extracted from the oven to avoid any humidity bias. The bark and pit of branch samples were removed in order to keep only branch wood with no soft tissues. Branch wood samples were immersed in water to evaluate their volume by water displacement. Wood samples were then dried for 48 hours at 80 $^\circ C$ and weighted. 
 
-We calculated five functional traits of leaf and wood samples: leaf thickness (LT in $\mu m$ ), leaf area measured from scans (LA in $mm^2$), leaf dry matter content as the leaf dry weight divided by the leaf fresh weight (LDMC in $mg.g^-1$), specific leaf area as the leaf area divided by the leaf dry mass (SLA in $m^2.kg^-1$), and branch wood density  as the the wood sample dry weight divided by its volume (WD in $g.cm^-3$, see table \@ref(tab:Traits)). We choose those five traits because they proved to be good proxies of the major dimensions of ecological strategies in plants [@mark_westoby_plant_2002; @diaz_global_2015] and were relatively easy to measure on the field.
+We calculated five functional traits of leaf and wood samples: leaf thickness (LT in $\mu m$ ), leaf area measured from scans (LA in $mm^2$), leaf dry matter content as the leaf dry weight divided by the leaf fresh weight (LDMC in $mg.g^-1$), specific leaf area as the leaf area divided by the leaf dry mass (SLA in $m^2.kg^-1$), and branch wood density  as the the wood sample dry weight divided by its volume (WD in $g.cm^-3$, see table \@ref(tab:Traits)). We chose those five traits because they proved to be good proxies of the major dimensions of ecological strategies in plants [@mark_westoby_plant_2002; @diaz_global_2015] and were relatively easy to measure on the field.
 
 ```{r Traits}
 PFT <- genPFT()
@@ -145,7 +147,7 @@ All analyses were conducted using the R 3.3.0  software [@r_core_team_r:_2016] w
 
 ## Traits variation and covariation
 
-We found an overall increase of functional trait variation from intra-individual to inter-specific levels (see table \@ref(tab:CV)), even though LA showed almost as large variability at intra-individual than at intra-specific levels ($CV_{individual} = 0.20$ and $CV_{species} = 0.24$, wilcoxon rank test $p-value = 0.137$). given the relatively low intra-individual and intra species variation, compared to inter-species variation, using species trait average values for community analyses is warranted.
+We found an overall increase of functional trait variation from intra-individual to inter-specific levels (see table \@ref(tab:CV)), even though LA showed almost as large variability at intra-individual than at intra-specific levels ($CV_{individual} = 0.20$ and $CV_{species} = 0.24$, wilcoxon rank test $p-value = 0.137$). Given the relatively low intra-individual and intra species variation, compared to inter-species variation, using species trait average values for community analyses is warranted.
 
 ```{r CV}
 PFT %>% 
@@ -210,7 +212,8 @@ row.names(PFT) <- PFT$SpCode
 
 PFT %>% 
   princomp(~ LA + WD + LT + LDMC + SLA, data = ., cor = T) %>% 
-  autoplot(colour = 'grey', loadings.label.size = 6,
+  autoplot(colour = 'grey', 
+           loadings.label.size = 6,
            loadings.label.colour = 'black',
            loadings = T, loadings.label = T, loadings.colour = 'black',
            loadings.label.vjust = 1.2) +
@@ -376,7 +379,7 @@ L %>%
   ggplot(aes(trait, com_sign)) +
   geom_bar(stat = "identity") +
   xlab("Functional trait") +
-  ylab("Percentage of significant communities")
+  ylab("Percentage of significant communities") 
 ```
 
 ```{r GWMH1a, fig.cap="Number of communities significantly (p-value<0.05) different from null expectations with null model NM1 for each trait of GWMs, for canopy (C) and understorey (U) guilds, in abundance. See table \\@ref(tab:Traits) for abbreviations.", fig.height=4, include = F}
@@ -437,7 +440,7 @@ GWM %>%
   ggplot(aes(x = strata, y = GWM, fill = strata)) +
   geom_boxplot() +
   facet_wrap(~trait, scales = "free",nrow = 1) +
-  xlab("Guild") + scale_fill_discrete(guide = "none")
+  xlab("Guild") + scale_fill_discrete(guide = "none") 
 ```
 
 ```{r GWVH1b, fig.cap="Number of communities significantly (p-value<0.05) different from null expectations with null model NM3 for each trait of GWVs, for canopy (C) and understorey (U) guilds, in abundance. See table \\@ref(tab:Traits) for abbreviations.", fig.height=4, include = F}
@@ -525,7 +528,7 @@ GWV %>%
   facet_wrap(~trait, scales = "free") +
   ggpubr::stat_compare_means(aes(label = paste("Wilcoxon, p",
                                                ..p.format..,
-                                               ..p.signif..)))
+                                               ..p.signif..))) 
 ```
 
 ### *Does the local functional composition reflect the influence of abiotic and biotic drivers of community dynamics within guilds ?*
@@ -534,7 +537,7 @@ The guild weighted trait means (GWM) varied weakly but significantly along the e
 
 Focusing on canopy tree species, we found an increase in wood density under south-west orientation. We also observed a decrease in leaf area under the south-west orientation. Leaf area decreased with curvature, while wood density and LDMC increased with curvature. Finally, heigh canopy was also related to an increased leaf area. 
 
-For understorey tree species, SLA significantly decreased and and leaf thickness significantly increased with curvature. SLA significantly increased with canopy height, while leaf thickness decreased with canopy height. Finally, SLA and wood density significantly decreased and and leaf area and thickness significantly increased with wetness.
+For understorey tree species, SLA significantly decreased and leaf thickness significantly increased with curvature. SLA significantly increased with canopy height, while leaf thickness decreased with canopy height. Finally, SLA and wood density significantly decreased and leaf area and thickness significantly increased with wetness.
 
 ```{r GWMH2a}
 GWM <- L %>% 
@@ -629,7 +632,7 @@ GWM_ses %>%
   geom_point() +
   facet_grid(strata ~ trait, scales = "free") +
   geom_hline(yintercept = c(0.95, -0.95), linetype = 'dashed') +
-  geom_hline(yintercept = 0)
+  geom_hline(yintercept = 0) 
 ```
 
 We found significant relationships between the standardized effect size (SES) of GWVs and the environmental predictors (see table \@ref(tab:GWVH2b)). Curvature increased LDMC variance in canopy. Wetness decreased variance of SLA and wood density in canopy and leaf area in understorey, but increased variance of wood density in understorey. Sout-West orientation results in decreased variance of density of leaf in understorey. Finally, Canopy height diminished variance of leaf density in canopy whereas basal aea increased variance of SLA in both strata.
@@ -737,7 +740,7 @@ pca.env %>%
   coord_equal() +
   geom_hline(yintercept = 0, linetype = 'dashed') +
   geom_vline(xintercept = 0, linetype = 'dashed') +
-  xlab('Axe 1 − 42.52 %') + ylab('Axe 2 − 23.44 %')
+  xlab('Axe 1 − 42.52 %') + ylab('Axe 2 − 23.44 %') 
 ```
 
 Curvature covaries with profile curvature, plan curvature, distance to potential rivers and the PCA first axis. Elevation and wetness are opposed in the principal component analysis and slope and south-westerness does not seem to covary much with other variables **Not precise**.
@@ -745,11 +748,11 @@ Curvature covaries with profile curvature, plan curvature, distance to potential
 ## S2: Hypervolumes of functional guilds
 
 ```{r hypervfig, fig.cap='Functional hypervolume overlap of canopy and understorey species.', fig.height=4}
-hypervolume_fig
+hypervolume_fig 
 ```
 
 ```{r hypervolume_tab}
-hypervolume_table
+hypervolume_table 
 ```
 
 # References
