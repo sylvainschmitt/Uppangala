@@ -4,9 +4,5 @@ Uppangala
 Description
 -----------
 
-Uppangala tree functionnal traits analysis package
+Article draft from Uppangala tree functionnal traits analysis
 
-Documents
----------
-
--   [draft](http://sylvainschmitt.github.io/Uppangala/draft2)

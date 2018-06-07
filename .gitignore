@@ -1,19 +1,14 @@
+# R files
 .Rproj.user
 .Rhistory
 .RData
 .Ruserdata
-inst/extdata/*
-inst/doc/*.pdf
-inst/doc/*.docx
-inst/doc/*.html
-inst/doc/*.RData
-inst/doc/*.pdf
-inst/doc/*.png
-inst/doc/*_files
-inst/doc/*_cache
-inst/phylogeny
-*.csl
-inst/extdata.zip
-inst/doc/draft/_*
-inst/doc/draft_save/
-inst/doc/draft/docs/*
+# data
+data/*
+# document creation
+*.pdf
+*.docx
+*.html
+*_files
+*_cache
+*_save

@@ -39,7 +39,6 @@ opts_chunk$set(
   cache = T, cache.lazy = F)
 cv <- function(x, na.rm = T)
   sd(x, na.rm = na.rm)/mean(x, na.rm = na.rm)
-path <- '~/Documents/IFP/Uppangala/inst/doc/draft_save/'
 n = 999 # Random repetitions
 ```
 
@@ -162,7 +161,7 @@ L <- genTrees() %>%
 # row.names(R) <- com@data$id
 # R$community <- row.names(R)
 # save(R, file = file.path(path, 'R.Rdata'))
-load(file.path(path, 'R.Rdata'))
+load(file.path("draft_save", 'R.Rdata'))
 ```
 
 # Traits covariation
@@ -337,8 +336,8 @@ nGWM <- array(unlist(lapply(nGWM, function(x) as.matrix(x[3:9]))),
               c(dim(GWM[3:9]), n),
               list(row.names(GWM), names(GWM[3:9]), 1:n))
 rm(cl, nQ)
-save(nGWM, file = file.path(path, 'nGWM.Rdata'))
-load(file.path(path, 'nGWM.Rdata'))
+save(nGWM, file = file.path("draft_save", 'nGWM.Rdata'))
+load(file.path("draft_save", 'nGWM.Rdata'))
 GWM_ses <- GWM
 GWM_ses[3:9] <- (GWM[3:9] - apply(nGWM, 1:2, mean, na.rm = T))/apply(nGWM, 1:2, sd, na.rm = T)
 ```
@@ -476,7 +475,7 @@ GWM_ses %>%
 # Environment selection
 
 ```{r PCAenv, fig.cap='Principal component analysis (PCA) performed on topgraphical variables. SW stand for southwesterness.'}
-load(file.path(path, 'pca.env.Rdata'))
+load(file.path("draft_save", 'pca.env.Rdata'))
 pca.env %>% 
   autoplot(colour = 'grey', loadings.label.size = 6,
            loadings.label.colour = 'black',
@@ -488,4 +487,6 @@ pca.env %>%
   geom_vline(xintercept = 0, linetype = 'dashed') +
   xlab('Axe 1 − 42.52 %') + ylab('Axe 2 − 23.44 %') 
 ```
+
+# Why not hypervolumes
 
