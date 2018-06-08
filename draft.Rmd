@@ -15,8 +15,8 @@ output:
     number_sections: false
     toc: false
 linestretch: 1.5
-csl: mee.csl
-bibliography: refs.bib
+csl: bibliography/mee.csl
+bibliography: bibliography/refs.bib
 link-citations: yes
 ---
 
@@ -24,7 +24,6 @@ link-citations: yes
 rm(list = ls()); invisible(gc())
 library(knitr)
 library(parallel)
-library(Uppangala)
 library(raster)
 library(broom)
 library(vegan)
@@ -32,6 +31,7 @@ library(dplyr)
 library(reshape2)
 library(ggplot2)
 library(ggfortify)
+sapply(list.files("R", full.names = T), source)
 theme_set(bayesplot::theme_default())
 cores <- detectCores() - 1
 opts_chunk$set(
@@ -42,39 +42,36 @@ cv <- function(x, na.rm = T)
 n = 999 # Random repetitions
 ```
 
-# Traits variation
+# Traits
 
 ```{r Traits}
-kable(data.frame(
-  Trait = c('Leaf thickness', 'Leaf area', 'Leaf dry matter content', 'Specific leaf area', 'Wood density'),
-  Abbreviation = c('LT', 'LA', 'LDMC', 'SLA', 'WD'),
-  Unit = c('$\\mu m$', '$mm^2$', '$mg.g^-1$', '$m^2.kg^-1$', '$g.cm^-3$'),
-  Strategy = c('Leaf defense and investment',
-        'Leaf resource capture vs.investment',
-        'Leaf defense and investment',
-        'Leaf resource acquisiton vs. defense',
-        'Stem transport, structure and defense')
-), caption = 'Functional traits measured. Traits with their abbreviation, standard unit, and associated species strategy for functioning, survival and reproduction [@baraloto_decoupled_2010].', format = 'pandoc')
-```
-
-
-```{r CV}
 genPFT() %>% 
   select(-Tree, -Sp, -SpCode, -CE, -SHA, -LTD) %>% 
-  melt(variable.name = 'trait') %>% 
-  group_by(trait) %>% 
-  summarise_each(funs(min(.,na.rm = T), max(., na.rm = T), 
-                      mean(.,na.rm = T), sd(.,na.rm = T))) %>% 
+  melt(variable.name = 'Abbreviation') %>% 
+      left_join(data.frame(
+    Trait = c('Leaf thickness', 'Leaf area', 'Leaf dry matter content', 'Specific leaf area', 'Wood density'),
+    Abbreviation = c('LT', 'LA', 'LDMC', 'SLA', 'WD'),
+    Unit = c('$\\mu m$', '$mm^2$', '$mg.g^-1$', '$m^2.kg^-1$', '$g.cm^-3$'),
+    Strategy = c('Leaf defense and investment',
+                 'Leaf resource capture vs.investment',
+                 'Leaf defense and investment',
+                 'Leaf resource acquisiton vs. defense',
+                 'Stem transport, structure and defense')
+  )) %>% 
+  group_by(Trait, Abbreviation, Unit, Strategy) %>% 
+  summarise_if(is.numeric, funs(min(.,na.rm = T), max(., na.rm = T))) %>% 
+  mutate(range = paste(round(min,2), "-", round(max,2))) %>% 
+  select(-min, -max) %>% 
   left_join(genPFT() %>% 
               select(-Sp, -SpCode, -CE, -SHA, -LTD) %>% 
               melt(id.vars = 'Tree', 
-                   variable.name = 'trait', 
+                   variable.name = 'Abbreviation', 
                    value.name = 'Intra-individuals') %>% 
-              group_by(Tree, trait) %>% 
+              group_by(Tree, Abbreviation) %>% 
               summarise_each(funs(sd(., na.rm = T)/mean(., na.rm = T))) %>% 
               ungroup() %>% 
               select(-Tree) %>% 
-              group_by(trait) %>% 
+              group_by(Abbreviation) %>% 
               summarise_each(funs(mean(., na.rm = T)))) %>% 
   left_join(genPFT() %>% 
               group_by(Tree, Sp, SpCode, CE) %>% 
@@ -82,12 +79,12 @@ genPFT() %>%
               ungroup() %>% 
               select(-Tree, -SpCode, -CE, -SHA, -LTD) %>% 
               melt(id.vars = 'Sp', 
-                   variable.name = 'trait', value.name = 'Intra-species') %>% 
-              group_by(Sp, trait) %>% 
+                   variable.name = 'Abbreviation', value.name = 'Intra-species') %>% 
+              group_by(Sp, Abbreviation) %>% 
               summarise_each(funs(sd(., na.rm = T)/mean(., na.rm = T))) %>% 
               ungroup() %>% 
               select(-Sp) %>% 
-              group_by(trait) %>% 
+              group_by(Abbreviation) %>% 
               summarise_each(funs(mean(., na.rm = T)))) %>% 
   left_join(genPFT() %>% 
               group_by(Tree, Sp, SpCode, CE) %>% 
@@ -98,10 +95,14 @@ genPFT() %>%
               summarise_each(funs(mean)) %>% 
               ungroup() %>% 
               select(-Sp, -SpCode, -SHA, -LTD) %>% 
-              melt(variable.name = 'trait', value.name = 'Inter-species') %>% 
-              group_by(trait) %>% 
-              summarise_each(funs(sd(., na.rm = T)/mean(., na.rm = T)))) %>% 
-  kable(digits = 2, caption = 'Intra-individual, intra-specific and inter-specific component of trait variation. The overall range, mean and standard deviation are provided for each trait. The remaining columns represent the coefficient of variation of trait values among leaves per individuals (intra-individual), among trees per species (intra-specific), and among trees of different species. See table \\@ref(tab:Traits) for abbreviation.', format = 'pandoc')
+              melt(variable.name = 'Abbreviation', value.name = 'Inter-species') %>% 
+              group_by(Abbreviation) %>% 
+              summarise_each(funs(sd(., na.rm = T)/mean(., na.rm = T)))) %>%
+  mutate(`Intra-individuals` = ifelse(Abbreviation == "WD", NA, `Intra-individuals`)) %>% 
+  kable(digits = 2, format.args = list(big.mark = " "), format = 'pandoc',
+        caption = 'Functional traits measured. Traits with their abbreviation, standard unit, associated species strategy, range of values, intra-individual, intra-specific and inter-specific component of variation.  Species strategy are precised for functioning, survival and reproduction [@baraloto_decoupled_2010]. The rlast columns represents the coefficient of variation of trait values among leaves per individuals (intra-individual), among trees per species (intra-specific), and among trees of different species.')
+
+
 ```
 
 ```{r Q}
@@ -115,8 +116,7 @@ PFT <- genPFT() %>%
   group_by(Sp, SpCode) %>% 
   summarise_each(funs(mean(., na.rm = T))) %>% 
   ungroup() %>% 
-  select(-Tree, -Sp, -CE, -LTD, -SHA) %>% 
-  filter(SpCode != "desi")
+  select(-Tree, -Sp, -CE, -LTD, -SHA)
 row.names(PFT) <- PFT$SpCode
 # PCA
 PFT.pca <- princomp(~ LA + WD + LT + LDMC + SLA, data = PFT, cor = T)
@@ -164,10 +164,10 @@ L <- genTrees() %>%
 load(file.path("draft_save", 'R.Rdata'))
 ```
 
-# Traits covariation
+# PCA
 
-```{r PCA,  fig.cap='Principal Component Analysis (PCA) of species mean trait values. First axis, in red, is named wood economic spectrum (WES) ; whereas second axis, in green, is named leaf economic spectrum (LES). See table \\@ref(tab:Traits) for abbreviation.'}
-autoplot(PFT.pca, 
+```{r PCA,  fig.cap='Principal Component Analysis (PCA) of species mean trait values. Marginal plots represent the density distribution of species on the two principal component axis for each morphotype. See table \\@ref(tab:Traits) for abbreviation.'}
+pca.plot <- autoplot(PFT.pca, 
          data = Q %>% 
            left_join(L %>% 
                        dplyr::select(-com) %>% 
@@ -184,88 +184,45 @@ autoplot(PFT.pca,
          loadings = T, loadings.label = T, loadings.colour = 'black',
          loadings.label.vjust = 1.2) +
   coord_equal() +
-  geom_hline(aes(yintercept = 0, linetype = 'Wood'), 
-             col = 'red') +
-  geom_vline(aes(xintercept = 0, linetype = 'Leaf'), 
-             col = 'green') +
+  geom_hline(aes(yintercept = 0), col = 'lightgrey') +
+  geom_vline(aes(xintercept = 0), col = 'lightgrey') +
   xlab('Axe 1 − 33.66 %') + ylab('Axe 2 − 29.07 %') +
-  scale_linetype_manual(name = "Economics\nSpectrum", values = c(2, 2), 
-                        guide = guide_legend(override.aes = 
-                                               list(color = c("red", "green")))) +
   theme(legend.position = c(1, 1), 
         legend.justification = c(1, 1))
+spectrum.density <-pca.plot$data %>% 
+  select(Comp.1, Comp.2, strata) %>% 
+  rename(WES = Comp.1, LES = Comp.2) %>% 
+  melt(id.vars = "strata", variable.name = "spectrum") %>% 
+  ggplot(aes(value, color = spectrum, fill = spectrum)) +
+  geom_density(alpha = 0.5) + 
+  facet_wrap(~strata, nrow = 2) +
+  coord_flip()
+cowplot::plot_grid(pca.plot, spectrum.density, rel_widths = c(2,1))
 ```
 
 ```{r varianceTest}
-data <- Q %>% select(LES, WES, strata) %>% 
+data <- pca.plot$data %>% 
+  select(Comp.1, Comp.2, strata) %>% 
+  # rename(WES = Comp.1, LES = Comp.2) %>% 
+  rename(WES = Comp.1, LES = Comp.2) %>% # ! test !
   melt(id.vars = "strata", variable.name = "spectrum")
-# Q %>% 
-#   select(LES, WES, strata) %>% 
-#   melt(id.vars = "strata", variable.name = "spectrum") %>% 
-#   group_by(strata) %>% 
-#   do(var_test = car::leveneTest(value ~ spectrum, data = .)) %>% 
-#   tidy(var_test)
-data.frame(
-  Variance_LES = c(var(data[data$strata == "C" & data$spectrum == "LES", "value"], na.rm = T),
-                   var(data[data$strata == "U" & data$spectrum == "LES", "value"], na.rm = T)),
-  Variance_WES = c(var(data[data$strata == "C" & data$spectrum == "WES", "value"], na.rm = T),
-                   var(data[data$strata == "U" & data$spectrum == "WES", "value"], na.rm = T)),
-  Bartlet_test = c(bartlett.test(value ~ spectrum, data[data$strata == "C",])$p.value,
-                   bartlett.test(value ~ spectrum, data[data$strata == "U",])$p.value),
-  Leven_test = c(car::leveneTest(value ~ spectrum, data[data$strata == "C",])$`Pr(>F)`[1],
-                 car::leveneTest(value ~ spectrum, data[data$strata == "U",])$`Pr(>F)`[1]),
-  row.names = c("Canopy", "Understorey")
-) %>% kable(col.names = c("Variance of LES variance", "Variance of WES", 
-                          "P-value of Bartlet's test", "P-value of Leven's test"),
-            caption = "Test of variance differences betweenn guilds and economic spectra")
+Variance <- list(
+  LES = list(
+    C = round(var(data[data$strata == "C" & data$spectrum == "LES", "value"], na.rm = T), 3),
+    U = round(var(data[data$strata == "U" & data$spectrum == "LES", "value"], na.rm = T), 3)),
+ WES = list(
+   C = round(var(data[data$strata == "C" & data$spectrum == "WES", "value"], na.rm = T), 3),
+   U = round(var(data[data$strata == "U" & data$spectrum == "WES", "value"], na.rm = T) ,3))
+)
+Leven_test <- list(
+  C = round(car::leveneTest(value ~ spectrum, data[data$strata == "C",])$`Pr(>F)`[1], 3),
+  U = round(car::leveneTest(value ~ spectrum, data[data$strata == "U",])$`Pr(>F)`[1], 3)
+)
 ```
 
-# Guilds hypervolume
+Canopy species vary significantly more on the wood than the leaf economic spectrum (`r Variance$LES$C` vs `r Variance$WES$C`, Levene's test p-value=`r Leven_test$C`). In parrallel, understorey species show a tendency to vary more on the leaf than the wood economic spectrum (`r Variance$LES$U` vs `r Variance$WES$U`, Levene's test p-value=`r Leven_test$U`).
 
-```{r hypervolumes}
-# library(hypervolume)
-# bd <- Q %>% 
-#   filter(!is.na(WES)) %>% 
-#   select(-LES, -WES, -SpCode, -strata) %>% 
-#   summarise_all(funs(sd)) %>% 
-#   unlist()
-# hv <- hypervolume_set(hypervolume(na.omit(Q[Q$strata == "C",names(bd)]), 
-#                                   kde.bandwidth = bd, verbose = F), 
-#                       hypervolume(na.omit(Q[Q$strata == "U",names(bd)]), 
-#                                   kde.bandwidth = bd, verbose = F), 
-#                       check.memory = F, verbose = F)
-# plot(hv)
-# rm(hv)
-```
-
-# Guilds functional differences
-
-```{r percsign, fig.cap="Percentage of communities with indivdual traits significantly different between guilds (for canopy (C) and understorey (U) guilds). Test realized with an unpaired wilcoxon two sided test, significance was considered for p-values under the level $\\alpha = 0.05$ .See table \\@ref(tab:Traits) for abbreviations.", fig.height=4}
-L %>% 
-  rename(community = com) %>% 
-  filter(!(community %in% c("C105", "C11",  "C26",  "C5" ))) %>% 
-  melt(id.vars = "community", 
-       variable.name = "SpCode",
-       value.name = "abundance") %>% 
-  filter(abundance > 0) %>% 
-  tidyr::uncount(abundance) %>% 
-  left_join(Q) %>% 
-  select(-LES, -WES) %>% 
-  melt(id.vars = c("community", "strata", "SpCode"),
-       variable.name = "trait") %>% 
-  filter(!is.na(value)) %>% 
-  group_by(community, trait) %>% 
-  do(wilcoxon = wilcox.test(value ~ strata, .)) %>% 
-  tidy(wilcoxon) %>% 
-  group_by(trait) %>% 
-  summarise(n_sign = sum(p.value < 0.05), n = n()) %>% 
-  mutate(n_perc = n_sign/n*100)  %>% 
-  ggplot(aes(trait, n_perc)) +
-  geom_bar(stat = "identity") +
-  # coord_flip() +
-  xlab("Functional trait") +
-  ylab("Percentage of significant communities")
-```
+# Guilds
 
 ```{r GWMboxplot, fig.cap="Boxplot of guilds weighted means (GWM) among communties for each traits (for canopy (C) and understorey (U) guilds). See table \\@ref(tab:Traits) for abbreviations.", fig.height=4}
 L %>%
@@ -273,7 +230,7 @@ L %>%
        variable.name = "SpCode",
        value.name = "abundance") %>% 
   dcast(SpCode ~ com) %>% 
-  left_join(Q) %>%
+  inner_join(Q) %>%
   select(-SpCode) %>%
   melt(id.vars = c('strata', 'LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'LT'),
        variable.name = 'community', value.name = 'abundance') %>%
@@ -290,7 +247,7 @@ L %>%
   ggpubr::stat_compare_means(aes(label = paste(..p.signif..))) 
 ```
 
-# Environment effect on guilds
+# LM
 
 ```{r GWMses}
 GWM <- L %>%
@@ -304,121 +261,45 @@ GWM <- L %>%
        variable.name = 'community', value.name = 'abundance') %>% 
   group_by(strata, community) %>% 
   summarise_each(funs(weighted.mean(., abundance, na.rm = T)), -abundance)
-nQ <- array(rep(as.matrix(Q), n),
-            c(dim(Q), n),
-            list(row.names(Q), names(Q), 1:n))
-nQ <- array(apply(nQ, 3, function(x){
-  x[which(x[,"strata"] == "C"),'SpCode'] <- sample(x[which(x[,"strata"] == "C"),'SpCode'])
-  x[which(x[,"strata"] == "U"),'SpCode'] <- sample(x[which(x[,"strata"] == "U"),'SpCode'])
-  return(x)
-  }), c(dim(Q), n), list(row.names(Q), names(Q), 1:n))
-cl <- makeCluster(cores)
-clusterExport(cl, list('L', 'nQ'))
-nGWM <- parApply(cl, nQ, 3, function(x){
-  library(dplyr)
-  library(reshape2)
-  L %>%
-    melt(id.var = "com",
-         variable.name = "SpCode",
-         value.name = "abundance") %>%
-    dcast(SpCode ~ com) %>%
-    left_join(data.frame(x)) %>%
-    select(-SpCode) %>%
-    melt(id.vars = c('strata', 'LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'LT'),
-         variable.name = 'community', value.name = 'abundance') %>%
-    group_by(strata, community) %>%
-    mutate_each(funs(as.character), -abundance) %>%
-    mutate_each(funs(as.numeric), -abundance) %>%
-    summarise_each(funs(weighted.mean(., abundance, na.rm = T)), -abundance)
-})
-stopCluster(cl)
-nGWM <- array(unlist(lapply(nGWM, function(x) as.matrix(x[3:9]))),
-              c(dim(GWM[3:9]), n),
-              list(row.names(GWM), names(GWM[3:9]), 1:n))
-rm(cl, nQ)
-save(nGWM, file = file.path("draft_save", 'nGWM.Rdata'))
+# nQ <- array(rep(as.matrix(Q), n),
+#             c(dim(Q), n),
+#             list(row.names(Q), names(Q), 1:n))
+# nQ <- array(apply(nQ, 3, function(x){
+#   x[which(x[,"strata"] == "C"),'SpCode'] <- sample(x[which(x[,"strata"] == "C"),'SpCode'])
+#   x[which(x[,"strata"] == "U"),'SpCode'] <- sample(x[which(x[,"strata"] == "U"),'SpCode'])
+#   return(x)
+#   }), c(dim(Q), n), list(row.names(Q), names(Q), 1:n))
+# cl <- makeCluster(cores)
+# clusterExport(cl, list('L', 'nQ'))
+# nGWM <- parApply(cl, nQ, 3, function(x){
+#   library(dplyr)
+#   library(reshape2)
+#   L %>%
+#     melt(id.var = "com",
+#          variable.name = "SpCode",
+#          value.name = "abundance") %>%
+#     dcast(SpCode ~ com) %>%
+#     left_join(data.frame(x)) %>%
+#     select(-SpCode) %>%
+#     melt(id.vars = c('strata', 'LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'LT'),
+#          variable.name = 'community', value.name = 'abundance') %>%
+#     group_by(strata, community) %>%
+#     mutate_each(funs(as.character), -abundance) %>%
+#     mutate_each(funs(as.numeric), -abundance) %>%
+#     summarise_each(funs(weighted.mean(., abundance, na.rm = T)), -abundance)
+# })
+# stopCluster(cl)
+# nGWM <- array(unlist(lapply(nGWM, function(x) as.matrix(x[3:9]))),
+#               c(dim(GWM[3:9]), n),
+#               list(row.names(GWM), names(GWM[3:9]), 1:n))
+# rm(cl, nQ)
+# save(nGWM, file = file.path("draft_save", 'nGWM.Rdata'))
 load(file.path("draft_save", 'nGWM.Rdata'))
 GWM_ses <- GWM
 GWM_ses[3:9] <- (GWM[3:9] - apply(nGWM, 1:2, mean, na.rm = T))/apply(nGWM, 1:2, sd, na.rm = T)
 ```
 
-```{r LM1}
-GWM_ses %>% 
-  filter(!is.na(strata)) %>% 
-  melt(id.vars = c('strata', 'community')) %>% 
-  rename(trait = variable) %>% 
-  rename(SES = value) %>% 
-  left_join(R) %>%
-  group_by(strata, trait) %>% 
-  do(reg = step(lm(SES ~ Slope + Curvature + Wetness + SW + Canopy + BA, .), 
-                     direction = 'both', trace = 0)) %>% 
-  tidy(reg) %>% 
-  group_by(strata, trait, term) %>%
-  transmute(value = paste(format(estimate, scientific = T, digits = 2, trim = T), 
-                          stars(p.value, ns = '   '))) %>% 
-  dcast(strata + trait ~ term) %>% 
-  select(strata, trait, Slope, Curvature, Wetness, SW, Canopy, BA) %>% 
-  mutate_each(funs(replace(., is.na(.), ' '))) %>% 
-  left_join( # Inclusion of R2 but should be split
-    GWM_ses %>% 
-      filter(!is.na(strata)) %>% 
-      melt(id.vars = c('strata', 'community')) %>% 
-      rename(trait = variable) %>% 
-      rename(SES = value) %>% 
-      left_join(R) %>%
-      group_by(strata, trait) %>% 
-      do(reg = step(lm(SES ~ Slope + Curvature + Wetness + SW + Canopy + BA, .), 
-                    direction = 'both', trace = 0)) %>% 
-      glance(reg) %>% 
-      select(r.squared) %>% 
-      mutate(r.squared = round(r.squared, 2)) %>% 
-      rename("$R^2$" = r.squared)
-  )%>% # End of R2
-  filter(trait != 'LES') %>% 
-  filter(trait != 'WES') %>%
-  bold() %>% 
-  kable(caption = 'Linear models of the standardized effect size (SES) with null model NM2 for each trait of GWMs, for canopy (C) and understorey (U) guilds, in abundance. We performed stepwise selection of the predictors including slope, curvature, wetness southwesterness (SW), canopy height (Canopy) and basal area (BA), and only the selected predictors are shown. See table \\@ref(tab:Traits) for abbreviations. Bold and number of asterisk indicates the significance threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001).', format = 'pandoc')
-```
-
-```{r LM2}
-GWM_ses %>% 
-  filter(!is.na(strata)) %>% 
-  melt(id.vars = c('strata', 'community')) %>% 
-  rename(trait = variable) %>% 
-  rename(SES = value) %>% 
-  left_join(R) %>%
-  group_by(strata, trait) %>% 
-  do(reg = step(lm(SES ~ Slope + Curvature + Wetness + SW + BA, .), 
-                     direction = 'both', trace = 0)) %>% 
-  tidy(reg) %>% 
-  group_by(strata, trait, term) %>%
-  transmute(value = paste(format(estimate, scientific = T, digits = 2, trim = T), 
-                          stars(p.value, ns = '   '))) %>% 
-  dcast(strata + trait ~ term) %>% 
-  select(strata, trait, Slope, Curvature, Wetness, SW, BA) %>% 
-  mutate_each(funs(replace(., is.na(.), ' '))) %>% 
-  left_join( # Inclusion of R2 but should be split
-    GWM_ses %>% 
-      filter(!is.na(strata)) %>% 
-      melt(id.vars = c('strata', 'community')) %>% 
-      rename(trait = variable) %>% 
-      rename(SES = value) %>% 
-      left_join(R) %>%
-      group_by(strata, trait) %>% 
-      do(reg = step(lm(SES ~ Slope + Curvature + Wetness + SW + BA, .), 
-                    direction = 'both', trace = 0)) %>% 
-      glance(reg) %>% 
-      select(r.squared) %>% 
-      mutate(r.squared = round(r.squared, 2)) %>% 
-      rename("$R^2$" = r.squared)
-  )%>% # End of R2
-  filter(trait != 'LES') %>% 
-  filter(trait != 'WES') %>%
-  bold() %>% 
-  kable(caption = 'Linear models of the standardized effect size (SES) with null model NM2 for each trait of GWMs, for canopy (C) and understorey (U) guilds, in abundance. We performed stepwise selection of the predictors including slope, curvature, wetness southwesterness (SW), canopy height (Canopy) and basal area (BA), and only the selected predictors are shown. See table \\@ref(tab:Traits) for abbreviations. Bold and number of asterisk indicates the significance threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001).', format = 'pandoc')
-```
-
-```{r LM3}
+```{r LM}
 GWM_ses %>% 
   filter(!is.na(strata)) %>% 
   melt(id.vars = c('strata', 'community')) %>% 
@@ -453,26 +334,10 @@ GWM_ses %>%
   filter(trait != 'LES') %>% 
   filter(trait != 'WES') %>%
   bold() %>% 
-  kable(caption = 'Linear models of the standardized effect size (SES) with null model NM2 for each trait of GWMs, for canopy (C) and understorey (U) guilds, in abundance. We performed stepwise selection of the predictors including slope, curvature, wetness southwesterness (SW), canopy height (Canopy) and basal area (BA), and only the selected predictors are shown. See table \\@ref(tab:Traits) for abbreviations. Bold and number of asterisk indicates the significance threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001).', format = 'pandoc')
+  kable(caption = 'Linear models of the standardized effect size (SES) with null model NM2 for each trait of GWMs, for canopy (C) and understorey (U) guilds, in abundance. We performed stepwise selection of the predictors including slope, curvature, wetness southwesterness (SW), and canopy height (Canopy), and only the selected predictors are shown. See table \\@ref(tab:Traits) for abbreviations. Bold and number of asterisk indicates the significance threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001).', format = 'pandoc')
 ```
 
-```{r WD, fig.cap='Standard effect size (SES) against curvature, for each trait and both guilds (canopy (C) and understorey (U) guilds). Each subplot show  standard effect size (SES) with null model NM12. Continuous line represents a null SES, whereas dashed line represents limits of the confidence interval above which SES are considered as significant. See table \\@ref(tab:Traits) for abbreviation.'}
-GWM_ses %>%
-  filter(!is.na(strata)) %>% 
-  left_join(R) %>%
-  ungroup() %>%
-  select(strata, SLA, WD, LDMC, LA, LT, Curvature) %>%
-  melt(id.vars = c('strata', 'Curvature'),
-       variable.name = 'trait',
-       value.name = 'SES') %>%
-  ggplot(aes(Curvature, SES)) +
-  geom_point() +
-  facet_grid(strata ~ trait, scales = "free") +
-  geom_hline(yintercept = c(0.95, -0.95), linetype = 'dashed') +
-  geom_hline(yintercept = 0) 
-```
-
-# Environment selection
+# Environment
 
 ```{r PCAenv, fig.cap='Principal component analysis (PCA) performed on topgraphical variables. SW stand for southwesterness.'}
 load(file.path("draft_save", 'pca.env.Rdata'))
@@ -490,3 +355,21 @@ pca.env %>%
 
 # Why not hypervolumes
 
+```{r hypervolumes}
+# library(hypervolume)
+# bd <- Q %>% 
+#   filter(!is.na(WES)) %>% 
+#   select(-LES, -WES, -SpCode, -strata) %>% 
+#   summarise_all(funs(sd)) %>% 
+#   unlist()
+# hv <- hypervolume_set(hypervolume(na.omit(Q[Q$strata == "C",names(bd)]), 
+#                                   kde.bandwidth = bd, verbose = F), 
+#                       hypervolume(na.omit(Q[Q$strata == "U",names(bd)]), 
+#                                   kde.bandwidth = bd, verbose = F), 
+#                       check.memory = F, verbose = F)
+# plot(hv)
+# rm(hv)
+```
+
+* Outliers make quicly overlapping hypervolumes besides the density stay low in those area
+* Hypervolumes consider uncorrelated axis, which is not true for functional traits, and blur strategy axes highlighted by economic spectra
