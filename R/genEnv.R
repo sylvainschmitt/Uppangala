@@ -19,9 +19,9 @@ genEnv <- function(area = data.frame(x = c(571675.8, 572011.3),
                                      row.names = c('min', 'max'))){
   # Opening
   extent <- extent(t(as.matrix(area)))
-  DEM <- raster(system.file('extdata', 'DEM.tif', package = 'Uppangala'))
+  DEM <- raster(file.path('data', 'DEM.tif'))
   DEM <- crop(DEM, extent)
-  Canopy <- raster(system.file('extdata', 'Canopy.tif', package = 'Uppangala'))
+  Canopy <- raster(file.path('data', 'Canopy.tif'))
   Canopy <- crop(Canopy, extent)
   return(list(DEM = DEM, Canopy = Canopy))
 }

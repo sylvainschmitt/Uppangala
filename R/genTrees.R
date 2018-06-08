@@ -14,7 +14,7 @@ NULL
 genTrees <- function(){
 
   # Opening trees
-  path <- system.file('extdata', 'UppangalaCoordDataset.csv', package = 'Uppangala')
+  path <- file.path('data', 'UppangalaCoordDataset.csv')
   tree <- read.table(path, header = T, sep = ",", dec = ".")
   # ID creations
   tree$ID <- NA
@@ -30,7 +30,7 @@ genTrees <- function(){
   tree <- tree[c('ID', 'SpCode', 'x', 'y')]
 
   # Opening girth
-  path <- system.file('extdata', 'allGirth.csv', package = 'Uppangala')
+  path <-file.path('data', 'allGirth.csv')
   girth <- read.table(path, header = T, sep = ",", dec = ".")
   girth <- girth[which(girth$CensusDate %in% c('2013-03', '2014-03')),]
   girth$ID <- NA
