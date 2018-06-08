@@ -13,7 +13,7 @@ NULL
 #'
 genPFT <- function(){
   # Opening
-  path <- system.file('extdata', 'PFT.csv', package = 'Uppangala')
+  path <- file.path('data', 'PFT.csv')
   PFT <- read.csv(path, stringsAsFactors = F, na.strings = c('#N/A', 'NA'))
   PFT <- PFT[-c(13:14)] # Deleting SD & VD in waiting of measurements
   names(PFT)[3:4] <- c('Sp', 'SpCode')

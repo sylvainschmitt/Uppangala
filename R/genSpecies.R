@@ -11,7 +11,7 @@
 genSpecies <- function(){
 
   # Opening
-  path <- system.file('extdata', 'Species.csv', package = 'Uppangala')
+  path <- file.path('data', 'Species.csv')
   species <- read.table(path,sep=",",dec=".", stringsAsFactors =F, h = T) # Dans BDD Uppangala
   # Formatting table
   species <- species[c('Sp_code', 'Sp_code_large', 'Latin_name', 'Family', 'Genus', 'Species', 'Pot_strata', 'old_Sp_code')]
@@ -20,7 +20,7 @@ genSpecies <- function(){
   species[duplicated(species$SpCode),1] <- species[duplicated(species$SpCode),8]
   rownames(species) <- species$SpCode
   # Opening strata
-  path <- system.file('extdata', 'UPSP_Species_list.csv', package = 'Uppangala')
+  path <- file.path('data', 'UPSP_Species_list.csv')
   strata <- read.table(path,sep=",",dec=".", stringsAsFactors =F, h = T) # Pelissier et al, 2011
   strata <- strata[c(1:100),]
   row.names(strata) <- strata$SpCode
