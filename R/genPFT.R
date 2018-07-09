@@ -22,7 +22,7 @@ genPFT <- function(){
   PFT$CE <- as.factor(tolower(PFT$CE))
   # Variables modification
   PFT$CEs <- as.numeric(as.character(substr(PFT$CE, 1, 1)))
-  PFT$LTD <- as.numeric(PFT$LTD)
+  PFT$LTD <- suppressWarnings(as.numeric(PFT$LTD)) # Missing values
   PFT$LDMC = 1000 * PFT$LDMC # from g.g-1 to mg.g-1
   PFT$SLA = PFT$SLA / 1000 # from mm2.g-1 to m2.kg-1
   PFT$HA = PFT$HA / PFT$LA

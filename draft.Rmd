@@ -46,9 +46,11 @@ n = 999 # Random repetitions
 
 ```{r Traits}
 genPFT() %>% 
+  mutate(id = row.names(.)) %>% 
   select(-Tree, -Sp, -SpCode, -CE, -SHA, -LTD) %>% 
-  melt(variable.name = 'Abbreviation') %>% 
-      left_join(data.frame(
+  melt(id.vars = "id", variable.name = 'Abbreviation') %>% 
+  mutate(Abbreviation = as.character(Abbreviation)) %>% 
+  left_join(data.frame(
     Trait = c('Leaf thickness', 'Leaf area', 'Leaf dry matter content', 'Specific leaf area', 'Wood density'),
     Abbreviation = c('LT', 'LA', 'LDMC', 'SLA', 'WD'),
     Unit = c('$\\mu m$', '$mm^2$', '$mg.g^-1$', '$m^2.kg^-1$', '$g.cm^-3$'),
@@ -56,8 +58,9 @@ genPFT() %>%
                  'Leaf resource capture vs.investment',
                  'Leaf defense and investment',
                  'Leaf resource acquisiton vs. defense',
-                 'Stem transport, structure and defense')
-  )) %>% 
+                 'Stem transport, structure and defense'),
+    stringsAsFactors = F
+  ),  by = "Abbreviation") %>% 
   group_by(Trait, Abbreviation, Unit, Strategy) %>% 
   summarise_if(is.numeric, funs(min(.,na.rm = T), max(., na.rm = T))) %>% 
   mutate(range = paste(round(min,2), "-", round(max,2))) %>% 
@@ -67,42 +70,47 @@ genPFT() %>%
               melt(id.vars = 'Tree', 
                    variable.name = 'Abbreviation', 
                    value.name = 'Intra-individuals') %>% 
+              mutate(Abbreviation = as.character(Abbreviation)) %>% 
               group_by(Tree, Abbreviation) %>% 
-              summarise_each(funs(sd(., na.rm = T)/mean(., na.rm = T))) %>% 
+              summarise_all(funs(sd(., na.rm = T)/mean(., na.rm = T))) %>% 
               ungroup() %>% 
               select(-Tree) %>% 
               group_by(Abbreviation) %>% 
-              summarise_each(funs(mean(., na.rm = T)))) %>% 
+              summarise_all(funs(mean(., na.rm = T))),  by = "Abbreviation") %>% 
   left_join(genPFT() %>% 
               group_by(Tree, Sp, SpCode, CE) %>% 
-              summarise_each(funs(mean)) %>% 
+              summarise_all(funs(mean)) %>% 
               ungroup() %>% 
               select(-Tree, -SpCode, -CE, -SHA, -LTD) %>% 
               melt(id.vars = 'Sp', 
                    variable.name = 'Abbreviation', value.name = 'Intra-species') %>% 
+              mutate(Abbreviation = as.character(Abbreviation)) %>% 
               group_by(Sp, Abbreviation) %>% 
-              summarise_each(funs(sd(., na.rm = T)/mean(., na.rm = T))) %>% 
+              summarise_all(funs(sd(., na.rm = T)/mean(., na.rm = T))) %>% 
               ungroup() %>% 
               select(-Sp) %>% 
               group_by(Abbreviation) %>% 
-              summarise_each(funs(mean(., na.rm = T)))) %>% 
+              summarise_all(funs(mean(., na.rm = T))),  by = "Abbreviation") %>% 
   left_join(genPFT() %>% 
               group_by(Tree, Sp, SpCode, CE) %>% 
-              summarise_each(funs(mean)) %>% 
+              summarise_all(funs(mean)) %>% 
               ungroup() %>% 
               select(-Tree, -CE) %>% 
               group_by(Sp, SpCode) %>% 
-              summarise_each(funs(mean)) %>% 
+              summarise_all(funs(mean)) %>% 
               ungroup() %>% 
-              select(-Sp, -SpCode, -SHA, -LTD) %>% 
-              melt(variable.name = 'Abbreviation', value.name = 'Inter-species') %>% 
-              group_by(Abbreviation) %>% 
-              summarise_each(funs(sd(., na.rm = T)/mean(., na.rm = T)))) %>%
+              select(-Sp, -SpCode, -SHA, -LTD) %>%
+              mutate(id = row.names(.)) %>% 
+              melt(id.vars = "id", 
+                   variable.name = 'Abbreviation', value.name = 'Inter-species') %>% 
+              select(-id) %>% 
+              mutate(Abbreviation = as.character(Abbreviation)) %>% 
+              group_by(Abbreviation) %>%
+              summarise_all(funs(sd(., na.rm = T)/mean(., na.rm = T))),
+            by = "Abbreviation") %>%
   mutate(`Intra-individuals` = ifelse(Abbreviation == "WD", NA, `Intra-individuals`)) %>% 
   kable(digits = 2, format.args = list(big.mark = " "), format = 'pandoc',
         caption = 'Functional traits measured. Traits with their abbreviation, standard unit, associated species strategy, range of values, intra-individual, intra-specific and inter-specific component of variation.  Species strategy are precised for functioning, survival and reproduction [@baraloto_decoupled_2010]. The rlast columns represents the coefficient of variation of trait values among leaves per individuals (intra-individual), among trees per species (intra-specific), and among trees of different species.')
-
-
 ```
 
 ```{r Q}
@@ -111,20 +119,24 @@ PFT <- genPFT() %>%
   mutate(LA = log(LA)) %>% 
   mutate(SLA = log(SLA)) %>% 
   group_by(Tree, Sp, SpCode, CE) %>% 
-  summarise_each(funs(mean(., na.rm = T))) %>% 
+  summarise_all(funs(mean(., na.rm = T))) %>% 
   ungroup() %>% 
+  select(-Tree, -CE) %>% 
   group_by(Sp, SpCode) %>% 
-  summarise_each(funs(mean(., na.rm = T))) %>% 
+  summarise_all(funs(mean(., na.rm = T))) %>% 
   ungroup() %>% 
-  select(-Tree, -Sp, -CE, -LTD, -SHA)
-row.names(PFT) <- PFT$SpCode
+  select(-Sp, -LTD, -SHA)
+suppressWarnings(row.names(PFT) <- PFT$SpCode) # deprecated
 # PCA
 PFT.pca <- princomp(~ LA + WD + LT + LDMC + SLA, data = PFT, cor = T)
 # Matrix Q
 Q <- PFT %>% 
-  left_join(data.frame(PFT.pca$scores) %>% mutate(SpCode = row.names(.))) %>% 
+  mutate(SpCode = as.character(SpCode)) %>% 
+  left_join(data.frame(PFT.pca$scores) %>% 
+              mutate(SpCode = row.names(.)),
+            by = "SpCode") %>% 
   rename(WES = Comp.1, LES = Comp.2) %>% 
-  left_join(genSpecies()) %>% 
+  left_join(genSpecies(), by = "SpCode") %>% 
   mutate(strata = ifelse(Strata == 3, "U", "C")) %>%
   select(SLA, LDMC, WD, LA, LT, LES, WES, strata, SpCode) %>%
   mutate(strata = ifelse(SpCode == "agin", "U", strata))
@@ -140,7 +152,7 @@ L <- genTrees() %>%
   filter(!is.na(com)) %>% 
   group_by(com, SpCode) %>% 
   summarise(n = n()) %>% 
-  dcast(com ~ SpCode) %>% 
+  dcast(com ~ SpCode, value.var = "n") %>% 
   replace(is.na(.), 0)
 ```
 
@@ -229,8 +241,9 @@ L %>%
   melt(id.var = "com",
        variable.name = "SpCode",
        value.name = "abundance") %>% 
-  dcast(SpCode ~ com) %>% 
-  inner_join(Q) %>%
+  dcast(SpCode ~ com, value.var = "abundance") %>% 
+  mutate(SpCode = as.character(SpCode)) %>% 
+  inner_join(Q, by = "SpCode") %>%
   select(-SpCode) %>%
   melt(id.vars = c('strata', 'LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'LT'),
        variable.name = 'community', value.name = 'abundance') %>%
@@ -254,8 +267,9 @@ GWM <- L %>%
   melt(id.var = "com",
        variable.name = "SpCode",
        value.name = "abundance") %>% 
-  dcast(SpCode ~ com) %>% 
-  left_join(Q) %>% 
+  dcast(SpCode ~ com, value.var = "abundance") %>% 
+  mutate(SpCode = as.character(SpCode)) %>% 
+  left_join(Q, by = "SpCode") %>% 
   select(-SpCode) %>% 
   melt(id.vars = c('strata', 'LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'LT'),
        variable.name = 'community', value.name = 'abundance') %>% 
@@ -305,7 +319,8 @@ GWM_ses %>%
   melt(id.vars = c('strata', 'community')) %>% 
   rename(trait = variable) %>% 
   rename(SES = value) %>% 
-  left_join(R) %>%
+  mutate(community = as.character(community)) %>% 
+  left_join(R, by = "community") %>%
   group_by(strata, trait) %>% 
   do(reg = step(lm(SES ~ Slope + Curvature + Wetness + SW + Canopy, .), 
                      direction = 'both', trace = 0)) %>% 
@@ -315,21 +330,22 @@ GWM_ses %>%
                           stars(p.value, ns = '   '))) %>% 
   dcast(strata + trait ~ term) %>% 
   select(strata, trait, Slope, Curvature, Wetness, SW, Canopy) %>% 
-  mutate_each(funs(replace(., is.na(.), ' '))) %>% 
+  mutate_all(funs(replace(., is.na(.), ' '))) %>% 
   left_join( # Inclusion of R2 but should be split
     GWM_ses %>% 
       filter(!is.na(strata)) %>% 
       melt(id.vars = c('strata', 'community')) %>% 
       rename(trait = variable) %>% 
       rename(SES = value) %>% 
-      left_join(R) %>%
+      mutate(communtiy = as.character(community)) %>% 
+      left_join(R, by = "community") %>%
       group_by(strata, trait) %>% 
       do(reg = step(lm(SES ~ Slope + Curvature + Wetness + SW + Canopy, .), 
                     direction = 'both', trace = 0)) %>% 
       glance(reg) %>% 
       select(r.squared) %>% 
       mutate(r.squared = round(r.squared, 2)) %>% 
-      rename("$R^2$" = r.squared)
+      rename("$R^2$" = r.squared), by = c("strata", "trait")
   )%>% # End of R2
   filter(trait != 'LES') %>% 
   filter(trait != 'WES') %>%
