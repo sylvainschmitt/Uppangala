@@ -3,20 +3,20 @@ title: Decoupled wood and leaf strategies among canopy and understorey tree in a
 author: "Sylvain Schmitt, Valérie Raevel, Maxime Réjou-Méchain, Ayyappan N, Balachandran N., Barathan N., and François Munoz"
 date: '`r Sys.Date()`'
 output:
+  bookdown::word_document2: default
   bookdown::pdf_document2:
     includes:
       before_body: ./template/doc_prefix.tex
       in_header: ./template/preamble.tex
     number_sections: false
     toc: false
-  bookdown::word_document2: default
   bookdown::html_document2:
     number_sections: false
     toc: true
     toc_float: yes
 linestretch: 1.5
 csl: bibliography/mee.csl
-bibliography: bibliography/refs.bib
+bibliography: ["bibliography/refs.bib", "bibliography/library.bib"] 
 link-citations: yes
 ---
 
@@ -168,7 +168,26 @@ functional trait; rainforest; vertical forest strata; Western Ghats; environment
 
 # Introduction
 
+<!-- hook -->
+Understanding the determinants of species occurrence and co-occurrence is a long standing issue in ecology [@diamond_ecology_1975]. Tropical rainforests have especially fascinated ecologists due to their outstanding diversity [@connell_diversity_1978]. 
+<!-- spectrums -->
+The variation in functional traits among species is expected to reflect different abilities to grow, survive and reproduce in a given environment [@violle_let_2007] and expresses fundamental trade-offs along environmental gradients [@mark_westoby_plant_2002]. For instance, specific leaf area varies along the soil fertility-shade gradient and represents a trade-off between resource acquisition by photosynthesis and investment in leaf defense and durability [@hodgson_is_2011]. Fundamental trade-offs entail functional traits covariation along basic leaf [@wright_worldwide_2004 but see @osnas_global_2013 and @lloyd_photosynthetically_2013] and wood [@chave_towards_2009] economics spectra. The leaf economics spectrum opposes acquisitive to conservative ecological strategies, basically expressed at leaf level. The wood economics spectrum distinguishes species strategies over three axes spanning the basic CSR strategies of @grime_evidence_1977 : (i) competitive species, with high conductive efficiency, (ii) stress tolerant species, resistant to embolism, and (iii) disturbance tolerant species, with high mechanical strength [@chave_towards_2009]. @baraloto_decoupled_2010 found decoupled wood and leaf economics of trees in neotropical forest, but @reich_world-wide_2014 conversely posited that both spectra have to be integrated in a comprehensive whole plant economics spectrum [@freschet_evidence_2010] opposing fast growing acquisitive species to slow growing and more conservative ones.
 
+
+<!-- Spatial to ecological scale (trans diff guilds) -->
+Nevertheless, the nature of functional traits and ecological strategies driving species coexistence can change across scales. For instance, @messier_trait_2016 have underlined that the leaf economics spectrum basically expresses changes in ecological strategies along broad-scale environmental gradients, while it is not necessarily a primary driver of local coexistence [but see @Paine2011]. Scales can be geographic or ecologic, such as guilds. 
+<!-- Guild (diff in resp to env, Pacala & Duque) -->
+The concept of guilds refer to groups of functionally similar species [@wilson_guilds_1999]. Ecological guilds can coexist and occupy distinct niches within communities [@vergnon_niches_2009]. In tropical forests, the assembly of tree communities has been mostly studied irrespectivelly of guilds of canopy and understorey tree [@wright2002plant]. However, distinctive ecological constraints are expected to drive different resource use strategies and biotic interactions in these guilds, which should translate into different functional composition and response to environmental factors. For instance, in Colombian Amazonia, @duque2002different found some contrasted response of the composition of canopy and understorey guilds along environmental gradients. Consequently, guilds should bear differences of previously underlined functional strategies, so-called economics spectra.
+
+<!-- What we've done -->
+In this paper, we used a trait-based approach to study species strategies between canopy and understorey guilds. More specifically, we investigated separately the assembly of canopy and understorey tree species along topographical and biotic gradients in a large forest plot (10ha) located in Western Ghats biodiversity hotspot [@myers_biodiversity_2000], India. Low elevation rainforests in South India are remarkably heterogeneous in vertical structure and encompass distinctive guilds across the vertical strata [@pascal_wet_1988]. It thus provides an appropriate context to adress guild-dependent assembly rules and ecological strategies in tropical rainforests. Although considered as wet evergreen, the forest undergoes contrasted long dry and intense rainy seasons under the influence of monsoon. In this context, we expected water stress and competition for resource to be important drivers of tree functional composition within guilds. The trait values of coexisting species within the guilds represent a non-random sample of trait values found in a broader area, du to specific niche-based dynamics in the local community [@lortie_rethinking_2004; @bernard-verdier_community_2012]. Thus we used the signature of local niche-based dynamics to assess the deviation of local community structure from a larger "species pool", using appopriate null model [@kraft_functional_2008], to study how both canopy and understorey tree species composition varied with local environmental conditions.
+<!-- Questions -->
+We specifically addressed the following questions:
+
+
+* Does functional traits variation and covariation reflect basic dimensions of ecological strategy at local scale and how are organized canopy and understorey guilds along traits covariation ?
+* Does local functional composition from guilds differ ?
+* Does the local functional composition reflect the influence of abiotic and biotic drivers of community dynamics within guilds ?
 
 # Material and methods
 
@@ -221,8 +240,8 @@ We devised a null model approach to test for any significant changes in function
 We performed 999 randomizations of each null model and we derived a two-tailed test of the proportion of guilds deviating from the null expectation, with adjusted p-values by Benjamini-Hochberg correction [@Benjamini1995].
 
 To characterize the patterns of deviation from the null model, we also calculated standardized effect sizes (SES) as 
-$$SES = \frac{(I_{obs} - I_{null})}{\sigma {null}} ~~ (3)$$ 
-where $I{obs}$ was the observed metric and $I_{null}$ and $\sigma {null}$ were the mean and standard deviation of the corresponding null distribution. The influence of environment on SES values was investigated by linear regression with biotic and abiotic factors ($SES{trait} = Slope + Curvature + Wetness + SW + Canopy$). Analyses were conducted on the five functional traits.
+$$SES = \frac{(I_{obs} - I_{null})}{\sigma_{null}} ~~ (3)$$ 
+where $I{obs}$ was the observed metric and $I_{null}$ and $\sigma_{null}$ were the mean and standard deviation of the corresponding null distribution. The influence of environment on SES values was investigated by linear regression with biotic and abiotic factors ($SES{trait} = Slope + Curvature + Wetness + SW + Canopy$). Analyses were conducted on the five functional traits.
 
 All analyses were conducted using the R 3.3.0 software [@r_core_team_r:_2016] with packages ade4 [@dray_ade4_2007], and vegan [@oksanen_vegan:_2016].
 
@@ -365,7 +384,7 @@ The first axis of the principal component analysis (PCA, see figure \@ref(fig:PC
 
 ## Functional composition of guilds
 
-Guilds weighted means (GWM) from understorey and canopy guilds strongly diverged among communities (see figure \@ref(fig:GWMboxplot) ). Canopy guilds have higher SLA, WD and LA but lower LDMC and LT than understorey guilds. In other words, canopy guilds have larger, thinner and lighter leaves with increased SLA and denser woods, whereas understorey guilds have smaller, thicker, and more dense leaves with lower SLA and lighter woods.
+Guilds weighted means (GWM) from understorey and canopy guilds strongly diverged among communities (see figure \@ref(fig:GWMboxplot) ). Canopy guilds have higher SLA, WD and LA but lower LDMC and LT than understorey guilds. In other words, canopy guilds have larger, thinner and lighter leaves with increased SLA and denser woods, whereas understorey guilds have smaller, thicker, and denser leaves with lower SLA and lighter woods.
 
 The guild weighted trait means (GWM) varied weakly but significantly along the environmental gradients for both canopy (C) and understorey (U) guilds ($R^2$ from 0.04 to 0.5, see table \@ref(tab:LM)). Functional traits of canopy and understorey tree species were both influenced by curvature, but not for the same traits, and two major differences were observed between the two guilds. The effect of south-west orientation on functional composition was observed only for canopy tree species, while the effect of canopy height and wetness affected mainly understorey guild composition.
 
@@ -439,6 +458,41 @@ GWM_ses %>%
 
 # Discussion
 
+<!-- take home messages -->
+We found back economics spectra evidenced by @wright_worldwide_2004 and @chave_towards_2009 at finer scale than @messier_trait_2016 suggested (figure \@ref(fig:PCA)). This result advocate for a pantropical and multi-spatial scale oganisation of tropical plant strategies in two separated economics spectra. Still our results suggest that this two spectra are decoupled between canopy and understorey tree species, whereas existing in both guilds. Canopy tree species being the first layer of forest ecosystem interacting with external abiotic environment shows major variation in wood economics spectrum (table \@ref(tab:LM)). Indeed wood economic spectrum is related to mechanical resistance, disturbance tolerance and water conductivity efficiency. Thus understorey tree will benefit from a mircoclimate [@Porte2004] generated by the presence of the canopy tree. In this microclimate, leaf economics spectrum is then a major axis of strategy to answer to a changing light environment and soil fertility (table \@ref(tab:LM)).
+
+## Wood and leaf economics hold at the local scale
+
+<!-- WIP here -->
+
+We found an increasing trait variation within individuals, within species, and between species (table \@ref(tab:Traits)). Our analyses thus reveal that the primary source of trait variation within and among communities is the inter-species variation, justifying the use of species mean traits for the study of tropical tree guild assembly, besides protocol tend to minimise intra-specific variability. The PCA of functional trait variation among species displayed two main dimensions (figure \@ref(fig:PCA)), very similar to the ones found by @baraloto_decoupled_2010 and @fortunel_leaf_2012. Those authors interpreted these axes as independent wood and leaf economics spectra. We found that SLA and LDMC tend to covary negatively along the leaf economics spectrum, which be seen as a trade-off between productivity, with less carbon investment and higher photosynthesis rates, and persistence, with more leaf defense and investment [@wright_worldwide_2004]. A second major axis of trait variation opposed wood density to leaf area and thickness. It may be interpreted as an axis opposing stress tolerant species, with denser wood, to competitive species, with thicker and larger leaves, conferring a higher efficiency in water conductivity [@Santiago2004a]. It may thus be interpreted as the wood economics spectrum firstly introduced by @chave_towards_2009, and then discussed by @baraloto_decoupled_2010. Interestingly, @baraloto_decoupled_2010 found an independence between the leaf and wood economics spectra and their wood economics spectrum also showed an opposition between hardwood species having small thin leaves and light wood species having large thick leaves.
+
+Furthermore, our results are similar to the ones found by @fortunel_leaf_2012, where basic PCA axes also represented leaf and wood economics spectra (inverted compare to us). Noticeably, our analysis integrated less traits (5 against 14), less species (89 against 758), and considered a set of species found in a local forest-plot while @fortunel_leaf_2012 considered a regional set of species from French Guiana and Peru (i.e. the opposite ends of Amazonia). Therefore, our results shows that the economics spectra found at a regional scale in the Neotropics are also valid at a far more local scale in an Indian rainforest. This result does support the arguments by @messier_trait_2016 and suggests that the two observed spectra underline major ecological strategies in tropical forests, even locally.
+
+## Canopy and understorey species assembly rely on different economics spectra
+
+We further analyzed guilds distribution along economics spectra evidenced by the principal component analysis (figure \@ref(fig:PCA)). We found a weak but significant difference of variation of the canopy species along the wood economics spectrum compared to the leaf economics spectrum, whereas the understorey only showed an unsignificant trend of variation along the leaf more than the wood economics spectrum. In addition, we analyzed functional composition of $30*30m^2$ guilds from canopy and understorey, as well as the variation of this composition with environment across a 10-ha forest plot. 
+
+Distribution of functional composition among communities shows a strong differentiation between the two guilds for each trait (see figure \@ref(fig:GWMboxplot)). Canopy guilds have larger, thinner and lighter leaves with increased SLA and denser woods, whereas understorey guilds have smaller, thicker, and denser leaves with lower SLA and lighter woods.
+
+In addition, we found that the variations in trait composition along the environmental gradients differ between canopy and understorey species, with partially more variation in traits associated to the leaf economic spectrum (LES) for understorey species and to the wood economics scpectrum (WES) for canopy species. In the former case, the curvature, wetness index, and the canopy height had a significant effect on the LES-based composition of understorey tree species (but not only), whereas southwest orientation and curvature both had a significant effect on the WES-based composition of canopy tree species (table \@ref(tab:Traits)).
+
+Those results advocates for decoupled strategies between species of understorey and canopy guilds [@duque2002different]. Indeed canopy tree species could deploy strategies to endorse the role of first layer against external abiotic environment. Those strategies will come through wood economic spectrum (WES) to ensure mechanical resistance, disturbance tolerance and water conductivity efficiency. Effectivelly, @Poorter2010b found hydraulic traits to be more related to adult stature than light demand. They hypothesized that this pattern was related to more drought stress and higher cavitation risk for canopy guild, thus supporting our result. On the other hand, understorey tree species will encounter constraints directly linked to canopy guild limiting light availability. Thus they will need to deploy strategies linked to ressource acquisition coming through leaf economics spectrum. @duque2002different also highlighted increased correlation of understorey species to soil characteristics compared to canopy species in well-drained uplands. Furthemore, @Santiago2007a, studying understorey plants compared to trees and lianas, found that understorey leaf-allocation patterns optimize SLA, and hence growth. Besides @duque2002different results were significant only for well-drained uplands and @Santiago2007a results concerns plant and not tree understorey, those two studies reinforce the idea that understorey species deploy strategy linked to resources acquisition.
+
+Hence, those results participate to the debate of decoupled economics spectra [@baraloto_decoupled_2010] versus the whole plant economics spectrum [@reich_world-wide_2014]. Effectivelly, decoupled spectra could be linked to divergent strategy of canopy and understorey species in response to their abiotic and biotic environment. And @freschet_evidence_2010 might have lacked to evidence decoupled economic spectra due to an absence of vertical structure in the subartic flora. Still, both guilds presented significant effect of the environment on the second spectrum (LES for canopy and WES for understorey), highlighting a need to further investigate this pattern. We further tested guilds organization around economics spectra on Amazonian tree species with BRIDGE dataset [@baraloto_decoupled_2010, see supplementary materials X]. **We found ...**
+
+## Environment influence guild-level functionnal composition
+
+We should note that relations found between guilds weighted means (GWM) and environment are globally weak (table \@ref(tab:LM), most of $R^2 \leq 0.2$ besides SLA model in canopy have an $R^2=0.5$). This low explanatory power is advocating for underlying null process related to neutral theory [@hubbell_unified_2001]. Null process can effectivelly be responsible for the majority of observed variance in functionnal composition at a such fine scale. Studies highlighting environmental filtering effect often present a higher environmental variation than in our study site [@bernard-verdier_community_2012]. In parallel, the 10-ha plot scale is really low and partially responsible for the small environmental variation. @kraft_functional_2008 detected topographical filtering on functional trait and @gunatilleke_specieshabitat_2006 observed niche differentiation on 25-ha tropical forest plots including large flat valleys.
+<!-- NB: We effectivelly discussed with Bruno that Uppangala was really small to be able to derive ecological interpretation (lack of repliaction and statistical power) -->
+
+Curvature is affecting the variation of leaf economics in understorey species and the variation of wood economics in canopy tree species. A locally convex context would accumulate more soil and attract more water, increasing soil fertility and allowing persistence of species investing more in leaf resource acquisition in understorey with higher SLA and lower LT, or less in wood ressources in canopy with lighter wood and bigger leaves. Curvature effect for understorey species is doubled by the effect of wetness index, expressing also the water accumulation in convex context resulting in increased soil fertility [@ferry2010higher]. Wet soil will result in lower SLA, and bigger and thicker leaves for understorey species. Economics spectra are not perfectly divided between canopy and understorey, with wood and leaf respectivelly, for instance leaf area and thickness of understorey species also responded to wet soils in understorey.
+
+The influence of aspect on forest composition is little documented in tropical forests. In a similar context that our study site, @gunatilleke_specieshabitat_2006 gave some intuitive insights on the effect of aspect on forest composition: they suggested that aspect through monsoon had a potential effect on rainforests. @bunyan_effect_2015 tested the effect of aspect on the occurence of forest fragments in a forest-grassland mosaic and foud that southwest orientation strongly determined the presence of forest in mountain rainforests of Western Ghats. They suggested that it could result from monsoon winds. In our context, monsoon winds are south-west oriented, and are expected to be a major source of disturbance in forests [@soman_aspects_1990].
+
+The Uppangala plot is situated in a topographically complex area with steep slopes mostly organized along southwest-oriented crests. In this context it is diffcult to predict wind flow and orientation inside the 10-ha plot topography. We propose two explanation, hardwood associated to smaller leaves could be selected for mechanical resistance in more disturbed souwhtwest oriented area or topography provoke a turbulences on northeast oriented areas responsible of more disturbance and death events in the forest history resulting in lightwood filtering [@larjavaara_rethinking_2010]. In both case it seems reasonable that canopy tree species are the most influenced by disturbance events linked to monsoon, and may even buffer the effect on understorey species.
+
+Biotic factors, illustrated here by the canopy height, also had a significant effect on the LES-based composition of understorey tree species. We indeed found higher SLA values and lower LT values in understorey assemblages that are located under stands characterized by a tall canopy. This results contrasts with the expectation that understorey species invest in higher LDMC for higher leaf lifespan, at the expense of SLA, under light-limited conditions [@kitajima_tissue-level_2010]. The Uppangala forest is characterized by a large heterogeneity of canopy height allowing light to penetrate more in lower strata, maybe especially more in high canopy context covering less closely understorey, resulting in those observation on the leaf economics variation of understorey species. Canopy height also resulted in lighter wood for understorey species, which might parrallel acquisitive species with higher SLA in this context.
 
 # Supplementary materials
 
@@ -488,5 +542,9 @@ We decided to use Levene's test over hypervolume overlap test for several reason
 
 * Outliers make quicly overlapping hypervolumes besides the density stay low in those area
 * Hypervolumes consider uncorrelated axis, which is not true for functional traits, and blur strategy axes highlighted by economic spectra
+
+## S3: Guilds organization along economics spectra in French Guiana
+
+**In waiting for BRIDGE dataset.**
 
 # References
