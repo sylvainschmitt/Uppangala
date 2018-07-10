@@ -1,24 +1,26 @@
 ---
 title: Decoupled wood and leaf strategies among canopy and understorey tree in a low-elevation rainforest of India
-author: "Sylvain Schmitt, Maxime Réjou-Méchain, Valérie Raevel, Ayyappan N, Balachandran N., Barathan N., and François Munoz"
+author: "Sylvain Schmitt, Valérie Raevel, Maxime Réjou-Méchain, Ayyappan N, Balachandran N., Barathan N., and François Munoz"
 date: '`r Sys.Date()`'
 output:
-  bookdown::html_document2:
-    number_sections: false
-    toc: true
-    toc_float: yes
-  bookdown::word_document2: default
   bookdown::pdf_document2:
     includes:
       before_body: ./template/doc_prefix.tex
       in_header: ./template/preamble.tex
     number_sections: false
     toc: false
+  bookdown::word_document2: default
+  bookdown::html_document2:
+    number_sections: false
+    toc: true
+    toc_float: yes
 linestretch: 1.5
 csl: bibliography/mee.csl
 bibliography: bibliography/refs.bib
 link-citations: yes
 ---
+
+<!-- setup -->
 
 ```{r config, message=FALSE, warning=FALSE, include=FALSE}
 rm(list = ls()); invisible(gc())
@@ -42,7 +44,193 @@ cv <- function(x, na.rm = T)
 n = 999 # Random repetitions
 ```
 
-# Traits
+<!-- data -->
+
+```{r Q}
+# Sp level PFT
+PFT <- genPFT() %>% 
+  mutate(LA = log(LA)) %>% 
+  mutate(SLA = log(SLA)) %>% 
+  group_by(Tree, Sp, SpCode, CE) %>% 
+  summarise_all(funs(mean(., na.rm = T))) %>% 
+  ungroup() %>% 
+  select(-Tree, -CE) %>% 
+  group_by(Sp, SpCode) %>% 
+  summarise_all(funs(mean(., na.rm = T))) %>% 
+  ungroup() %>% 
+  select(-Sp, -LTD, -SHA)
+suppressWarnings(row.names(PFT) <- PFT$SpCode) # deprecated
+# PCA
+PFT.pca <- princomp(~ LA + WD + LT + LDMC + SLA, data = PFT, cor = T)
+# Matrix Q
+Q <- PFT %>% 
+  mutate(SpCode = as.character(SpCode)) %>% 
+  left_join(data.frame(PFT.pca$scores) %>% 
+              mutate(SpCode = row.names(.)),
+            by = "SpCode") %>% 
+  rename(WES = Comp.1, LES = Comp.2) %>% 
+  left_join(genSpecies(), by = "SpCode") %>% 
+  mutate(strata = ifelse(Strata == 3, "U", "C")) %>%
+  select(SLA, LDMC, WD, LA, LT, LES, WES, strata, SpCode) %>%
+  mutate(strata = ifelse(SpCode == "agin", "U", strata))
+```
+
+```{r L}
+com <- quadrats(cs = c(30,30))
+XY <- genTrees()[c('x', 'y')]
+coordinates(XY) <- ~ x + y
+proj4string(XY) <- crs(com)
+L <- genTrees() %>% 
+  mutate(com = (XY %over% com)[,1]) %>% 
+  filter(!is.na(com)) %>% 
+  group_by(com, SpCode) %>% 
+  summarise(n = n()) %>% 
+  dcast(com ~ SpCode, value.var = "n") %>% 
+  replace(is.na(.), 0)
+```
+
+```{r R}
+# Env <- genEnv()
+# com <- quadrats(cs = c(30,30))
+# com@data$Elevation <- extract(Env$DEM, as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
+# Deriv <- DEMderiv(raster(com, 'Elevation'), c('slope', 'curvature', 'plancurvature', 'profcurvature', 'cosaspect'), path = '/usr/share/applications')
+# names(Deriv)[5] <- 'SW'
+# com@data <- cbind(com@data, extract(Deriv, as(com, "SpatialPolygons"), df = T, fun = mean)[-1])
+# com@data$Wetness <- extract(DEMderiv(Env$DEM, 'wetness'), as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
+# com@data$Canopy <- extract(Env$Canopy, as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
+# BA <- aggregate(Trees$Girth, list(Trees$com), function(x){sum(pi*(x/(2*pi))^2, na.rm = T)})
+# com@data$BA <- BA$x[match(com@data$id, BA$Group.1)]
+# pca.env <- princomp(~ Elevation + Slope + Curvature + PlanCurvature + ProfileCurvature + Wetness + SW, data = com@data, cor = T)
+# save(pca.env, file = file.path(path, 'pca.env.Rdata'))
+# R <- com@data[c('Slope', 'Curvature', 'Wetness', 'SW', 'Canopy', 'BA')]
+# row.names(R) <- com@data$id
+# R$community <- row.names(R)
+# save(R, file = file.path(path, 'R.Rdata'))
+load(file.path("draft_save", 'R.Rdata'))
+```
+
+```{r GWMses}
+GWM <- L %>%
+  melt(id.var = "com",
+       variable.name = "SpCode",
+       value.name = "abundance") %>% 
+  dcast(SpCode ~ com, value.var = "abundance") %>% 
+  mutate(SpCode = as.character(SpCode)) %>% 
+  left_join(Q, by = "SpCode") %>% 
+  select(-SpCode) %>% 
+  melt(id.vars = c('strata', 'LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'LT'),
+       variable.name = 'community', value.name = 'abundance') %>% 
+  group_by(strata, community) %>% 
+  summarise_each(funs(weighted.mean(., abundance, na.rm = T)), -abundance)
+# nQ <- array(rep(as.matrix(Q), n),
+#             c(dim(Q), n),
+#             list(row.names(Q), names(Q), 1:n))
+# nQ <- array(apply(nQ, 3, function(x){
+#   x[which(x[,"strata"] == "C"),'SpCode'] <- sample(x[which(x[,"strata"] == "C"),'SpCode'])
+#   x[which(x[,"strata"] == "U"),'SpCode'] <- sample(x[which(x[,"strata"] == "U"),'SpCode'])
+#   return(x)
+#   }), c(dim(Q), n), list(row.names(Q), names(Q), 1:n))
+# cl <- makeCluster(cores)
+# clusterExport(cl, list('L', 'nQ'))
+# nGWM <- parApply(cl, nQ, 3, function(x){
+#   library(dplyr)
+#   library(reshape2)
+#   L %>%
+#     melt(id.var = "com",
+#          variable.name = "SpCode",
+#          value.name = "abundance") %>%
+#     dcast(SpCode ~ com) %>%
+#     left_join(data.frame(x)) %>%
+#     select(-SpCode) %>%
+#     melt(id.vars = c('strata', 'LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'LT'),
+#          variable.name = 'community', value.name = 'abundance') %>%
+#     group_by(strata, community) %>%
+#     mutate_each(funs(as.character), -abundance) %>%
+#     mutate_each(funs(as.numeric), -abundance) %>%
+#     summarise_each(funs(weighted.mean(., abundance, na.rm = T)), -abundance)
+# })
+# stopCluster(cl)
+# nGWM <- array(unlist(lapply(nGWM, function(x) as.matrix(x[3:9]))),
+#               c(dim(GWM[3:9]), n),
+#               list(row.names(GWM), names(GWM[3:9]), 1:n))
+# rm(cl, nQ)
+# save(nGWM, file = file.path("draft_save", 'nGWM.Rdata'))
+load(file.path("draft_save", 'nGWM.Rdata'))
+GWM_ses <- GWM
+GWM_ses[3:9] <- (GWM[3:9] - apply(nGWM, 1:2, mean, na.rm = T))/apply(nGWM, 1:2, sd, na.rm = T)
+```
+
+# Abstract
+
+## Keywords
+
+functional trait; rainforest; vertical forest strata; Western Ghats; environmental filtering; niche differentiation; ecological guild
+
+# Introduction
+
+
+
+# Material and methods
+
+## Study site
+
+The study was carried out in a 10-ha permanent plot established in 1990 by the French Institute of Pondicherry in an undisturbed, old-growth wet evergreen Dipterocarp forest [@pascal_structure_1996]. The plot is located in the Kadamakal Reserve Forest (Kodagu District, Karnataka State, India), near the Uppangala village, and thus refers to as "Uppangala plot" (see figure \@ref(fig:Uppangala)). Annual precipitation averages 5108 mm per year but is highly variable in time with heavy rainfall from June to October (90% of the rainfall during the monsoon) and a severe dry season (monthly rainfall $\leq 45$ mm) lasting 3.8 months [@pelissier_twenty_2011]. Mean annual temperature in the station of Sampaji (15 km from Uppangala) is about 27$^\circ C$, with a mean minimum about 25$^\circ C$ during July rainfall pick and a maximum mean temperature of 29$^\circ C$ in April [@pascal_structure_1996]. Climate and geology of the 10-ha plot can be considered as homogeneous. The topography of the site is highly heterogeneous with regular east-west alternation of thalwegs and ridges separated by steep slopes, so that topography is expected to be a major component of environmental variation within the forest plot [@gimaret-carpentier_sampling_1998]. Therefore, we hypothesized that topographic variation should influence community assembly and yield changing ecological strategies and functional composition [@condit_spatial_2000].
+
+```{r Uppangala, fig.cap="Canopy model of the 10-ha forest permanent plot in Uppangala, India. Preliminry figure to be improved."}
+knitr::include_graphics("./data/test.png")
+```
+
+## Taxonomic composition and trait sampling
+
+From 1989 to 2014, the trees $\geq 10$ cm in diameter at breast height (dbh) were identified to species level, tagged, mapped and monitored in an area progressively extended to a contiguous $300 * 330 m^2$ (ca. 10-ha) plot [@pelissier_twenty_2011]. The plot included 111 different tree species. We collected trait data from 89 over 111 (80.1%) species, which represented 99.0% of tree individuals present in the plot. Note that the 32 most abundant species represented more than 80% of tree individuals. We sampled five individuals per species for these 32 species, and sampled one to five individuals for the remaining species (in total 267 individuals). For each individual we collected 5 mature shadow leaves and one branch sample with a diameter close to 1 cm following recommendation of @perez-harguindeguy_new_2013. Individuals and leaves were selected in consistent light conditions, development stage and sanitary state. Dawkins crown exposure index [@dawkins_management_1958] was recorded for each tree sampled to control for any sun-exposure effect. Leaf and branch samples were kept in humidified ziplock filled with enriched $CO_{2}$ air inside a black bag until measurement within the next 24 hours. For some individuals, we were unable to collect suitable branch sample, i.e. with a diameter $\leq 1$ cm (11 missing species over 89 representing 1% of individuals present).
+
+## Trait measurements
+
+Leaf petioles, rachis and petiolules were removed for all measurements. Leaf fresh weights, thickness and area were measured, using a weighing scale, a micrometer and a bend scanner with ImageJ software [@Schneider2012] respectively. Leaves were first kept in herbarium and then dried in an oven for at least 72 hours at 60 $^\circ C$. Once dried, the leaves were weighted directly after been extracted from the oven to avoid any humidity bias. The bark and pit of branch samples were removed in order to keep only branch wood with no soft tissues. Branch wood samples were immersed in water to evaluate their volume by water displacement. Wood samples were then dried for 48 hours at 80 $^\circ C$ and weighted.
+
+We calculated five functional traits of leaf and wood samples: leaf thickness (LT in $\mu m$ ), leaf area measured from scans (LA in $mm^2$), leaf dry matter content as the leaf dry weight divided by the leaf fresh weight (LDMC in $mg.g^-1$), specific leaf area as the leaf area divided by the leaf dry mass (SLA in $m^2.kg^-1$), and branch wood density as the the wood sample dry weight divided by its volume (WD in $g.cm^-3$, see table \@ref(tab:Traits)). We chose those five traits because they proved to be good proxies of the major dimensions of ecological strategies in plants [@mark_westoby_plant_2002; @diaz_global_2015] and were relatively easy to measure on the field.
+
+## Environmental variables
+
+Topography was expected to be a major environmental factor influencing the assemby of tree communities [@gimaret-carpentier_sampling_1998]. We selected 8 topographical variables representing the abiotic environment: elevation, slope, curvature, plan curvature, profile curvature, wetness (function of both slope and elevation representing water flow and accumulation areas), southwesterness (SW, aspect in direction of south-west: $cos(aspectindegres + 225)$) derived from elevation data available within the plot using the RSAGA package [@brenning_statistical_2008], and distance to the nearest potential river computed in ArcGis [@desktop_arcgis_2011].
+
+In order to identify the main sources of environmental variation and to avoid multi-colinearity in subsequent analyses, we performed a principal component analysis (PCA) of the abiotic environmental variables (see Supplementary materials [S1: Principal component analysis of topographical variables]). We selected four little-correlated variables: curvature representing local water flow paths and soil accumulation areas, wetness highlighting water accumulation areas over the whole study area, southwesterness representing aspect [@bunyan_effect_2015] and slope, which may have both a strong effect on forest dynamics and on nutrient/water availability [@ferry2010higher].
+
+In addition, we selected two biotic factors related to local forest structure: canopy height and basal area. Canopy height, i.e. the maximum local height of the canopy, was calculated from a 1-m resolution digital canopy model built from a LiDAR (Light Detection And Ranging) dataset acquired in 2013 over the Uppangala plot. Basal area was calculated from the girth measurements taken within the 10-ha plot (censuses done in 2013 and 2014) for stems $\geq 10$ cm dbh. We kept only canopy height because the two variables were highly correlated and canopy height present the advantage to be independant from plot censuses.
+
+## Analyses
+
+### Guilds
+
+@pascal_wet_1988 defined four vertical strata attained by adult trees: emergent above 39m, canopy trees between 25 and 39m, sub-canopy trees between 15 and 25m, and understorey trees below 15m. Despite the vertical hierarchy, steep topography could allow sub-canopy trees receiving more light, especially in slopes, and thus participates to canopy. We thus defined two basic guilds called canopy (C), composed of emergent, canopy and sub-canopy species (n = `r sum(Q$strata == "C")`), and understorey (U) species (n = `r sum(Q$strata == "U")`). 
+
+### Traits variation and covariation
+
+We first calculated the coefficient of variation (ratio of the standard deviation to the mean) of trait values among leaves of the same individual (intra-individual), among trees of the same species (intra-specific for species with more than one individual), and among species (inter-specific). We then performed a principal component analysis (PCA) of the mean value of traits per species to identify main dimensions of ecological strategies along which traits can covary among guilds. In addition we explored guilds functional organisation around the strategy axes revealed by the PCA. We compared guilds functional variance along the two first axis from the PCA with Levene's tests [@Schultz1985]. Subsequent community-level analyses were based on trait values averaged per species.
+
+### Drivers of community dynamics
+
+We subdivided the 10-ha plot into $30*30 m^2$ quadrats leading to 110 local communities. We analyzed the functionnal composition of the guilds in the 110 communities. Guilds in the communities have a mean number of 28 individuals representing 10 species, with less in understorey than in canopy.
+
+We calculated weighted mean [GWM, where G stands for "guild", @violle_let_2007] for each guild in each community. In the quadrat $j$, GWM of trait $t$ was the mean of trait values $t_{i}$ of species $i$ weighted by species relative abundance $p_{i}$: 
+$$GWM_{j} = \sum_{i=1}^{S} p_{i,j} * t_{i,j} ~~ (1)$$ 
+where $S$ is the number of species in the quadrat $j$.
+
+We devised a null model approach to test for any significant changes in functional composition in response to an environmental gradient. We thus wanted to explore if the local functional composition reflect the influence of abiotic and biotic drivers of community dynamics within guilds. We hypothesized that *drivers of environmental filtering on local functional composition differ between canopy and understorey tree species*. To accept or reject the hypothesis we used a null model randomizing trait values among species in the whole plot for each guild (permuting rows in Trait*Species matrices of both guilds) [@bernard-verdier_community_2012]. Consequently, this nul model breaks the link between environement and local functional composition while keeping guilds and species spatial structure, thus testing for our hypothesis.
+
+We performed 999 randomizations of each null model and we derived a two-tailed test of the proportion of guilds deviating from the null expectation, with adjusted p-values by Benjamini-Hochberg correction [@Benjamini1995].
+
+To characterize the patterns of deviation from the null model, we also calculated standardized effect sizes (SES) as 
+$$SES = \frac{(I_{obs} - I_{null})}{\sigma {null}} ~~ (3)$$ 
+where $I{obs}$ was the observed metric and $I_{null}$ and $\sigma {null}$ were the mean and standard deviation of the corresponding null distribution. The influence of environment on SES values was investigated by linear regression with biotic and abiotic factors ($SES{trait} = Slope + Curvature + Wetness + SW + Canopy$). Analyses were conducted on the five functional traits.
+
+All analyses were conducted using the R 3.3.0 software [@r_core_team_r:_2016] with packages ade4 [@dray_ade4_2007], and vegan [@oksanen_vegan:_2016].
+
+# Results
+
+## Traits variation and covariation
+
+We found an overall increase of functional trait variation from intra-individual to inter-specific levels (see table \@ref(tab:Traits)), even though LA showed almost as large variability at intra-individual than at intra-specific levels ($CV_{individual} = 0.20$ and $CV_{species} = 0.24$, wilcoxon rank test $p-value = 0.137$). Given the relatively low intra-individual and intra species variation, compared to inter-species variation, using species trait average values for community analyses is warranted.
 
 ```{r Traits}
 genPFT() %>% 
@@ -113,71 +301,6 @@ genPFT() %>%
         caption = 'Functional traits measured. Traits with their abbreviation, standard unit, associated species strategy, range of values, intra-individual, intra-specific and inter-specific component of variation.  Species strategy are precised for functioning, survival and reproduction [@baraloto_decoupled_2010]. The rlast columns represents the coefficient of variation of trait values among leaves per individuals (intra-individual), among trees per species (intra-specific), and among trees of different species.')
 ```
 
-```{r Q}
-# Sp level PFT
-PFT <- genPFT() %>% 
-  mutate(LA = log(LA)) %>% 
-  mutate(SLA = log(SLA)) %>% 
-  group_by(Tree, Sp, SpCode, CE) %>% 
-  summarise_all(funs(mean(., na.rm = T))) %>% 
-  ungroup() %>% 
-  select(-Tree, -CE) %>% 
-  group_by(Sp, SpCode) %>% 
-  summarise_all(funs(mean(., na.rm = T))) %>% 
-  ungroup() %>% 
-  select(-Sp, -LTD, -SHA)
-suppressWarnings(row.names(PFT) <- PFT$SpCode) # deprecated
-# PCA
-PFT.pca <- princomp(~ LA + WD + LT + LDMC + SLA, data = PFT, cor = T)
-# Matrix Q
-Q <- PFT %>% 
-  mutate(SpCode = as.character(SpCode)) %>% 
-  left_join(data.frame(PFT.pca$scores) %>% 
-              mutate(SpCode = row.names(.)),
-            by = "SpCode") %>% 
-  rename(WES = Comp.1, LES = Comp.2) %>% 
-  left_join(genSpecies(), by = "SpCode") %>% 
-  mutate(strata = ifelse(Strata == 3, "U", "C")) %>%
-  select(SLA, LDMC, WD, LA, LT, LES, WES, strata, SpCode) %>%
-  mutate(strata = ifelse(SpCode == "agin", "U", strata))
-```
-
-```{r L}
-com <- quadrats(cs = c(30,30))
-XY <- genTrees()[c('x', 'y')]
-coordinates(XY) <- ~ x + y
-proj4string(XY) <- crs(com)
-L <- genTrees() %>% 
-  mutate(com = (XY %over% com)[,1]) %>% 
-  filter(!is.na(com)) %>% 
-  group_by(com, SpCode) %>% 
-  summarise(n = n()) %>% 
-  dcast(com ~ SpCode, value.var = "n") %>% 
-  replace(is.na(.), 0)
-```
-
-```{r R}
-# Env <- genEnv()
-# com <- quadrats(cs = c(30,30))
-# com@data$Elevation <- extract(Env$DEM, as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
-# Deriv <- DEMderiv(raster(com, 'Elevation'), c('slope', 'curvature', 'plancurvature', 'profcurvature', 'cosaspect'), path = '/usr/share/applications')
-# names(Deriv)[5] <- 'SW'
-# com@data <- cbind(com@data, extract(Deriv, as(com, "SpatialPolygons"), df = T, fun = mean)[-1])
-# com@data$Wetness <- extract(DEMderiv(Env$DEM, 'wetness'), as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
-# com@data$Canopy <- extract(Env$Canopy, as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
-# BA <- aggregate(Trees$Girth, list(Trees$com), function(x){sum(pi*(x/(2*pi))^2, na.rm = T)})
-# com@data$BA <- BA$x[match(com@data$id, BA$Group.1)]
-# pca.env <- princomp(~ Elevation + Slope + Curvature + PlanCurvature + ProfileCurvature + Wetness + SW, data = com@data, cor = T)
-# save(pca.env, file = file.path(path, 'pca.env.Rdata'))
-# R <- com@data[c('Slope', 'Curvature', 'Wetness', 'SW', 'Canopy', 'BA')]
-# row.names(R) <- com@data$id
-# R$community <- row.names(R)
-# save(R, file = file.path(path, 'R.Rdata'))
-load(file.path("draft_save", 'R.Rdata'))
-```
-
-# PCA
-
 ```{r PCA,  fig.cap='Principal Component Analysis (PCA) of species mean trait values. Marginal plots represent the density distribution of species on the two principal component axis for each morphotype. See table \\@ref(tab:Traits) for abbreviation.'}
 pca.plot <- autoplot(PFT.pca, 
          data = Q %>% 
@@ -196,8 +319,8 @@ pca.plot <- autoplot(PFT.pca,
          loadings = T, loadings.label = T, loadings.colour = 'black',
          loadings.label.vjust = 1.2) +
   coord_equal() +
-  geom_hline(aes(yintercept = 0), col = 'lightgrey') +
-  geom_vline(aes(xintercept = 0), col = 'lightgrey') +
+  geom_hline(aes(yintercept = 0), col = 'green', linetype = "dotted") +
+  geom_vline(aes(xintercept = 0), col = 'purple', linetype = "dotted") +
   xlab('Axe 1 − 33.66 %') + ylab('Axe 2 − 29.07 %') +
   theme(legend.position = c(1, 1), 
         legend.justification = c(1, 1))
@@ -208,7 +331,13 @@ spectrum.density <-pca.plot$data %>%
   ggplot(aes(value, color = spectrum, fill = spectrum)) +
   geom_density(alpha = 0.5) + 
   facet_wrap(~strata, nrow = 2) +
-  coord_flip()
+  coord_flip() +
+  scale_fill_manual("PCA axis", 
+                    labels = c("WES" = "PCA1", "LES" = "PCA2"),
+                    values = c("green", "purple")) +
+  scale_color_manual("PCA axis", 
+                     labels = c("WES" = "PCA1", "LES" = "PCA2"),
+                     values = c("green", "purple"))
 cowplot::plot_grid(pca.plot, spectrum.density, rel_widths = c(2,1))
 ```
 
@@ -232,9 +361,17 @@ Leven_test <- list(
 )
 ```
 
-Canopy species vary significantly more on the wood than the leaf economic spectrum (`r Variance$LES$C` vs `r Variance$WES$C`, Levene's test p-value=`r Leven_test$C`). In parrallel, understorey species show a tendency to vary more on the leaf than the wood economic spectrum (`r Variance$LES$U` vs `r Variance$WES$U`, Levene's test p-value=`r Leven_test$U`).
+The first axis of the principal component analysis (PCA, see figure \@ref(fig:PCA)) of mean species trait values was basically related to wood density and structural leaf trait variations (LT, LA, LDMC), thus opposing species with thick, big leaves and lightwood to species with dense leaves and hardwood. The second axis mostly opposed SLA to LDMC, and to a less extent to wood density. However, wood density was orthogonal to SLA in the plan 1-2 of the PCA indicating independence between those two traits. In addition, canopy species vary significantly more on the PCA first axis than on the second axis (`r Variance$LES$C` vs `r Variance$WES$C`, Levene's test p-value=`r Leven_test$C`). In parrallel, understorey species show a tendency to vary more on the PCA second axis than the first axis (`r Variance$LES$U` vs `r Variance$WES$U`, Levene's test p-value=`r Leven_test$U`).
 
-# Guilds
+## Functional composition of guilds
+
+Guilds weighted means (GWM) from understorey and canopy guilds strongly diverged among communities (see figure \@ref(fig:GWMboxplot) ). Canopy guilds have higher SLA, WD and LA but lower LDMC and LT than understorey guilds. In other words, canopy guilds have larger, thinner and lighter leaves with increased SLA and denser woods, whereas understorey guilds have smaller, thicker, and more dense leaves with lower SLA and lighter woods.
+
+The guild weighted trait means (GWM) varied weakly but significantly along the environmental gradients for both canopy (C) and understorey (U) guilds ($R^2$ from 0.04 to 0.5, see table \@ref(tab:LM)). Functional traits of canopy and understorey tree species were both influenced by curvature, but not for the same traits, and two major differences were observed between the two guilds. The effect of south-west orientation on functional composition was observed only for canopy tree species, while the effect of canopy height and wetness affected mainly understorey guild composition.
+
+Focusing on canopy tree species, we found an increase in wood density under south-west orientation. We also observed a decrease in leaf area under the south-west orientation. Leaf area decreased with curvature, while wood density and LDMC increased with curvature. Finally, heigh canopy was also related to an increased leaf area.
+
+For understorey tree species, SLA significantly decreased and leaf thickness significantly increased with curvature. SLA significantly increased with canopy height, while leaf thickness decreased with canopy height. Finally, SLA and wood density significantly decreased and leaf area and thickness significantly increased with wetness.
 
 ```{r GWMboxplot, fig.cap="Boxplot of guilds weighted means (GWM) among communties for each traits (for canopy (C) and understorey (U) guilds). See table \\@ref(tab:Traits) for abbreviations.", fig.height=4}
 L %>%
@@ -258,59 +395,6 @@ L %>%
   facet_wrap(~trait, scales = "free", nrow = 1) +
   xlab("Guild") + scale_fill_discrete(guide = "none") +
   ggpubr::stat_compare_means(aes(label = paste(..p.signif..))) 
-```
-
-# LM
-
-```{r GWMses}
-GWM <- L %>%
-  melt(id.var = "com",
-       variable.name = "SpCode",
-       value.name = "abundance") %>% 
-  dcast(SpCode ~ com, value.var = "abundance") %>% 
-  mutate(SpCode = as.character(SpCode)) %>% 
-  left_join(Q, by = "SpCode") %>% 
-  select(-SpCode) %>% 
-  melt(id.vars = c('strata', 'LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'LT'),
-       variable.name = 'community', value.name = 'abundance') %>% 
-  group_by(strata, community) %>% 
-  summarise_each(funs(weighted.mean(., abundance, na.rm = T)), -abundance)
-# nQ <- array(rep(as.matrix(Q), n),
-#             c(dim(Q), n),
-#             list(row.names(Q), names(Q), 1:n))
-# nQ <- array(apply(nQ, 3, function(x){
-#   x[which(x[,"strata"] == "C"),'SpCode'] <- sample(x[which(x[,"strata"] == "C"),'SpCode'])
-#   x[which(x[,"strata"] == "U"),'SpCode'] <- sample(x[which(x[,"strata"] == "U"),'SpCode'])
-#   return(x)
-#   }), c(dim(Q), n), list(row.names(Q), names(Q), 1:n))
-# cl <- makeCluster(cores)
-# clusterExport(cl, list('L', 'nQ'))
-# nGWM <- parApply(cl, nQ, 3, function(x){
-#   library(dplyr)
-#   library(reshape2)
-#   L %>%
-#     melt(id.var = "com",
-#          variable.name = "SpCode",
-#          value.name = "abundance") %>%
-#     dcast(SpCode ~ com) %>%
-#     left_join(data.frame(x)) %>%
-#     select(-SpCode) %>%
-#     melt(id.vars = c('strata', 'LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'LT'),
-#          variable.name = 'community', value.name = 'abundance') %>%
-#     group_by(strata, community) %>%
-#     mutate_each(funs(as.character), -abundance) %>%
-#     mutate_each(funs(as.numeric), -abundance) %>%
-#     summarise_each(funs(weighted.mean(., abundance, na.rm = T)), -abundance)
-# })
-# stopCluster(cl)
-# nGWM <- array(unlist(lapply(nGWM, function(x) as.matrix(x[3:9]))),
-#               c(dim(GWM[3:9]), n),
-#               list(row.names(GWM), names(GWM[3:9]), 1:n))
-# rm(cl, nQ)
-# save(nGWM, file = file.path("draft_save", 'nGWM.Rdata'))
-load(file.path("draft_save", 'nGWM.Rdata'))
-GWM_ses <- GWM
-GWM_ses[3:9] <- (GWM[3:9] - apply(nGWM, 1:2, mean, na.rm = T))/apply(nGWM, 1:2, sd, na.rm = T)
 ```
 
 ```{r LM}
@@ -353,7 +437,16 @@ GWM_ses %>%
   kable(caption = 'Linear models of the standardized effect size (SES) with null model NM2 for each trait of GWMs, for canopy (C) and understorey (U) guilds, in abundance. We performed stepwise selection of the predictors including slope, curvature, wetness southwesterness (SW), and canopy height (Canopy), and only the selected predictors are shown. See table \\@ref(tab:Traits) for abbreviations. Bold and number of asterisk indicates the significance threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001).', format = 'pandoc')
 ```
 
-# Environment
+# Discussion
+
+
+# Supplementary materials
+
+## S1: Principal component analysis of topographical variables
+
+We selected 8 topographical variables representing the abiotic environment: elevation, slope, curvature, plan curvature, profile curvature, wetness (function of both slope and elevation representing water flow and accumulation areas), southwesterness (SW, aspect in direction of south-west: $cos(aspectindegres + 225)$) derived from elevation data available within the plot using the RSAGA package [@brenning_statistical_2008], and distance to the nearest potential river computed in ArcGis [@desktop_arcgis_2011].
+
+In order to identify the main sources of environmental variation and to avoid multi-colinearity in subsequent analyses, we performed a principal component analysis (PCA).
 
 ```{r PCAenv, fig.cap='Principal component analysis (PCA) performed on topgraphical variables. SW stand for southwesterness.'}
 load(file.path("draft_save", 'pca.env.Rdata'))
@@ -369,23 +462,31 @@ pca.env %>%
   xlab('Axe 1 − 42.52 %') + ylab('Axe 2 − 23.44 %') 
 ```
 
-# Why not hypervolumes
+Plan curvature and profile curvature were obviously highly correlated to curvature (see figure \@ref(fig:PCAenv)). We selected curvature to represent local water flow paths and soil accumulation areas. Wetness was negatively correlated to elevation, and was kept to represent water accumulation areas over the whole study area. Slope was kept apart, besides a correlation to elevation, for its putative effect on forest dynamics and on nutrients/water availability. Finally, southwesterness was not in first plan 1-2 from PCA, and was thus kept to represent aspect.
+
+## S2: Why not hypervolumes
+
+**Reminder to be further removed !**
 
 ```{r hypervolumes}
 # library(hypervolume)
-# bd <- Q %>% 
-#   filter(!is.na(WES)) %>% 
-#   select(-LES, -WES, -SpCode, -strata) %>% 
-#   summarise_all(funs(sd)) %>% 
+# bd <- Q %>%
+#   filter(!is.na(WES)) %>%
+#   select(-LES, -WES, -SpCode, -strata) %>%
+#   summarise_all(funs(sd)) %>%
 #   unlist()
-# hv <- hypervolume_set(hypervolume(na.omit(Q[Q$strata == "C",names(bd)]), 
-#                                   kde.bandwidth = bd, verbose = F), 
-#                       hypervolume(na.omit(Q[Q$strata == "U",names(bd)]), 
-#                                   kde.bandwidth = bd, verbose = F), 
+# hv <- hypervolume_set(hypervolume(na.omit(Q[Q$strata == "C",names(bd)]),
+#                                   kde.bandwidth = bd, verbose = F),
+#                       hypervolume(na.omit(Q[Q$strata == "U",names(bd)]),
+#                                   kde.bandwidth = bd, verbose = F),
 #                       check.memory = F, verbose = F)
 # plot(hv)
 # rm(hv)
 ```
 
+We decided to use Levene's test over hypervolume overlap test for several reasons listes below (the chunk included in the Rmarkdown can be used for better vizualisation of the arguments):
+
 * Outliers make quicly overlapping hypervolumes besides the density stay low in those area
 * Hypervolumes consider uncorrelated axis, which is not true for functional traits, and blur strategy axes highlighted by economic spectra
+
+# References
