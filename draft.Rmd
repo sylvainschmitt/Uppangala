@@ -3,17 +3,17 @@ title: Decoupled wood and leaf strategies among canopy and understorey tree in a
 author: "Sylvain Schmitt, Valérie Raevel, Maxime Réjou-Méchain, Ayyappan N, Balachandran N., Barathan N., and François Munoz"
 date: '`r Sys.Date()`'
 output:
-  bookdown::word_document2: default
+  bookdown::html_document2:
+    number_sections: false
+    toc: true
+    toc_float: yes
   bookdown::pdf_document2:
     includes:
       before_body: ./template/doc_prefix.tex
       in_header: ./template/preamble.tex
     number_sections: false
     toc: false
-  bookdown::html_document2:
-    number_sections: false
-    toc: true
-    toc_float: yes
+  bookdown::word_document2: default
 linestretch: 1.5
 csl: bibliography/mee.csl
 bibliography: ["bibliography/refs.bib", "bibliography/library.bib"] 
@@ -320,7 +320,7 @@ genPFT() %>%
         caption = 'Functional traits measured. Traits with their abbreviation, standard unit, associated species strategy, range of values, intra-individual, intra-specific and inter-specific component of variation.  Species strategy are precised for functioning, survival and reproduction [@baraloto_decoupled_2010]. The rlast columns represents the coefficient of variation of trait values among leaves per individuals (intra-individual), among trees per species (intra-specific), and among trees of different species.')
 ```
 
-```{r PCA,  fig.cap='Principal Component Analysis (PCA) of species mean trait values. Marginal plots represent the density distribution of species on the two principal component axis for each morphotype. See table \\@ref(tab:Traits) for abbreviation.'}
+```{r PCA,  fig.cap='Principal Component Analysis (PCA) of species mean trait values. Marginal plots represent the density distribution of species on the two principal component axis for each strata. See table \\@ref(tab:Traits) for abbreviation.'}
 pca.plot <- autoplot(PFT.pca, 
          data = Q %>% 
            left_join(L %>% 
@@ -545,6 +545,59 @@ We decided to use Levene's test over hypervolume overlap test for several reason
 
 ## S3: Guilds organization along economics spectra in French Guiana
 
-**In waiting for BRIDGE dataset.**
+```{r pcaBRIDGE, fig.cap='Principal Component Analysis (PCA) of species mean trait values for Amazonian species (BRIDGE dataset). Marginal plots represent the density distribution of species on the two principal component axis for each strata.'}
+dlim = 0.35
+BRIDGE <- readr::read_tsv("./data/species_TROLL_Nino.txt") %>% 
+  mutate(strata = ifelse(dmax > dlim, "C", "U"))
+BRIDGE.pca <- princomp(~ LMA + Nmass + Pmass + wsg, data = BRIDGE, cor = T)
+pca.plot <- autoplot(BRIDGE.pca, 
+         data = BRIDGE,
+         colour = "strata",
+         size = "Freg",
+         loadings.label.size = 6,
+         loadings.label.colour = 'black',
+         loadings = T, loadings.label = T, loadings.colour = 'black',
+         loadings.label.vjust = 1.2) +
+    coord_equal() +
+  geom_hline(aes(yintercept = 0), col = 'green', linetype = "dotted") +
+  geom_vline(aes(xintercept = 0), col = 'purple', linetype = "dotted") +
+  xlab('Axe 1 − 33.66 %') + ylab('Axe 2 − 29.07 %') +
+  theme(legend.position = c(1, 1), 
+        legend.justification = c(1, 1))
+spectrum.density <- pca.plot$data %>% 
+  select(Comp.1, Comp.2, strata) %>% 
+  rename(WES = Comp.1, LES = Comp.2) %>% 
+  melt(id.vars = "strata", variable.name = "spectrum") %>% 
+  ggplot(aes(value, color = spectrum, fill = spectrum)) +
+  geom_density(alpha = 0.5) + 
+  facet_wrap(~strata, nrow = 2) +
+  coord_flip() +
+  scale_fill_manual("PCA axis", 
+                    labels = c("WES" = "PCA1", "LES" = "PCA2"),
+                    values = c("green", "purple")) +
+  scale_color_manual("PCA axis", 
+                     labels = c("WES" = "PCA1", "LES" = "PCA2"),
+                     values = c("green", "purple"))
+data <- pca.plot$data %>% 
+  select(Comp.1, Comp.2, strata) %>% 
+  rename(WES = Comp.1, LES = Comp.2) %>% # ! test !
+  melt(id.vars = "strata", variable.name = "spectrum")
+Variance <- list(
+  LES = list(
+    C = round(var(data[data$strata == "C" & data$spectrum == "LES", "value"], na.rm = T), 3),
+    U = round(var(data[data$strata == "U" & data$spectrum == "LES", "value"], na.rm = T), 3)),
+ WES = list(
+   C = round(var(data[data$strata == "C" & data$spectrum == "WES", "value"], na.rm = T), 3),
+   U = round(var(data[data$strata == "U" & data$spectrum == "WES", "value"], na.rm = T) ,3))
+)
+Leven_test <- list(
+  C = round(car::leveneTest(value ~ spectrum, data[data$strata == "C",])$`Pr(>F)`[1], 3),
+  U = round(car::leveneTest(value ~ spectrum, data[data$strata == "U",])$`Pr(>F)`[1], 3)
+)
+cowplot::plot_grid(pca.plot, spectrum.density, rel_widths = c(2,1))
+```
+
+* Canopy species WES vs LES: `r Variance$LES$C` vs `r Variance$WES$C`, Levene's test p-value=`r Leven_test$C`
+* Understorey species LES vs WES: `r Variance$LES$U` vs `r Variance$WES$U`, Levene's test p-value=`r Leven_test$U`
 
 # References

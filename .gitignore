@@ -12,3 +12,5 @@ data/*
 *_files
 *_cache
 *_save
+# BRIDGE_test
+BRIDGE_test/*.txt
