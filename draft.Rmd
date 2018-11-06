@@ -196,7 +196,7 @@ We specifically addressed the following questions:
 The study was carried out in a 10-ha permanent plot established in 1990 by the French Institute of Pondicherry in an undisturbed, old-growth wet evergreen Dipterocarp forest [@pascal_structure_1996]. The plot is located in the Kadamakal Reserve Forest (Kodagu District, Karnataka State, India), near the Uppangala village, and thus refers to as "Uppangala plot" (see figure \@ref(fig:Uppangala)). Annual precipitation averages 5108 mm per year but is highly variable in time with heavy rainfall from June to October (90% of the rainfall during the monsoon) and a severe dry season (monthly rainfall $\leq 45$ mm) lasting 3.8 months [@pelissier_twenty_2011]. Mean annual temperature in the station of Sampaji (15 km from Uppangala) is about 27$^\circ C$, with a mean minimum about 25$^\circ C$ during July rainfall pick and a maximum mean temperature of 29$^\circ C$ in April [@pascal_structure_1996]. Climate and geology of the 10-ha plot can be considered as homogeneous. The topography of the site is highly heterogeneous with regular east-west alternation of thalwegs and ridges separated by steep slopes, so that topography is expected to be a major component of environmental variation within the forest plot [@gimaret-carpentier_sampling_1998]. Therefore, we hypothesized that topographic variation should influence community assembly and yield changing ecological strategies and functional composition [@condit_spatial_2000].
 
 ```{r Uppangala, fig.cap="Canopy model of the 10-ha forest permanent plot in Uppangala, India. Preliminry figure to be improved."}
-knitr::include_graphics("./data/test.png")
+knitr::include_graphics("./data/Plot.png")
 ```
 
 ## Taxonomic composition and trait sampling
@@ -378,6 +378,35 @@ Leven_test <- list(
   C = round(car::leveneTest(value ~ spectrum, data[data$strata == "C",])$`Pr(>F)`[1], 3),
   U = round(car::leveneTest(value ~ spectrum, data[data$strata == "U",])$`Pr(>F)`[1], 3)
 )
+```
+
+```{r positionTest, eval=F}
+data <- pca.plot$data %>% 
+  select(Comp.1, Comp.2, strata) %>% 
+  rename(WES = Comp.1, LES = Comp.2)
+test <- array(NA, c(2,2,n+1))
+test[,,1] <- data %>% 
+  group_by(strata) %>% 
+  summarise_all(mean) %>% 
+  select(-strata) %>% 
+  as.matrix()
+for(i in 1:n)
+  test[,,i+1] <- data %>% 
+  mutate(strata = sample(strata)) %>% 
+  group_by(strata) %>% 
+  summarise_all(mean) %>% 
+  select(-strata) %>% 
+  as.matrix()
+data %>% 
+  group_by(strata) %>% 
+  summarise_all(mean) %>% 
+  cbind(apply(test, 1:2, function(x){
+    p <- rank(x)[1]/(n+1)
+    if(p > 0.5)
+      p <- 1 - p
+    return(p)
+  })) %>% 
+  rename(WES.pval = `1`, LES.pval = `2`)
 ```
 
 The first axis of the principal component analysis (PCA, see figure \@ref(fig:PCA)) of mean species trait values was basically related to wood density and structural leaf trait variations (LT, LA, LDMC), thus opposing species with thick, big leaves and lightwood to species with dense leaves and hardwood. The second axis mostly opposed SLA to LDMC, and to a less extent to wood density. However, wood density was orthogonal to SLA in the plan 1-2 of the PCA indicating independence between those two traits. In addition, canopy species vary significantly more on the PCA first axis than on the second axis (`r Variance$LES$C` vs `r Variance$WES$C`, Levene's test p-value=`r Leven_test$C`). In parrallel, understorey species show a tendency to vary more on the PCA second axis than the first axis (`r Variance$LES$U` vs `r Variance$WES$U`, Levene's test p-value=`r Leven_test$U`).
