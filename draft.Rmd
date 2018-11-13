@@ -196,7 +196,34 @@ We specifically addressed the following questions:
 The study was carried out in a 10-ha permanent plot established in 1990 by the French Institute of Pondicherry in an undisturbed, old-growth wet evergreen Dipterocarp forest [@pascal_structure_1996]. The plot is located in the Kadamakal Reserve Forest (Kodagu District, Karnataka State, India), near the Uppangala village, and thus refers to as "Uppangala plot" (see figure \@ref(fig:Uppangala)). Annual precipitation averages 5108 mm per year but is highly variable in time with heavy rainfall from June to October (90% of the rainfall during the monsoon) and a severe dry season (monthly rainfall $\leq 45$ mm) lasting 3.8 months [@pelissier_twenty_2011]. Mean annual temperature in the station of Sampaji (15 km from Uppangala) is about 27$^\circ C$, with a mean minimum about 25$^\circ C$ during July rainfall pick and a maximum mean temperature of 29$^\circ C$ in April [@pascal_structure_1996]. Climate and geology of the 10-ha plot can be considered as homogeneous. The topography of the site is highly heterogeneous with regular east-west alternation of thalwegs and ridges separated by steep slopes, so that topography is expected to be a major component of environmental variation within the forest plot [@gimaret-carpentier_sampling_1998]. Therefore, we hypothesized that topographic variation should influence community assembly and yield changing ecological strategies and functional composition [@condit_spatial_2000].
 
 ```{r Uppangala, fig.cap="Canopy model of the 10-ha forest permanent plot in Uppangala, India. Preliminry figure to be improved."}
-knitr::include_graphics("./data/Plot.png")
+DCM <- raster("./data/Canopy.tif")
+crs(DCM) <- '+proj=utm +zone=43 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0'
+DEM <- raster("./data/DEM.tif")
+crs(DEM) <- '+proj=utm +zone=43 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0'
+limits <- shapefile("./data/Plots/Shapeall10ha.shp")
+DCM <- crop(DCM, limits)
+DEM <- crop(DEM, limits)
+DEM_spdf <- as(DEM, "SpatialPixelsDataFrame")
+DEM_df <- as.data.frame(DEM_spdf)
+colnames(DEM_df) <- c("Elevation", "x", "y")
+DEM_plot <- ggplot() +  
+  geom_tile(data=DEM_df, aes(x=x, y=y, fill=Elevation), alpha=0.8) + 
+  scale_fill_distiller(palette = "Spectral") +
+  coord_equal() +
+  cowplot::theme_map()
+DCM_spdf <- as(DCM, "SpatialPixelsDataFrame")
+DCM_df <- as.data.frame(DCM_spdf)
+colnames(DCM_df) <- c("Height", "x", "y")
+DCM_plot <- ggplot() +  
+  geom_tile(data=DCM_df, aes(x=x, y=y, fill=Height), alpha=0.8) + 
+  coord_equal() +
+  cowplot::theme_map() +
+  scale_fill_distiller(palette = "Spectral")
+ggsave(cowplot::plot_grid(DEM_plot, DCM_plot, labels = c("a) Elevation (m)", "b) Canopy height (m)")), 
+       file = "Plot.png",
+       path = './data/',
+       width = 200, height = 100, unit = 'mm',
+       dpi = 300)
 ```
 
 ## Taxonomic composition and trait sampling
@@ -434,13 +461,16 @@ L %>%
        variable.name = 'community', value.name = 'abundance') %>%
   group_by(strata, community) %>%
   summarise_each(funs(weighted.mean(., abundance, na.rm = T)), -abundance) %>% 
-  select(-community, -LES, -WES) %>% 
+  # select(-community, -LES, -WES) %>% 
+  # select(-community, -SLA, -WD, -LDMC, -LA, -LT) %>% 
+  select(-community) %>% 
   melt(id.vars = "strata", 
        variable.name = "trait",
        value.name = "GWM") %>% 
   ggplot(aes(x = strata, y = GWM, fill = strata)) +
   geom_boxplot() +
-  facet_wrap(~trait, scales = "free", nrow = 1) +
+  # facet_wrap(~trait, scales = "free", nrow = 1) +
+  facet_wrap(~trait, scales = "free", nrow = 2) +
   xlab("Guild") + scale_fill_discrete(guide = "none") +
   ggpubr::stat_compare_means(aes(label = paste(..p.signif..))) 
 ```
