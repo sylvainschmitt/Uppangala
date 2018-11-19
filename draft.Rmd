@@ -201,29 +201,34 @@ crs(DCM) <- '+proj=utm +zone=43 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +tow
 DEM <- raster("./data/DEM.tif")
 crs(DEM) <- '+proj=utm +zone=43 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0'
 limits <- shapefile("./data/Plots/Shapeall10ha.shp")
-DCM <- crop(DCM, limits)
-DEM <- crop(DEM, limits)
-DEM_spdf <- as(DEM, "SpatialPixelsDataFrame")
-DEM_df <- as.data.frame(DEM_spdf)
-colnames(DEM_df) <- c("Elevation", "x", "y")
-DEM_plot <- ggplot() +  
-  geom_tile(data=DEM_df, aes(x=x, y=y, fill=Elevation), alpha=0.8) + 
-  scale_fill_distiller(palette = "Spectral") +
-  coord_equal() +
-  cowplot::theme_map()
-DCM_spdf <- as(DCM, "SpatialPixelsDataFrame")
-DCM_df <- as.data.frame(DCM_spdf)
-colnames(DCM_df) <- c("Height", "x", "y")
-DCM_plot <- ggplot() +  
-  geom_tile(data=DCM_df, aes(x=x, y=y, fill=Height), alpha=0.8) + 
+limits$melt <- 1
+limits <- maptools::unionSpatialPolygons(limits, limits$melt)
+DCM <- crop(DCM, buffer(limits, 30))
+DEM <- crop(DEM, buffer(limits, 30))
+DEM <- as(DEM, "SpatialPixelsDataFrame")
+DEM <- as.data.frame(DEM)
+colnames(DEM) <- c("Elevation", "x", "y")
+DCM <- as(DCM, "SpatialPixelsDataFrame")
+DCM <- as.data.frame(DCM)
+colnames(DCM) <- c("Height", "x", "y")
+ggplot() +  
+  geom_tile(data=DCM, aes(x=x, y=y, fill=Height)) +
+  geom_contour(data=DEM, aes(x=x, y=y, z=Elevation),
+               colour = "black", alpha = 0.6, breaks = seq(300, 500, by = 25)) +
+  directlabels::geom_dl(data=DEM, aes(x=x, y=y, z=Elevation, label = paste0(..level.., "m")),
+                        method = list('last.bumpup', cex = 0.8, hjust = 1),
+                        stat="contour", breaks = seq(300, 500, by = 25)) +
+  geom_polygon(data = fortify(limits),
+                 aes(long, lat, group=group),
+                 colour = "black", lwd = 1.1, alpha = 0) +
   coord_equal() +
   cowplot::theme_map() +
-  scale_fill_distiller(palette = "Spectral")
-ggsave(cowplot::plot_grid(DEM_plot, DCM_plot, labels = c("a) Elevation (m)", "b) Canopy height (m)")), 
-       file = "Plot.png",
-       path = './data/',
-       width = 200, height = 100, unit = 'mm',
-       dpi = 300)
+  scale_fill_distiller("Canopy\nheight (m)", palette = "Spectral") +
+  ggsave(file = "Plot.png",
+         path = './data/',
+         width = 150, height = 200, unit = 'mm',
+         dpi = 300)
+rm(DEM, DCM, limits, contour, DEM_df, DCM_df, DEM_spdf, DCM_spdf, DCM_plot, DEM_plot)
 ```
 
 ## Taxonomic composition and trait sampling
@@ -370,21 +375,34 @@ pca.plot <- autoplot(PFT.pca,
   xlab('Axe 1 − 33.66 %') + ylab('Axe 2 − 29.07 %') +
   theme(legend.position = c(1, 1), 
         legend.justification = c(1, 1))
-spectrum.density <-pca.plot$data %>% 
-  select(Comp.1, Comp.2, strata) %>% 
-  rename(WES = Comp.1, LES = Comp.2) %>% 
-  melt(id.vars = "strata", variable.name = "spectrum") %>% 
+spectrum.density <- pca.plot$data %>%
+  select(Comp.1, Comp.2, strata) %>%
+  rename(WES = Comp.1, LES = Comp.2) %>%
+  melt(id.vars = "strata", variable.name = "spectrum") %>%
   ggplot(aes(value, color = spectrum, fill = spectrum)) +
-  geom_density(alpha = 0.5) + 
+  geom_density(alpha = 0.5) +
   facet_wrap(~strata, nrow = 2) +
   coord_flip() +
-  scale_fill_manual("PCA axis", 
+  scale_fill_manual("PCA axis",
                     labels = c("WES" = "PCA1", "LES" = "PCA2"),
                     values = c("green", "purple")) +
-  scale_color_manual("PCA axis", 
+  scale_color_manual("PCA axis",
                      labels = c("WES" = "PCA1", "LES" = "PCA2"),
                      values = c("green", "purple"))
-cowplot::plot_grid(pca.plot, spectrum.density, rel_widths = c(2,1))
+spectrum.boxplots <- pca.plot$data %>%
+  select(Comp.1, Comp.2, strata) %>%
+  rename(`Axe 1` = Comp.1, `Axe 2` = Comp.2) %>%
+  melt(id.vars = "strata", variable.name = "spectrum") %>%
+  ggplot(aes(strata, value, fill = strata)) +
+  ggpubr::stat_compare_means(aes(label = ..p.signif..)) +
+  geom_boxplot() +
+  facet_wrap(~spectrum, nrow = 2)
+# cowplot::plot_grid(pca.plot, spectrum.density, rel_widths = c(2,1))
+ggsave(cowplot::plot_grid(pca.plot, spectrum.boxplots, rel_widths = c(2,1), labels = c("A", "B")), 
+       file = "PCA.png",
+       path = './data/',
+       width = 200, height = 150, unit = 'mm',
+       dpi = 300)
 ```
 
 ```{r varianceTest}
@@ -470,6 +488,32 @@ L %>%
   ggplot(aes(x = strata, y = GWM, fill = strata)) +
   geom_boxplot() +
   # facet_wrap(~trait, scales = "free", nrow = 1) +
+  facet_wrap(~trait, scales = "free", nrow = 2) +
+  xlab("Guild") + scale_fill_discrete(guide = "none") +
+  ggpubr::stat_compare_means(aes(label = paste(..p.signif..))) 
+```
+
+
+```{r GMboxplot, fig.cap="Boxplot of guilds means (GM) among communties for each traits (for canopy (C) and understorey (U) guilds). See table \\@ref(tab:Traits) for abbreviations.", fig.height=4}
+L %>%
+  melt(id.var = "com",
+       variable.name = "SpCode",
+       value.name = "abundance") %>% 
+  mutate(abundance = ifelse(abundance > 0, 1, 0)) %>% 
+  dcast(SpCode ~ com, value.var = "abundance") %>% 
+  mutate(SpCode = as.character(SpCode)) %>% 
+  inner_join(Q, by = "SpCode") %>%
+  select(-SpCode) %>%
+  melt(id.vars = c('strata', 'LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'LT'),
+       variable.name = 'community', value.name = 'abundance') %>%
+  group_by(strata, community) %>%
+  summarise_each(funs(weighted.mean(., abundance, na.rm = T)), -abundance) %>% 
+  select(-community) %>% 
+  melt(id.vars = "strata", 
+       variable.name = "trait",
+       value.name = "GM") %>% 
+  ggplot(aes(x = strata, y = GM, fill = strata)) +
+  geom_boxplot() +
   facet_wrap(~trait, scales = "free", nrow = 2) +
   xlab("Guild") + scale_fill_discrete(guide = "none") +
   ggpubr::stat_compare_means(aes(label = paste(..p.signif..))) 
@@ -658,5 +702,63 @@ cowplot::plot_grid(pca.plot, spectrum.density, rel_widths = c(2,1))
 
 * Canopy species WES vs LES: `r Variance$LES$C` vs `r Variance$WES$C`, Levene's test p-value=`r Leven_test$C`
 * Understorey species LES vs WES: `r Variance$LES$U` vs `r Variance$WES$U`, Levene's test p-value=`r Leven_test$U`
+
+## S4 : Dawkins effect on traits
+
+```{r CEeffect}
+# L %>% 
+#   melt(id.vars = "com",
+#        variable.name = "SpCode",
+#        value.name = "individuals") %>% 
+#   filter(individuals > 0) %>% 
+#   left_join(Q %>% 
+#               select(SpCode, strata)) %>% 
+#   filter(!is.na(strata)) %>% 
+#   group_by(com, strata) %>% 
+#   summarise(species = length(unique(SpCode)),
+#             individuals = sum(individuals)) %>% 
+#   ungroup() %>% 
+#   # group_by(strata) %>% 
+#   summarise(species = mean(species), individuals = mean(individuals))
+# genPFT() %>%
+#   mutate(CE = gsub('([[:alpha:]])', "", CE)) %>%
+#   filter(!is.na(CE)) %>%
+#   mutate(LA = log(LA)) %>%
+#   mutate(SLA = log(SLA)) %>%
+#   select(CE, Sp, WD, LT, LA, LDMC, LTD, SLA) %>%
+#   reshape2::melt(id.vars = c("CE", "Sp"), variable.name = "Trait") %>%
+#   group_by(Trait) %>%
+#   do(anova = TukeyHSD(aov(lm(value ~ CE, data = .)))) %>%
+#   tidy(anova) %>%
+#   filter(adj.p.value < 0.05)
+my_comparisons <- list( c("1", "2"), c("2", "3"), c("3", "4"),
+                        c("4", "5"), c("1", "3"), c("3", "5"),
+                        c("1", "5"),  c("2", "4"), c("2", "5"))
+genPFT() %>% 
+  mutate(CE = gsub('([[:alpha:]])', "", CE)) %>% 
+  filter(!is.na(CE)) %>% 
+  select(CE, WD, LT, LA, LDMC, LTD, SLA) %>% 
+  mutate(LA = log(LA)) %>% 
+  mutate(SLA = log(SLA)) %>% 
+  reshape2::melt(id.vars = "CE", variable.name = "Trait") %>% 
+  ggplot(aes(CE, value, fill = CE)) +
+  geom_boxplot() +
+  facet_wrap(~Trait, scales = "free") +
+  ggpubr::stat_compare_means(comparisons = my_comparisons, aes(label = ..p.signif..)) +
+  ggpubr::stat_compare_means(method = "anova", aes(label = paste("Anova", ..p.signif..))) +
+  ggsave(file = "CE.png",
+         path = './data/',
+         width = 200, height = 200, unit = 'mm',
+         dpi = 300)
+
+genPFT() %>% 
+  select(CE) %>% 
+  mutate(CE = gsub('([[:alpha:]])', "", CE)) %>% 
+  group_by(CE) %>% 
+  summarise(n = n()) %>% 
+  ungroup() %>% 
+  mutate(P = round(n/sum(n)*100))
+```
+
 
 # References
