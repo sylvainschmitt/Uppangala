@@ -3,17 +3,17 @@ title: Decoupled wood and leaf strategies among canopy and understorey tree in a
 author: "Sylvain Schmitt, Valérie Raevel, Maxime Réjou-Méchain, Ayyappan N, Balachandran N., Barathan N., and François Munoz"
 date: '`r Sys.Date()`'
 output:
-  bookdown::html_document2:
-    number_sections: false
-    toc: true
-    toc_float: yes
+  bookdown::word_document2: default
   bookdown::pdf_document2:
     includes:
       before_body: ./template/doc_prefix.tex
       in_header: ./template/preamble.tex
     number_sections: false
     toc: false
-  bookdown::word_document2: default
+  bookdown::html_document2:
+    number_sections: false
+    toc: true
+    toc_float: yes
 linestretch: 1.5
 csl: bibliography/mee.csl
 bibliography: ["bibliography/refs.bib", "bibliography/library.bib"] 
@@ -374,21 +374,8 @@ pca.plot <- autoplot(PFT.pca,
   geom_vline(aes(xintercept = 0), col = 'purple', linetype = "dotted") +
   xlab('Axe 1 − 33.66 %') + ylab('Axe 2 − 29.07 %') +
   theme(legend.position = c(1, 1), 
-        legend.justification = c(1, 1))
-spectrum.density <- pca.plot$data %>%
-  select(Comp.1, Comp.2, strata) %>%
-  rename(WES = Comp.1, LES = Comp.2) %>%
-  melt(id.vars = "strata", variable.name = "spectrum") %>%
-  ggplot(aes(value, color = spectrum, fill = spectrum)) +
-  geom_density(alpha = 0.5) +
-  facet_wrap(~strata, nrow = 2) +
-  coord_flip() +
-  scale_fill_manual("PCA axis",
-                    labels = c("WES" = "PCA1", "LES" = "PCA2"),
-                    values = c("green", "purple")) +
-  scale_color_manual("PCA axis",
-                     labels = c("WES" = "PCA1", "LES" = "PCA2"),
-                     values = c("green", "purple"))
+        legend.justification = c(1, 1)) +
+  scale_color_discrete("Guild")
 spectrum.boxplots <- pca.plot$data %>%
   select(Comp.1, Comp.2, strata) %>%
   rename(`Axe 1` = Comp.1, `Axe 2` = Comp.2) %>%
@@ -396,9 +383,10 @@ spectrum.boxplots <- pca.plot$data %>%
   ggplot(aes(strata, value, fill = strata)) +
   ggpubr::stat_compare_means(aes(label = ..p.signif..)) +
   geom_boxplot() +
-  facet_wrap(~spectrum, nrow = 2)
-# cowplot::plot_grid(pca.plot, spectrum.density, rel_widths = c(2,1))
-ggsave(cowplot::plot_grid(pca.plot, spectrum.boxplots, rel_widths = c(2,1), labels = c("A", "B")), 
+  facet_wrap(~spectrum, nrow = 2) +
+  scale_fill_discrete("Guild")
+cowplot::plot_grid(pca.plot, spectrum.boxplots, rel_widths = c(2,1))
+ggsave(cowplot::plot_grid(pca.plot, spectrum.boxplots, rel_widths = c(2,1), labels = c("A", "B")),
        file = "PCA.png",
        path = './data/',
        width = 200, height = 150, unit = 'mm',
@@ -423,6 +411,13 @@ Leven_test <- list(
   C = round(car::leveneTest(value ~ spectrum, data[data$strata == "C",])$`Pr(>F)`[1], 3),
   U = round(car::leveneTest(value ~ spectrum, data[data$strata == "U",])$`Pr(>F)`[1], 3)
 )
+pca.plot$data %>%
+  select(Comp.1, Comp.2, strata) %>%
+  rename(`Axe 1` = Comp.1, `Axe 2` = Comp.2) %>%
+  melt(id.vars = "strata", variable.name = "spectrum") %>% 
+  group_by(spectrum) %>% 
+  do(anova = aov(value ~ strata, data = .)) %>% 
+  broom::tidy(anova)
 ```
 
 ```{r positionTest, eval=F}
@@ -479,18 +474,22 @@ L %>%
        variable.name = 'community', value.name = 'abundance') %>%
   group_by(strata, community) %>%
   summarise_each(funs(weighted.mean(., abundance, na.rm = T)), -abundance) %>% 
-  # select(-community, -LES, -WES) %>% 
+  select(-community, -LES, -WES) %>%
   # select(-community, -SLA, -WD, -LDMC, -LA, -LT) %>% 
-  select(-community) %>% 
+  # select(-community) %>% 
   melt(id.vars = "strata", 
        variable.name = "trait",
        value.name = "GWM") %>% 
   ggplot(aes(x = strata, y = GWM, fill = strata)) +
   geom_boxplot() +
-  # facet_wrap(~trait, scales = "free", nrow = 1) +
-  facet_wrap(~trait, scales = "free", nrow = 2) +
+  facet_wrap(~trait, scales = "free", nrow = 1) +
+  # facet_wrap(~trait, scales = "free", nrow = 2) +
   xlab("Guild") + scale_fill_discrete(guide = "none") +
-  ggpubr::stat_compare_means(aes(label = paste(..p.signif..))) 
+  ggpubr::stat_compare_means(aes(label = paste(substr(..p.signif.., 1,3)))) +
+  ggsave(file = "boxplot.png",
+         path = './data/',
+         width = 200, height = 150, unit = 'mm',
+         dpi = 300)
 ```
 
 
@@ -529,11 +528,14 @@ GWM_ses %>%
   left_join(R, by = "community") %>%
   group_by(strata, trait) %>% 
   do(reg = step(lm(SES ~ Slope + Curvature + Wetness + SW + Canopy, .), 
-                     direction = 'both', trace = 0)) %>% 
-  tidy(reg) %>% 
+     direction = 'both', trace = 0)) %>% 
+  # do(reg = lm(SES ~ Slope + Curvature + Wetness + SW + Canopy, .),
+  #    direction = 'both', trace = 0) %>%
+  tidy(reg) %>%
   group_by(strata, trait, term) %>%
-  transmute(value = paste(format(estimate, scientific = T, digits = 2, trim = T), 
-                          stars(p.value, ns = '   '))) %>% 
+  # transmute(value = paste(format(estimate, scientific = T, digits = 2, trim = T), 
+                          # stars(p.value, ns = '   '))) %>% 
+  transmute(value = format(estimate, scientific = T, digits = 2, trim = T)) %>% 
   dcast(strata + trait ~ term) %>% 
   select(strata, trait, Slope, Curvature, Wetness, SW, Canopy) %>% 
   mutate_all(funs(replace(., is.na(.), ' '))) %>% 
@@ -555,8 +557,8 @@ GWM_ses %>%
   )%>% # End of R2
   filter(trait != 'LES') %>% 
   filter(trait != 'WES') %>%
-  bold() %>% 
-  kable(caption = 'Linear models of the standardized effect size (SES) with null model NM2 for each trait of GWMs, for canopy (C) and understorey (U) guilds, in abundance. We performed stepwise selection of the predictors including slope, curvature, wetness southwesterness (SW), and canopy height (Canopy), and only the selected predictors are shown. See table \\@ref(tab:Traits) for abbreviations. Bold and number of asterisk indicates the significance threshold ( * p-value<0.05, ** p-value <0.01, *** p-value<0.001).', format = 'pandoc')
+  # bold() %>% 
+  kable(caption = 'Linear models of the standardized effect size (SES) with null model NM2 for each trait of GWMs, for canopy (C) and understorey (U) guilds, in abundance. We performed stepwise selection of the predictors including slope, curvature, wetness southwesterness (SW), and canopy height (Canopy), and only the selected predictors are shown. See table \\@ref(tab:Traits) for abbreviations.', format = 'pandoc')
 ```
 
 # Discussion
@@ -731,6 +733,19 @@ cowplot::plot_grid(pca.plot, spectrum.density, rel_widths = c(2,1))
 #   do(anova = TukeyHSD(aov(lm(value ~ CE, data = .)))) %>%
 #   tidy(anova) %>%
 #   filter(adj.p.value < 0.05)
+# genPFT() %>%
+#   mutate(CE = gsub('([[:alpha:]])', "", CE)) %>%
+#   filter(!is.na(CE)) %>%
+#   mutate(LA = log(LA)) %>%
+#   mutate(SLA = log(SLA)) %>%
+#   select(CE, Sp, WD, LT, LA, LDMC, LTD, SLA) %>%
+#   reshape2::melt(id.vars = c("CE", "Sp"), variable.name = "Trait") %>%
+#   mutate(CE = as.numeric(CE)) %>% 
+#   group_by(Trait) %>%
+#   do(lm = lm(value ~ CE + Sp, data = .)) %>%
+#   tidy(lm) %>% 
+#   filter(term == "CE") %>% 
+#   filter(p.value < 0.05)
 my_comparisons <- list( c("1", "2"), c("2", "3"), c("3", "4"),
                         c("4", "5"), c("1", "3"), c("3", "5"),
                         c("1", "5"),  c("2", "4"), c("2", "5"))
@@ -750,7 +765,6 @@ genPFT() %>%
          path = './data/',
          width = 200, height = 200, unit = 'mm',
          dpi = 300)
-
 genPFT() %>% 
   select(CE) %>% 
   mutate(CE = gsub('([[:alpha:]])', "", CE)) %>% 
@@ -758,6 +772,15 @@ genPFT() %>%
   summarise(n = n()) %>% 
   ungroup() %>% 
   mutate(P = round(n/sum(n)*100))
+genPFT() %>%
+  mutate(CE = as.numeric(gsub('([[:alpha:]])', "", CE))) %>%
+  filter(CE != 5) %>% 
+  filter(!is.na(CE)) %>%
+  ggplot(aes(CE, WD, group = NA)) +
+  geom_boxplot(aes(group = CE), col = "lightgrey") +
+  geom_point(aes(col = Sp), alpha = 0.3) +
+  geom_smooth(method = "lm") +
+  scale_color_discrete(guide = "none")
 ```
 
 
