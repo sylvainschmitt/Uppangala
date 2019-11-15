@@ -1,0 +1,598 @@
+---
+title: Environmental filtering favor different functional composition of tree assemblages between canopy and understory guilds within Indian forest communities
+date: '`r Sys.Date()`'
+output:
+  bookdown::word_document2:
+    reference_docx: ./template/template.docx
+  bookdown::html_document2:
+    number_sections: false  
+    toc: true
+    toc_float: yes
+  bookdown::pdf_document2:
+    includes:
+      before_body: ./template/doc_prefix.tex
+      in_header: ./template/preamble.tex
+    number_sections: false
+    toc: false
+linestretch: 1.5
+csl: /home/sylvain/Documents/Bibliography/csl/joe.csl
+bibliography: /home/sylvain/Documents/Bibliography/library.bib
+link-citations: yes
+---
+
+```{r config, message=FALSE, warning=FALSE, include=FALSE}
+rm(list = ls()); invisible(gc())
+library(raster)
+library(parallel)
+library(knitr)
+library(kableExtra)
+if(knitr:::is_html_output()) options(knitr.table.format = "html") 
+if(knitr:::is_latex_output()) options(knitr.table.format = "latex") 
+library(tidyverse)
+library(broom)
+library(reshape2)
+library(ggfortify)
+theme_set(bayesplot::theme_default())
+opts_chunk$set(echo = F, message = F, warning = F, 
+               fig.height = 8, fig.width = 8,
+               cache = T, cache.lazy = F)
+cv <- function(x, na.rm = T)
+  sd(x, na.rm = na.rm)/mean(x, na.rm = na.rm)
+n = 999 # Random repetitions
+sapply(list.files("R", full.names = T), source)
+```
+
+```{r data}
+# Sp level PFT
+PFT <- genPFT() %>% 
+  mutate(LA = log(LA)) %>% 
+  mutate(SLA = log(SLA)) %>% 
+  select(-CE) %>% 
+  group_by(Tree, Sp, SpCode) %>% 
+  summarise_all(funs(mean(., na.rm = T))) %>% 
+  ungroup() %>% 
+  select(-Tree) %>% 
+  group_by(Sp, SpCode) %>% 
+  summarise_all(funs(mean(., na.rm = T))) %>% 
+  ungroup() %>% 
+  select(-Sp, -LTD, -SHA)
+suppressWarnings(row.names(PFT) <- PFT$SpCode) # deprecated
+# PCA
+PFT.pca <- princomp(~ LA + WD + LT + LDMC + SLA, data = PFT, cor = T)
+# Matrix Q
+Q <- PFT %>% 
+  mutate(SpCode = as.character(SpCode)) %>% 
+  left_join(data.frame(PFT.pca$scores) %>% 
+              mutate(SpCode = row.names(.)),
+            by = "SpCode") %>% 
+  rename(WES = Comp.1, LES = Comp.2) %>% 
+  left_join(genSpecies(), by = "SpCode") %>% 
+  mutate(strata = ifelse(Strata == 3, "U", "C")) %>%
+  select(SLA, LDMC, WD, LA, LT, LES, WES, strata, SpCode) %>%
+  mutate(strata = ifelse(SpCode == "agin", "U", strata))
+# Matrix L
+com <- quadrats(cs = c(30,30))
+XY <- genTrees()[c('x', 'y')]
+coordinates(XY) <- ~ x + y
+proj4string(XY) <- crs(com)
+L <- genTrees() %>% 
+  mutate(com = (XY %over% com)[,1]) %>% 
+  filter(!is.na(com)) %>% 
+  group_by(com, SpCode) %>% 
+  summarise(n = n()) %>% 
+  dcast(com ~ SpCode, value.var = "n") %>% 
+  replace(is.na(.), 0)
+# Matrix R
+load(file.path("draft_save", 'R.Rdata'))
+# GWMses
+GWM <- L %>%
+  melt(id.var = "com",
+       variable.name = "SpCode",
+       value.name = "abundance") %>% 
+  dcast(SpCode ~ com, value.var = "abundance") %>% 
+  mutate(SpCode = as.character(SpCode)) %>% 
+  left_join(Q, by = "SpCode") %>% 
+  filter(!is.na(strata)) %>% 
+  select(-SpCode) %>% 
+  melt(id.vars = c('strata', 'LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'LT'),
+       variable.name = 'community', value.name = 'abundance') %>% 
+  group_by(strata, community) %>% 
+  summarise_each(funs(weighted.mean(., abundance, na.rm = T)), -abundance)
+# nQ <- array(rep(as.matrix(Q), n),
+#             c(dim(Q), n),
+#             list(row.names(Q), names(Q), 1:n))
+# nQ <- array(apply(nQ, 3, function(x){
+#   x[which(x[,"strata"] == "C"),'SpCode'] <- sample(x[which(x[,"strata"] == "C"),'SpCode'])
+#   x[which(x[,"strata"] == "U"),'SpCode'] <- sample(x[which(x[,"strata"] == "U"),'SpCode'])
+#   return(x)
+#   }), c(dim(Q), n), list(row.names(Q), names(Q), 1:n))
+# cl <- makeCluster(detectCores())
+# clusterExport(cl, list('L', 'nQ'))
+# nGWM <- parApply(cl, nQ, 3, function(x){
+#   library(dplyr)
+#   library(reshape2)
+#   L %>%
+#     melt(id.var = "com",
+#          variable.name = "SpCode",
+#          value.name = "abundance") %>%
+#     dcast(SpCode ~ com) %>%
+#     left_join(data.frame(x)) %>%
+#     select(-SpCode) %>%
+#     melt(id.vars = c('strata', 'LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'LT'),
+#          variable.name = 'community', value.name = 'abundance') %>%
+#     group_by(strata, community) %>%
+#     mutate_each(funs(as.character), -abundance) %>%
+#     mutate_each(funs(as.numeric), -abundance) %>%
+#     summarise_each(funs(weighted.mean(., abundance, na.rm = T)), -abundance)
+# })
+# stopCluster(cl)
+# nGWM <- array(unlist(lapply(nGWM, function(x) as.matrix(x[3:9]))),
+#               c(dim(GWM[3:9]), n),
+#               list(row.names(GWM), names(GWM[3:9]), 1:n))
+# rm(cl, nQ)
+# save(nGWM, file = file.path("draft_save", 'nGWM.Rdata'))
+load(file.path("draft_save", 'nGWM.Rdata'))
+GWM_ses <- GWM
+GWM_ses[3:9] <- (GWM[3:9] - apply(nGWM, 1:2, mean, na.rm = T))/apply(nGWM, 1:2, sd, na.rm = T)
+```
+
+1. Sylvain Schmitt
+    - Corresponding author
+    - sylvain.m.schmitt@gmail.com
+    - orcid.org/0000-0001-7759-7106
+    - French Institute of Pondicherry, UMIFRE 21/USR 3330 CNRS-MAEE, Pondicherry, India
+    - UMR BIOGECO, INRA - Université de Bordeaux, 69 route d’Arcachon, F-33612 Cestas cedex France
+1. Maxime Réjou-Méchain
+    - maxime.rejou@gmail.com
+    - orcid.org/0000-0003-2824-267X
+    - French Institute of Pondicherry, UMIFRE 21/USR 3330 CNRS-MAEE, Pondicherry, India
+    - UMR AMAP, IRD, F-34000 Montpellier, France
+1. Valérie Raevel
+    - vraevel@gmail.com
+    - French Institute of Pondicherry, UMIFRE 21/USR 3330 CNRS-MAEE, Pondicherry, India
+1. Narayanan Ayyappan
+    - ayyappan.n@ifpindia.org
+    - French Institute of Pondicherry, UMIFRE 21/USR 3330 CNRS-MAEE, Pondicherry, India
+1. Natesan Balachandran
+    - balachandran.n@ifpindia.org
+    - French Institute of Pondicherry, UMIFRE 21/USR 3330 CNRS-MAEE, Pondicherry, India
+1. N. Barathan
+    - barathan.n@ifpindia.org
+    - French Institute of Pondicherry, UMIFRE 21/USR 3330 CNRS-MAEE, Pondicherry, India
+1. Chandra Shekhar Jha
+    - email
+    - Forestry and Ecology Group, National Remote Sensing Centre, Hyderabad 500 037, India
+1. François Munoz
+    - fmunoz@univ-grenoble-alpes.fr
+    - Laboratoire d'Écologie Alpine, Univ. Grenoble Alpes, FR-38000 Grenoble, France
+
+\newpage 
+
+# Abstract
+
+1. Joint study of topography and community vertical structure hold promise to understand the drivers of hyperdiverse tropical communities. Moreover, understory species are generally characterized by a low potential growth rate associated to a conservative strategy of resource use, while canopy species tend to have a higher potential growth rate associated to a faster resource acquisition. Despite, assembly of tree communities has been mostly studied irrespectively of vertical stratification in tropical forests, or focusing on canopy trees.
+1. We measured leaf and wood traits over 89 species representing 99% of all individuals in a 10-ha forest plot located in the Western Ghats, South India. Combining tree census data, LiDAR-derived topographic data and canopy metrics, and measured functional traits, we used multivariate approaches and linear regressions to assess the variation of functional assemblages within tropical tree communities between understory and canopy species, and to address the effects of abiotic and biotic environments on these variations.  
+1. We found that decoupled wood and leaf economics spectra were present in Indian rainforests and were maintained at local scale. Moreover, we showed that while functional traits characteristics did not differ between species pools of canopy and understory, environmental filtering strongly favored different functional trait assemblages between canopy and understory guilds within communities. We further showed that the canopy and understory guilds assemblages responded differently across communities to environmental gradients related to soil resource, light availabilities and monsoon disturbances.
+1. *Synthesis.* These results illustrate how fine-scale environmental heterogeneity may shape the tree community composition and function. Moreover, our study show guild-specific answer to biotic and abiotic environmental filtering between canopy and understory, highlighting the importance of forest vertical stratification in community assembly processes.
+
+## Keywords
+
+Rainforest; Western Ghats; Economics spectra; Environmental filtering, Vertical strata
+
+\newpage 
+
+# Introduction 
+
+<!-- hook topo + vertical str -->
+
+Understanding the drivers of hyperdiverse tropical forest tree composition is a long-standing issue in ecology [@Cody1976]. Abiotic environment has been shown to influence tree community composition at regional [@Rejou-Mechain2008; @Tuomisto2003]  and local scale [@Ferry2007; @gunatilleke_specieshabitat_2006]. Specifically, topography can filter different ecological strategies [@kraft_functional_2008] due to variation in water and nutrient availability in tropical forests [@ferry2010higher]. But biotic interactions can also have a major impact on tree community composition [@Uriarte2004]. Indeed, light availability, and thus community vertical structure, represent a major constraint for tree survival and growth in tropical forests [@Stark2015]. Joint study of topography and community vertical structure therefore hold promise  to understand the drivers of hyperdiverse tropical communities [@Jucker2018].
+
+<!-- topo and vert strata, what do we know ? -->
+
+Higher topographic positions, e.g. hilltops, result in decreased water and nutrient availability [@ferry2010higher] filtering for species with conservative strategy of resource use [@Cunningham2007; @kraft_functional_2008; @Mendez-Toribio2017]. In addition, different responses of vertical strata to environmental gradients have been observed in Columbia [@duque2002different] and central Africa [@Ouedraogo2013]. Understory species are generally characterized by a low potential growth rate associated to a conservative strategy of resource use, while canopy species tend to have a higher potential growth rate associated to a faster resource acquisition [@Herault2011]. Therefore, understory and canopy guilds can differently respond to environmental gradients. Despite, assembly of tree communities has been mostly studied irrespectively of vertical stratification in tropical forests [@wright2002plant], or focusing on canopy trees [@Hubbell2001].  Whereas, investigating community assembly among vertical strata may reveal distinct response to environmental gradients [@Raevel2018], and thus provide a better understanding of community assembly processes.
+
+<!-- FT for community assembly -->
+
+Functional traits express fundamental trade-offs determining species occurrences and co-occurrences along environmental gradients [@Wright2002], contributing thus to test for community assembly processes. Functional traits have been defined as phenotypic traits that impact fitness indirectly through their effect on individual performance, which is defined as the ability to recruit, grow, survive, and reproduce in a given environment [@violle_let_2007]. Functional traits covary among species [@diaz_global_2015] and communities [@Bruelheide2018] along distinct economics spectra of leaf [@wright_worldwide_2004; @osnas_global_2013; but see @lloyd_photosynthetically_2013] and wood [@chave_towards_2009]. The leaf economics spectrum opposes acquisitive ecological strategies, with high photosynthetic carbon assimilation, to conservative ones with high investment in leaf defense and durability. For instance, specific leaf area (leaf mass divided by leaf area) varies along soil and light availability gradients, and represents a trade-off between resource acquisition by photosynthesis and investment in leaf defense and durability [@Evans2001a; @hodgson_is_2011; but see @Gibert2016]. The wood economics spectrum opposes slow and fast growing species. However, @reich_world-wide_2014 advocate for a unique plant economics spectrum between fast and slow growing species, evidenced in a subarctic flora [@freschet_evidence_2010]. Functional traits have been used to evidenced community assembly processes at local scale [@fortunel_leaf_2012; @Paine2011; but see @Messier2017], but to our knowledge little is known of the role of tropical forest vertical stratification in community trait-based studies.
+
+<!-- what have we done ? -->
+
+In the present study, we assessed the variation of functional assemblages within tropical tree communities between understory and canopy species, and addressed the effects of abiotic and biotic environments on these variations. We measured leaf and wood traits over 89 species representing 99% of all individuals in a 10-ha forest plot located in the Western Ghats, South India, a region considered as a global biodiversity hotspot [@myers_biodiversity_2000]. The plot encompasses a large variation of topography [@Antin2013] and vertical structure [@Pascal1988]. Combining tree census data, LiDAR-derived topographic data and canopy metrics, and measured functional traits, we used multivariate approaches and linear regressions to address the following questions: (i) Do the trait variations among species follow independent leaf and wood economics spectra at local scale ? If so, how are canopy and understory guilds distributed along leaf and wood economics spectra ? (ii) Does functional composition differ between canopy and understory guilds ? and (iii) Does the guild functional composition vary with local environmental heterogeneity, and do the understory and canopy guilds respond differently ? Based on previous evidences of independent economics spectra at large scale in the Neotropics [@baraloto_decoupled_2010; @fortunel_leaf_2012], we would expect leaf and wood economics spectra to be maintained in Indian rainforests at local scale [but see @Messier2017]. We hypothesized functional composition to differ between canopy and understorey species, due to their differences in growth and functional strategies [@Herault2011]. Because this region experiences a long dry season period and is under the influence of intense monsoon rainy seasons with strong wind disturbances, we expected that the local topography is a major driver of tree community functional composition. 
+
+# Material and Methods
+
+## Study site
+
+The study was carried out in a nearly 10-ha (300m*330m) permanent plot established in 1990 in an undisturbed, old-growth wet evergreen Dipterocarp forest [@Pascal1996]. The plot is named after the nearest village, Uppangala, and is located in the Kadamakal Reserve Forest (Kodagu District, Karnataka State, India). Annual precipitation averages 5,100 mm per year but is highly variable throughout the year with heavy rainfall during the monsoon from June to October (90% of the rainfall) and a severe dry season (monthly rainfall 45 mm) lasting 3.8 months on average [@pelissier_twenty_2011]. Mean annual temperature in the station of Sampaji (15 km from Uppangala) is about 27°C, ranging from 25°C at rainfall peak to 29°C at dry season peak [@Pascal1996]. The geology can be considered as homogeneous within the Uppangala plot [@Ferry1994]. The topography of the site is highly heterogeneous with regular east-west alternation of thalwegs and ridges separated by steep slopes (Fig. \@ref(fig:Uppangala)). Topography is thus expected to represent a major component of environmental variation within the forest plot [@Antin2013; @gimaret-carpentier_sampling_1998].
+
+## Taxonomic composition and trait sampling
+
+Since 1989, all trees $\geq$ 10 cm in diameter at breast height (dbh) were identified to species level, tagged, mapped and monitored in an area progressively extended to a contiguous 10-ha plot in 2014 following international standards [@Jairazbhoy2006]. The plot includes 6672 tree individuals belonging to 111 tree species mostly from the Dipterocarpaceae, Myristicaceae and Fabaceae families. 
+
+Using the classification of @Pascal1988, we assigned a potential vertical stratum of tree species (vertical stratum reached by most adult trees) to all species from the plot. @Pascal1988’s classification consisted of four tree species categories: emergent species above 39m, canopy species between 25 and 39m, sub-canopy species between 15 and 25m, and understory species below 15m. Because our study site is characterized by a steep topography, sub-canopy species often reach the canopy in the Uppangala plot. We thus defined two vertical strata, namely, canopy guild (C) including emergent, canopy and sub-canopy species and understory guild (U) composed of understory trees. This resulted in 54 and 35 species belonging to the canopy and understory guilds, respectively.
+
+We collected trait data from 89 over the 111 (80.1%) species, representing 99.0% of tree individuals in the plot. We sampled five individuals per species for the 32 most abundant species (>80% of individuals), and one to five individuals for the remaining species, depending on leaf accessibility and species abundance (3 individuals on average). For each individual, we collected at 4 to 12 m height five mature leaves and one branch sample with a diameter close to 1 cm, following recommendation of @Perez-Harguindeguy2013. Whenever possible, individuals and leaves were selected in similar light conditions (Dawkins index of 2; [@Dawkins1958]). Leaf and branch samples were kept in humidified ziplock bags filled with enriched CO2 air in dark until measurement within the next 24 hours. For 11 species (1% of individuals in Uppangala plot), branch samples were too small (1 cm in diameter) to allow measuring branch wood density.
+
+## Trait measurements
+
+We measured five functional traits (Table \@ref(tab:traits)) related to the major dimensions of ecological strategies in plants [@diaz_global_2015; @Wright2002]: leaf thickness (LT, $\mu m$), leaf area (LA, $mm^2$), leaf dry matter content (leaf dry weight divided by the leaf fresh weight, LDMC, $mg.g^{-1}$), specific leaf area (leaf area divided by the leaf dry mass, SLA, $m^2.kg^{-1}$), and branch wood density (wood dry weight divided by its volume, WD, $g.cm^{-3}$). Leaf petioles, rachis and petiolules were removed for all measurements. Leaf fresh weight was measured with an analytical balance (Wensar, KD-H600, 0.01g), leaf fresh thickness with a micrometer and leaf area by  analyzing scanned images of fresh leaves with the ImageJ software [@Schneider2012]. Leaves were then kept in herbarium and oven-dried for at least 72 hours at 60°C before measurement of dry weight. The bark and pit of branch samples were removed in order to keep only branch wood without soft tissues. Branch wood samples were immersed in water to evaluate their volume by water displacement. Wood samples were then dried for 48 hours at 80°C and weighed following the protocol of [@Perez-Harguindeguy2013].
+
+## Environmental variables
+
+We used LiDAR (Light Detection And Ranging) data to characterize the local topography and forest canopy conditions. The LiDAR campaign was conducted in 2013, hence concomitantly with field measurements. Using a 1-m resolution LiDAR digital elevation model, we derived four statistically independent (Pearson’s r < 0.48) topographical variables: (i) curvature, which relates to local water and soil accumulation areas; (ii) wetness, an index accounting for both slope and elevation and highlighting water flow paths and accumulation at the study area scale [@Bohner2006], (iii) southwesterness (SW), representing the topographical aspect in the direction of south-west: $cos(aspect~in~degree+225))$ to account for the effect of dominant monsoon winds [@Bunyan2015]; and (iv) slope, which may have both a strong effect on forest dynamics and on nutrient/water availability [@ferry2010higher]. In addition, using a 1-m resolution LiDAR canopy model (Fig. \@ref(fig:Uppangala)), we used the mean of the top of canopy height to  represent the intensity of local competition for light.
+
+## Statistical Analyses
+
+To assess the degree of trait variation and covariation we first calculated the coefficient of variation (ratio of the standard deviation to the mean) of trait values among samples within individuals (intra-individual), among individuals within species (intra-specific) for species with more than one individual, and among species (inter-specific). We then performed a principal component analysis (PCA) of the average trait values per species to characterize the main dimensions of ecological strategies globally and per vertical stratum.
+
+We then analyzed the functional composition of vertical stratum communities in $30m*30m$ subplots (n=110). Each subplot contained 28 individuals and 10 species on average, with less species in understory (6 in average) than in canopy (13 in average) guilds.
+
+We calculated the weighted mean trait value per guild (GWM, where G stands for ‘guild’, [@Raevel2018]) of each trait in each subplot:
+
+$$GWM_j=\sum_{i=1}^Sp_{i,j}*t_i$$
+where $p_{i,j}$ is the relative abundance of species $i$ in subplot $j$, $t_i$ the mean trait value of species $i$ and $S$ the number of species in the guild considered.
+
+To test whether the local functional composition of guilds depends on the local topography and canopy structure, we devised a null model randomizing trait values among species within each guild (permuting rows in Trait*Species matrices of each guild, [@bernard-verdier_community_2012]). This null model broke the link between environment and local functional composition while maintaining the spatial structure of guilds and species abundances. Null GWM values generated through 999 randomizations were subsequently used to calculate the standardized effect sizes (SES) quantifying the deviation of observed values from the null distribution as
+
+$$SES = \frac{GWM_{obs}-\overline{GWM_null}}{\sigma_{null}}$$
+where $GWM_{obs}$ is the observed GWM, and $\overline{GWM_{null}}$ and $\sigma_{null}$ are the mean and standard deviation of the corresponding null distribution, respectively.
+
+Then we assessed how the deviation of guild composition from the null model depended on environmental variables using linear regressions with bidirectional stepwise selection of SES values. Thus, the topographical or canopy structure variables selected with this approach were interpreted as more impacting GWM values than expected by chance. These analyses were performed independently for each of the five functional traits. All analyses were conducted using the R 3.3.0 software [@RCoreTeam2018].
+
+# Results
+
+## Trait variation and covariation
+
+We found an overall increase of functional trait variation from intra-individual to inter-specific levels (Table \@ref(tab:traits)), even though LA showed almost as large variability at intra-individual than at intra-specific level. Thus, trait values averaged at species level grasp most of the functional variability in the species pool considered here.
+
+The first axis of the PCA performed on species trait values (Fig. \@ref(fig:pca)A) was basically related to wood density and structural leaf trait  (LT, LA, LDMC), opposing species with thick, big leaves and lightwood to species with dense leaves and hardwood. The second axis mostly opposed SLA to LDMC. WD was orthogonal to SLA in the plan 1-2 of the PCA suggesting that they provide independent information. Canopy and understory species did not show significant differentiation on the first and second PCA axis (Wilcoxon p=0.2 and p=0.3, respectively Fig. \@ref(fig:pca)B).
+
+## Changes in functional composition with environment 
+
+At the community level, the guild weighted mean (GWM) of all traits significantly differed between understory and canopy guilds (Student p<0.001, Fig. \@ref(fig:GWMboxplot)). GWM values of canopy assemblages were lower for SLA and WD with almost no overlap and, to a lesser extent, higher for LA and lower for LDMC and LT than understory tree assemblages. In other words, understory guild assemblages had larger, thinner and lighter leaves with higher SLA and denser woods, compared to canopy guild assemblages.
+
+We detected a significant effect of slope, curvature and wetness on both canopy and understory guilds assemblages, of southwesterness on canopy guild assemblages and of canopy height on understory guild assemblages (Table \@ref(tab:LM)). 
+
+# Discussion
+
+Assessing the variation of functional assemblages within tropical tree communities between understory and canopy species, we showed that while functional traits characteristics did not differ between species pools of canopy and understory, environmental filtering strongly favored different functional trait assemblages between canopy and understory guilds within communities. We further showed that the canopy and understory guilds assemblages responded differently across communities to environmental gradients related to soil resource, light availabilities and monsoon disturbances. While both understory and canopy assemblages responded similarly to water and nutrient access, canopy assemblages responded to monsoon winds with stronger support of the wood economics spectrum and understory assemblages responded to light access with a strong support of the leaf economics spectrum. These results illustrate how fine-scale environmental heterogeneity may shape the tree community composition and function. Moreover our study show guild-specific answer to biotic and abiotic environmental filtering between canopy and understory, highlighting the importance of forest vertical stratification in community assembly processes. 
+
+## Decoupled wood and leaf economics spectra at local scale
+
+Despite a reduced number of functional traits, our study support the existence of decoupled wood and leaf economics spectra at local scale in Indian rainforests. We found locally that species trait values varied along two orthogonal main dimensions (Fig. \@ref(fig:pca)). SLA and LDMC negative correlation have already been linked to the leaf economics spectrum [@diaz_global_2015; @wright_worldwide_2004], representing a trade-off between resource acquisition by photosynthesis and investment in leaf defense and durability [@Baraloto2010; @Evans2001; @hodgson_is_2011]. Whereas, wood density was opposed to leaf area and thickness along the wood economics spectrum [@chave_towards_2009], which contrasted species more tolerant to hydric stress, with denser wood, to more competitive species with thicker and larger leaves and higher efficiency in water conductivity [@Santiago2004a]. To our knowledge, our study is the first to support the two economics spectra in Indian rainforests. In addition, @Baraloto2010 and @Fortunel2012a found a similar structuring of Neotropical trees along these two spectra at the regional scale in Amazonia. Thus, our results indicate that the existence of the two economics spectra can hold at a very local scale (Fig. \@ref(fig:pca)A), although @Messier2017 suggested that the spectrum would not hold at local scale. Finally, our study support the idea of decoupled economics spectra [@Baraloto2010] and not a whole plant economics spectrum [@reich_world-wide_2014].
+
+## Functional differences between canopy and understory guilds
+
+Our results illustrated that while functional traits characteristics did not differ between species pools of canopy and understory, environmental filtering strongly favored different functional trait assemblages between canopy and understory guilds within communities. Indeed, we found no significant differences between functional traits of species pools from canopy and understory along the two main economics spectra (Fig. \@ref(fig:pca)B). Thus, species pools from canopy and understory overlap in functional space and both span a broad range of ecological strategies. Contrastingly, there was a sharp difference between the average trait values of guild assemblages across subplots (Fig. \@ref(fig:GWMboxplot)). Understory assemblages had larger, thinner and lighter leaves, thus greater SLA, and denser wood, than canopy assemblages, reflecting that understorey assemblages tend to have a more conservative strategy while canopy assemblages have a more competitive and acquisitive strategy. In other words, while understory assemblages favor tolerance to hydric stress and leaf investment and durability, canopy assemblages favor efficiency in water conductivity and resources acquisition. The observed contrast between species pools and guilds assemblages within communities of canopy and understory was solely due to the environmental filtering selecting for more abundant species with different strategies, while the overall range of species strategies broadly overlapped between guilds. Thus, while the guilds were adapting their functional strategy to the environment within communities, they conserved broad ecological variation insuring greater stability in space and time to maintain the guilds functions [@Yachi1999].
+
+## Different responses to abiotic and biotic environment between canopy and understory assemblages
+
+Our results support the hypothesis formulated by @duque2002different that trees experience guild-specific ecological constraints, leading to contrasting functional compositions between canopy and understory assemblages. Indeed, the way assemblages responded to environmental variation changed among guilds (Table \@ref(tab:LM)). While both understory and canopy assemblages responded similarly to slope wetness, and curvature, canopy assemblages responded to southwesterness with stronger support of the wood economics spectrum (higher $R^2$ for WD and LA), and understory assemblages responded to canopy height with a strong support of the SLA representing the leaf economics spectrum ($R^2=0.5$ for SLA model in understory, but WD model have also a good $R^2$). The wood economics spectrum major role in the response to environment of canopy assemblages might be explained by the critical role of mechanical resistance, disturbance tolerance and water conductivity efficiency in the establishment and persistence of canopy trees [@Poorter2010b]. Conversely, understory assemblages are subject to limited light availability due to interception by trees in canopy, resulting in a critical role of resource acquisition constraining functional composition of understory trees along the leaf economics spectrum.
+
+The influence of aspect, through southwesterness, on forest composition is little documented in tropical forests but was expected to be highly context dependent. The Uppangala plot shows large topographic heterogeneity, with steep slopes mostly organized along southwest-oriented crests (Fig. \@ref(fig:Uppangala)). @gunatilleke_specieshabitat_2006 found significant influence of aspect on forest composition in a similar context in Sri Lanka: they suggested that it can influence the local environment according to the exposure to monsoon winds. In addition, @Bunyan2015 suggested that greater occurrence of forest fragments on southwest orientation in a forest-grassland mosaic of Western Ghats could result from monsoon rains. In our context, monsoon winds are also south-west oriented, and are expected to be a major source of disturbance in forest [@soman_aspects_1990]. The possible consequences are that (i) harder wood and smaller leaves are selected for mechanical resistance in more disturbed southwest oriented area, or (ii) topography entails turbulences on northeast oriented areas responsible of more disturbance and death events in the forest history resulting in lightwood filtering [@larjavaara_rethinking_2010]. In both cases, canopy species tend to be more exposed to disturbance events once adult, which is consistent with the fact that aspect only influenced canopy guild functional assemblages.
+
+In addition, higher canopy significantly impacted the functional composition of understory species assemblages. Taller canopies resulted in more acquisitive strategies with higher SLA and lower LDMC and LT, maybe due to an increased light availability of less covering taller canopy resulting in less limited light-conditions and decreased investment in leaf lifespan [@kitajima_tissue-level_2010]. Putative increased light-conditions of taller canopies, may also have increased understory assemblages competitiveness resulting in lighter woods for relatively faster growth. These remains hypotheses to be thoroughly tested. 
+
+Finally, variation in curvature, wetness and slope similarly affected canopy and understory functional assemblages (at the exception of LDMC). Locally convex wet, or flat areas tend to accumulate more soil, especially in hilly landscapes, and retain more water, increasing soil fertility [@ferry2010higher], creating favorable conditions where species assemblages with faster resource acquisition (higher SLA, and lower LDMC and LT) and growth (lower WD and higher LA) strategy will outcompete others. By contrast, concave, drier or sloppy areas will be dryer and less fertile favoring species assemblages with more conservative strategies and slower growth.
+
+## Conclusion
+
+> *It does not really bring anything new, should I remove it ?*
+
+Our results show that a broad functional variation among species and assemblages in an Indian rainforest is structured along decoupled leaf and wood economic spectra. We showed a significant environmental determinism in the functional composition of tree communities but also stressed that this determinism is guild-specific. Our results  thus contribute to the debate on the nature and role of economics spectra in the assembly of tropical forests [@Baraloto2010]. They also underline that the functional signature of community assembly should be decomposed to better characterize and understand the different strategies and responses across ecological guilds [@Raevel2018] and across forest vertical structure [@duque2002different]. We thus call for a better acknowledgment of differential guild dynamics within communities and their influence on the global forest functioning.
+
+# Acknowledgements
+
+> *Who financed the project ? I think I'll acknowledge everybody that more or less helped on the field, and we should acknowledge someone for the plot extension right ? Anybody or anything else ?*
+
+# Authors’ contributions
+
+SS, MM, FM and VR conceived the study, designed the methodology and analysed model outputs; SS, FM, VR, NA, NB and NB conducted the field sampling; NA, NB and NB identified species; MM and CJ provided the environmental data; SS, MM, FM and VR led the writing of the manuscript. All the authors contributed to the drafts and gave their final approval for publication.
+
+# Data availability
+
+Functional traits data have been submitted to TRY initiative [@Kattge2011] under the name UppangalaTraits. Environmental variables and spatial positions of individuals were extracted from the Uppangala Station database or **lidar data**, for which access is modulated by **to precise**.
+
+# References
+
+<div id="refs"></div>
+
+\newpage 
+
+## Table captions
+
+__Table \@ref(tab:traits)__ Functional traits measured. Traits are presented with their abbreviation, unit, related species strategy according to @baraloto_decoupled_2010, range of values, intra-individual, intra-specific and inter-specific coefficients of variation (CV).
+
+__Table \@ref(tab:LM)__ Variation of standardized effect size (SES) values, for canopy (C) and understory (U) guilds, depending on slope, curvature, wetness, southwesterness (SW), and canopy height (Canopy). Linear model coefficients are reported only for predictors retained after bidirectional stepwise selection, with corresponding adjusted $R^2$. See Table \@ref(tab:traits) for trait abbreviations.
+
+## Figure captions
+
+__Figure \@ref(fig:Uppangala)__ Digital canopy model of the 10-ha forest permanent plot in Uppangala, India. Thin and thick black lines represent the elevation contour lines and plot limits, respectively.
+
+__Figure \@ref(fig:pca)__ Principal Component Analysis (PCA) of species mean trait values (A) and density distribution of species per guild (C canopy, U understory) along the first two PCA axes (B). Subplot A shows PCA biplot in plan 1-2, whereas boxplots in B show guild differentiation on the first and second PCA axes, with the associated Wilcoxon test. See Table \@ref(tab:traits) for trait abbreviations.
+
+__Figure \@ref(fig:GWMboxplot)__ Guild weighted mean (GWM) of specific leaf area (SLA), wood density (WD), leaf dry matter content (LDMC), leaf area (LA) and leaf thickness (LT) for canopy (C) and understory (U) guilds. Boxplots include the median value, the interquartile range (horizontal edges of the box) and an estimated 95% confidence interval (vertical lines). Asterisks represent significant differences between the two guilds (*** p-value<0.001). 
+
+\newpage 
+
+<!-- table 1 -->
+
+```{r traits, results="latex"}
+t <- genPFT() %>% 
+  mutate(id = row.names(.)) %>% 
+  select(-Tree, -Sp, -SpCode, -CE, -SHA, -LTD) %>% 
+  melt(id.vars = "id", variable.name = 'Abbreviation') %>% 
+  mutate(Abbreviation = as.character(Abbreviation)) %>% 
+  left_join(data.frame(
+    Trait = c('Leaf thickness', 'Leaf area', 'Leaf dry matter content', 'Specific leaf area', 'Wood density'),
+    Abbreviation = c('LT', 'LA', 'LDMC', 'SLA', 'WD'),
+    Unit = c('$\\mu m$', '$mm^2$', '$mg.g^-1$', '$m^2.kg^-1$', '$g.cm^-3$'),
+    Strategy = c('Leaf defense and investment',
+                 'Leaf resource capture vs. investment',
+                 'Leaf defense and investment',
+                 'Leaf resource acquisition vs. defense',
+                 'Stem transport, structure and defense'),
+    stringsAsFactors = F
+  ),  by = "Abbreviation") %>% 
+  group_by(Trait, Abbreviation, Unit, Strategy) %>% 
+  summarise_if(is.numeric, funs(min(.,na.rm = T), max(., na.rm = T))) %>% 
+  mutate(range = paste(round(min,2), "-", round(max,2))) %>% 
+  select(-min, -max) %>% 
+  left_join(genPFT() %>% 
+              select(-Sp, -SpCode, -CE, -SHA, -LTD) %>% 
+              melt(id.vars = 'Tree', 
+                   variable.name = 'Abbreviation', 
+                   value.name = 'Intra-individuals') %>% 
+              mutate(Abbreviation = as.character(Abbreviation)) %>% 
+              group_by(Tree, Abbreviation) %>% 
+              summarise_all(funs(sd(., na.rm = T)/mean(., na.rm = T))) %>% 
+              ungroup() %>% 
+              select(-Tree) %>% 
+              group_by(Abbreviation) %>% 
+              summarise_all(funs(mean(., na.rm = T))),  by = "Abbreviation") %>% 
+  left_join(genPFT() %>% 
+              group_by(Tree, Sp, SpCode, CE) %>% 
+              summarise_all(funs(mean)) %>% 
+              ungroup() %>% 
+              select(-Tree, -SpCode, -CE, -SHA, -LTD) %>% 
+              melt(id.vars = 'Sp', 
+                   variable.name = 'Abbreviation', value.name = 'Intra-species') %>% 
+              mutate(Abbreviation = as.character(Abbreviation)) %>% 
+              group_by(Sp, Abbreviation) %>% 
+              summarise_all(funs(sd(., na.rm = T)/mean(., na.rm = T))) %>% 
+              ungroup() %>% 
+              select(-Sp) %>% 
+              group_by(Abbreviation) %>% 
+              summarise_all(funs(mean(., na.rm = T))),  by = "Abbreviation") %>% 
+  left_join(genPFT() %>% 
+              group_by(Tree, Sp, SpCode, CE) %>% 
+              summarise_all(funs(mean)) %>% 
+              ungroup() %>% 
+              select(-Tree, -CE) %>% 
+              group_by(Sp, SpCode) %>% 
+              summarise_all(funs(mean)) %>% 
+              ungroup() %>% 
+              select(-Sp, -SpCode, -SHA, -LTD) %>%
+              mutate(id = row.names(.)) %>% 
+              melt(id.vars = "id", 
+                   variable.name = 'Abbreviation', value.name = 'Inter-species') %>% 
+              select(-id) %>% 
+              mutate(Abbreviation = as.character(Abbreviation)) %>% 
+              group_by(Abbreviation) %>%
+              summarise_all(funs(sd(., na.rm = T)/mean(., na.rm = T))),
+            by = "Abbreviation") %>%
+  mutate(`Intra-individuals` = ifelse(Abbreviation == "WD", NA, `Intra-individuals`))
+  
+if(knitr:::is_latex_output()){
+  t %>% 
+    ungroup() %>% 
+    mutate(Trait = c('Leaf area', 'Leaf dry\nmatter content', 'Leaf\nthickness', 'Specific\nleaf area', 'Wood\ndensity'),
+    Strategy = c('Leaf defense\nand investment',
+                 'Leaf resource\ncapture vs. investment',
+                 'Leaf defense\nand investment',
+                 'Leaf resource\nacquisition vs. defense',
+                 'Stem transport,\nstructure and defense')) %>% 
+    mutate_all(linebreak) %>% 
+    kable(caption = 'Functional traits measured. Traits are presented with their abbreviation, unit, related species strategy according to @baraloto_decoupled_2010, range of values, intra-individual, intra-specific and inter-specific coefficients of variation (CV).',
+          digits = 2, format.args = list(big.mark = " "), format = 'pandoc', escape = F,
+          col.names = c("Trait", "Abbreviation", "Unit", "Strategy", "Range", 
+                        "\\makecell[l]{Intra-\\\\individuals}", 
+                        "\\makecell[l]{Intra-\\\\species}", 
+                        "\\makecell[l]{Inter-\\\\species}")) %>%
+    kable_styling(full_width = T)
+} else {  
+  t %>% 
+  kable(digits = 2, format.args = list(big.mark = " "), format = 'pandoc', escape = F,
+        caption = 'Functional traits measured. Traits are presented with their abbreviation, unit, related species strategy according to @baraloto_decoupled_2010, range of values, intra-individual, intra-specific and inter-specific coefficients of variation (CV).') %>% 
+  kable_styling(full_width = T)
+}
+```
+
+\newpage 
+
+<!-- table 2 -->
+
+```{r LM}
+# GWM_ses %>% 
+#   filter(!is.na(strata)) %>% 
+#   melt(id.vars = c('strata', 'community')) %>% 
+#   rename(trait = variable) %>% 
+#   rename(SES = value) %>% 
+#   mutate(community = as.character(community)) %>% 
+#   left_join(R, by = "community") %>%
+#   group_by(strata, trait) %>% 
+#   do(reg = step(lm(SES ~ Slope + Curvature + Wetness + SW + Canopy, .), 
+#      direction = 'both', trace = 0)) %>% 
+#   # do(reg = lm(SES ~ Slope + Curvature + Wetness + SW + Canopy, .),
+#   #    direction = 'both', trace = 0) %>%
+#   tidy(reg) %>%
+#   group_by(strata, trait, term) %>%
+#   # transmute(value = paste(format(estimate, scientific = T, digits = 2, trim = T), 
+#                           # stars(p.value, ns = '   '))) %>% 
+#   transmute(value = format(estimate, scientific = T, digits = 2, trim = T)) %>% 
+#   dcast(strata + trait ~ term) %>% 
+#   select(strata, trait, Slope, Curvature, Wetness, SW, Canopy) %>% 
+#   mutate_all(funs(replace(., is.na(.), ' '))) %>% 
+#   left_join( # Inclusion of R2 but should be split
+#     GWM_ses %>% 
+#       filter(!is.na(strata)) %>% 
+#       melt(id.vars = c('strata', 'community')) %>% 
+#       rename(trait = variable) %>% 
+#       rename(SES = value) %>% 
+#       mutate(communtiy = as.character(community)) %>% 
+#       left_join(R, by = "community") %>%
+#       group_by(strata, trait) %>% 
+#       do(reg = step(lm(SES ~ Slope + Curvature + Wetness + SW + Canopy, .), 
+#                     direction = 'both', trace = 0)) %>% 
+#       glance(reg) %>% 
+#       select(r.squared) %>% 
+#       mutate(r.squared = round(r.squared, 2)) %>% 
+#       rename("$R^2$" = r.squared), by = c("strata", "trait")
+#   )%>% # End of R2
+#   filter(trait != 'LES') %>% 
+#   filter(trait != 'WES') %>%
+#   # bold() %>% 
+# Coefficients are unstable depending on random GWM so I entered the one from the last online version
+data.frame(
+  Guild = c(rep("C", 5), rep("U", 5)), Trait = rep(c("SLA", "WD", "LDMC", "LA", "LT"), 2),
+  Slope = c(-9.5*10^-3, "", "", "", 1.3*10^-2, "", 1.3*10^-2, "", "", ""),
+  Curvature = c(-2, 3.8, -3.2, -6, 3, -1.3, 6, 2.9, "", 6.6),
+  Wetness = c(-0.16, "",  -0.28, "", "", -0.22, "", "", 0.32, 0.19),
+  SW = c("", 0.23, "", -0.19, "", "", "", "", "", ""),
+  Canopy = c("", "", "", 1.8*10^-2, "", 2.6*10^-2, -1.5*10^-2, -9*10^-3, "", -1.6*10^-2),
+  R2 =c(0.06, 0.11, 0.04, 0.18, 0.05, 0.5, 0.32, 0.06, 0.04, 0.19)
+) %>% 
+  rename("Adjusted $R^2$" = R2) %>% 
+  kable(caption = 'Variation of standardized effect size (SES) values, for canopy (C) and understory (U) guilds, depending on slope, curvature, wetness, southwesterness (SW), and canopy height (Canopy). Linear model coefficients are reported only for predictors retained after bidirectional stepwise selection, with corresponding adjusted $R^2$ . See Table \\@ref(tab:traits) for trait abbreviations.', format = 'pandoc')
+```
+
+\newpage 
+
+<!-- figure 1 -->
+
+```{r Uppangala, fig.cap="Digital canopy model of the 10-ha forest permanent plot in Uppangala, India. Thin and thick black lines represent the elevation contour lines and plot limits, respectively."}
+DCM <- raster("./data/Canopy.tif")
+crs(DCM) <- '+proj=utm +zone=43 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0'
+DEM <- raster("./data/DEM.tif")
+crs(DEM) <- '+proj=utm +zone=43 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0'
+limits <- shapefile("./data/Plots/Shapeall10ha.shp")
+limits$melt <- 1
+limits <- maptools::unionSpatialPolygons(limits, limits$melt)
+india <- shapefile("./data/India_SHP/INDIA.shp")
+DCM <- crop(DCM, buffer(limits, 100))
+DEM <- crop(DEM, buffer(limits, 100))
+DEM <- as(DEM, "SpatialPixelsDataFrame")
+DEM <- as.data.frame(DEM)
+colnames(DEM) <- c("Elevation", "x", "y")
+DCM <- as(DCM, "SpatialPixelsDataFrame")
+DCM <- as.data.frame(DCM)
+colnames(DCM) <- c("Height", "x", "y")
+ggplot() +  
+geom_tile(data = DCM, aes(x = x, y = y, fill = Height),  alpha = 0.6) +
+  geom_contour(data = DEM, aes(x = x, y = y, z = Elevation),
+               colour = "black", alpha = 0.5, breaks = seq(300, 500, by = 25)) +
+  directlabels::geom_dl(data = DEM, aes(x = x, y = y, z = Elevation, label = paste0(..level.., "m")),
+                        method = list('last.bumpup', cex = 0.8, hjust = 1, fontface = 2),
+                        stat = "contour", breaks = seq(300, 500, by = 25)) +
+  geom_polygon(data = fortify(limits),
+               aes(long, lat, group=group),
+               colour = "black", lwd = 1.1, alpha = 0) +
+  coord_equal() +
+  cowplot::theme_map() +
+  scale_fill_distiller("Canopy\nheight (m)", palette = "Spectral") +
+  ggsn::scalebar(dist = 50, dist_unit = "m", x.min = min(DCM$x) + 5, x.max = max(DCM$x), y.min = min(DCM$y) + 20, y.max = max(DCM$y),
+                 transform = F, model = "WGS84", location = "bottomleft") +
+    annotation_custom(grob = ggplotGrob(ggplot() +  
+                                        geom_polygon(data = fortify(india),
+                                                     aes(long, lat, group=group),
+                                                     colour = "black", alpha = 0) +
+                                        geom_point(data = data.frame(long = 75.662778, lat = 12.537500), 
+                                                   aes(long, lat), col = "red", size = 3) +
+                                        coord_equal() +
+                                        cowplot::theme_map() +
+                                        theme(panel.border = element_rect(color = "black",size = .5,fill = NA),
+                                              plot.background	= element_rect(fill = "white"))), 
+                    xmin = min(DCM$x), xmax = min(DCM$x) + 150, 
+                    ymin = max(DCM$y) - 150, ymax = max(DCM$y))
+  # ggsave(file = "Plot.png", path = './data/', width = 150, height = 200, unit = 'mm', dpi = 300)
+```
+
+\newpage 
+
+<!-- figure 2 -->
+
+```{r pca,  fig.cap='Principal Component Analysis (PCA) of species mean trait values (A) and density distribution of species per guild (C canopy, U understory) along the first two PCA axes (B). Subplot A shows PCA biplot in plan 1-2, whereas boxplots in B show guild differentiation on the first and second PCA axes, with the associated Wilcoxon test. See Table  \\@ref(tab:traits) for trait abbreviations.'}
+pca.plot <- autoplot(PFT.pca, 
+         data = Q %>% 
+           left_join(L %>% 
+                       dplyr::select(-com) %>% 
+                       summarise_all(sum) %>% 
+                       t() %>% 
+                       data.frame() %>% 
+                       rename(abundance =  ".") %>% 
+                       mutate(SpCode = row.names(.))) %>% 
+           filter(!is.na(WES)), 
+         colour = "strata",
+         size = "abundance",
+         loadings.label.size = 6,
+         loadings.label.colour = 'black',
+         loadings = T, loadings.label = T, loadings.colour = 'black',
+         loadings.label.vjust = 1.2) +
+  coord_equal() +
+  geom_hline(aes(yintercept = 0), col = 'green', linetype = "dotted") +
+  geom_vline(aes(xintercept = 0), col = 'purple', linetype = "dotted") +
+  xlab('Axe 1 − 33.66 %') + ylab('Axe 2 − 29.07 %') +
+  theme(legend.position = c(1, 1), 
+        legend.justification = c(1, 1)) +
+  scale_color_discrete("Guild")
+spectrum.boxplots <- pca.plot$data %>%
+  select(Comp.1, Comp.2, strata) %>%
+  rename(`Axe 1` = Comp.1, `Axe 2` = Comp.2) %>%
+  melt(id.vars = "strata", variable.name = "spectrum") %>%
+  ggplot(aes(strata, value, fill = strata)) +
+  ggpubr::stat_compare_means(aes(label = ..p.signif..)) +
+  geom_boxplot() +
+  facet_wrap(~spectrum, nrow = 2) +
+  scale_fill_discrete("Guild")
+cowplot::plot_grid(pca.plot, spectrum.boxplots, rel_widths = c(2,1))
+# ggsave(cowplot::plot_grid(pca.plot, spectrum.boxplots, rel_widths = c(2,1), labels = c("A", "B")),
+#        file = "PCA.png",
+#        path = './data/',
+#        width = 200, height = 150, unit = 'mm',
+#        dpi = 300)
+```
+
+\newpage 
+
+<!-- figure 3 -->
+
+```{r GWMboxplot, fig.cap="Guild weighted mean (GWM) of specific leaf area (SLA), wood density (WD), leaf dry matter content (LDMC), leaf area (LA) and leaf thickness (LT) for canopy (C) and understory (U) guilds. Boxplots include the median value, the interquartile range (horizontal edges of the box) and an estimated 95% confidence interval (vertical lines). Asterisks represent significant differences between the two guilds (*** p-value<0.001).", fig.height=4}
+L %>%
+  melt(id.var = "com",
+       variable.name = "SpCode",
+       value.name = "abundance") %>% 
+  dcast(SpCode ~ com, value.var = "abundance") %>% 
+  mutate(SpCode = as.character(SpCode)) %>% 
+  inner_join(Q, by = "SpCode") %>%
+  select(-SpCode) %>%
+  melt(id.vars = c('strata', 'LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'LT'),
+       variable.name = 'community', value.name = 'abundance') %>%
+  group_by(strata, community) %>%
+  summarise_each(funs(weighted.mean(., abundance, na.rm = T)), -abundance) %>% 
+  select(-community, -LES, -WES) %>%
+  # select(-community, -SLA, -WD, -LDMC, -LA, -LT) %>% 
+  # select(-community) %>% 
+  melt(id.vars = "strata", 
+       variable.name = "trait",
+       value.name = "GWM") %>% 
+  ggplot(aes(x = strata, y = GWM, fill = strata)) +
+  geom_boxplot() +
+  facet_wrap(~trait, scales = "free", nrow = 1) +
+  # facet_wrap(~trait, scales = "free", nrow = 2) +
+  xlab("Guild") + scale_fill_discrete(guide = "none") +
+  ggpubr::stat_compare_means(aes(label = paste(substr(..p.signif.., 1,3))))
+  # ggsave(file = "boxplot.png",
+  #        path = './data/',
+  #        width = 200, height = 150, unit = 'mm',
+  #        dpi = 300)
+```
