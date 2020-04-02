@@ -55,85 +55,79 @@ PFT <- genPFT() %>%
   group_by(Sp, SpCode) %>% 
   summarise_all(funs(mean(., na.rm = T))) %>% 
   ungroup() %>% 
-  select(-Sp, -LTD, -SHA)
-suppressWarnings(row.names(PFT) <- PFT$SpCode) # deprecated
+  select(-LTD, -SHA, -Sp)
 # PCA
 PFT.pca <- princomp(~ LA + WD + LT + LDMC + SLA, data = PFT, cor = T)
 # Matrix Q
-Q <- PFT %>% 
+PFT <- PFT %>% 
   mutate(SpCode = as.character(SpCode)) %>% 
-  left_join(data.frame(PFT.pca$scores) %>% 
-              mutate(SpCode = row.names(.)),
-            by = "SpCode") %>% 
-  rename(WES = Comp.1, LES = Comp.2) %>% 
   left_join(genSpecies(), by = "SpCode") %>% 
   mutate(strata = ifelse(Strata == 3, "U", "C")) %>%
-  select(SLA, LDMC, WD, LA, LT, LES, WES, strata, SpCode) %>%
-  mutate(strata = ifelse(SpCode == "agin", "U", strata))
+  mutate(strata = ifelse(SpCode == "agin", "U", strata)) %>% 
+  dplyr::select(strata, SpCode, LA, WD, LT, LDMC, SLA) %>% 
+  reshape2::melt(id.vars = c("strata", "SpCode"), 
+                 variable.name = "trait", value.name = "traitvalue")
 # Matrix L
 com <- quadrats(cs = c(30,30))
 XY <- genTrees()[c('x', 'y')]
 coordinates(XY) <- ~ x + y
 proj4string(XY) <- crs(com)
-L <- genTrees() %>% 
-  mutate(com = (XY %over% com)[,1]) %>% 
-  filter(!is.na(com)) %>% 
-  group_by(com, SpCode) %>% 
-  summarise(n = n()) %>% 
-  dcast(com ~ SpCode, value.var = "n") %>% 
-  replace(is.na(.), 0)
+trees <- genTrees() %>% 
+  mutate(community = (XY %over% com)[,1]) %>% 
+  filter(!is.na(community)) %>% 
+  group_by(community, SpCode) %>% 
+  summarise(Abundance = n()) %>% 
+  filter(community != "C99")
 # Matrix R
 load(file.path("draft_save", 'R.Rdata'))
-# GWMses
-GWM <- L %>%
-  melt(id.var = "com",
-       variable.name = "SpCode",
-       value.name = "abundance") %>% 
-  dcast(SpCode ~ com, value.var = "abundance") %>% 
-  mutate(SpCode = as.character(SpCode)) %>% 
-  left_join(Q, by = "SpCode") %>% 
+# GWM
+GWM <- trees %>% 
+  left_join(PFT) %>% 
   filter(!is.na(strata)) %>% 
-  select(-SpCode) %>% 
-  melt(id.vars = c('strata', 'LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'LT'),
-       variable.name = 'community', value.name = 'abundance') %>% 
-  group_by(strata, community) %>% 
-  summarise_each(funs(weighted.mean(., abundance, na.rm = T)), -abundance)
-# nQ <- array(rep(as.matrix(Q), n),
-#             c(dim(Q), n),
-#             list(row.names(Q), names(Q), 1:n))
-# nQ <- array(apply(nQ, 3, function(x){
-#   x[which(x[,"strata"] == "C"),'SpCode'] <- sample(x[which(x[,"strata"] == "C"),'SpCode'])
-#   x[which(x[,"strata"] == "U"),'SpCode'] <- sample(x[which(x[,"strata"] == "U"),'SpCode'])
-#   return(x)
-#   }), c(dim(Q), n), list(row.names(Q), names(Q), 1:n))
-# cl <- makeCluster(detectCores())
-# clusterExport(cl, list('L', 'nQ'))
-# nGWM <- parApply(cl, nQ, 3, function(x){
-#   library(dplyr)
-#   library(reshape2)
-#   L %>%
-#     melt(id.var = "com",
-#          variable.name = "SpCode",
-#          value.name = "abundance") %>%
-#     dcast(SpCode ~ com) %>%
-#     left_join(data.frame(x)) %>%
-#     select(-SpCode) %>%
-#     melt(id.vars = c('strata', 'LES', 'SLA', 'WES', 'WD', 'LDMC', 'LA', 'LT'),
-#          variable.name = 'community', value.name = 'abundance') %>%
-#     group_by(strata, community) %>%
-#     mutate_each(funs(as.character), -abundance) %>%
-#     mutate_each(funs(as.numeric), -abundance) %>%
-#     summarise_each(funs(weighted.mean(., abundance, na.rm = T)), -abundance)
-# })
-# stopCluster(cl)
-# nGWM <- array(unlist(lapply(nGWM, function(x) as.matrix(x[3:9]))),
-#               c(dim(GWM[3:9]), n),
-#               list(row.names(GWM), names(GWM[3:9]), 1:n))
-# rm(cl, nQ)
-# save(nGWM, file = file.path("draft_save", 'nGWM.Rdata'))
-load(file.path("draft_save", 'nGWM.Rdata'))
-GWM_ses <- GWM
-GWM_ses[3:9] <- (GWM[3:9] - apply(nGWM, 1:2, mean, na.rm = T))/apply(nGWM, 1:2, sd, na.rm = T)
+  group_by(strata, community, trait) %>% 
+  summarise(GWM = weighted.mean(traitvalue, Abundance, na.rm = T))
+# GWM plot
+left_join(GWM, R) %>% 
+  reshape2::melt(id.vars = c("strata", "community", "trait", "GWM")) %>% 
+  filter(variable != "BA") %>% 
+  ggplot(aes(value, GWM, col = strata)) +
+  facet_grid(trait ~ variable, scales = "free") +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  theme(legend.position = "bottom", axis.title = element_blank())
+# nGWM
+nGWM <- lapply(1:n, function(n) 
+  left_join(trees, 
+            group_by(PFT, strata) %>% 
+              mutate(SpCode = sample(SpCode)),
+            by = "SpCode") %>% 
+    filter(!is.na(strata)) %>% 
+    group_by(strata, community, trait) %>% 
+    summarise(nGWM = weighted.mean(traitvalue, Abundance, na.rm = T)) %>% 
+    mutate(NullModel = n)) %>% 
+  bind_rows()
+# nGWM plot
+ggplot(nGWM, aes(nGWM, col = community), fill = NA) +
+  geom_density(alpha = .5) +
+  facet_wrap(~ strata + trait, scales = "free") +
+  scale_color_discrete(guide = "none")
+# SES
+SES <- GWM %>% 
+  left_join(group_by(nGWM, strata, community, trait) %>% 
+              summarise(nGWMmean = mean(nGWM, na.rm = T),
+                        nGWMsd = sd(nGWM, na.rm = T))) %>% 
+  mutate(SES = (GWM - nGWMmean)/nGWMsd) %>% 
+  dplyr::select(-GWM, -nGWMmean, -nGWMsd) %>% 
+  left_join(R)
+# SES plot
+reshape2::melt(SES, id.vars = c("strata", "community", "trait", "SES")) %>% 
+  filter(variable != "BA") %>% 
+  ggplot(aes(value, SES, col = strata)) +
+  facet_grid(trait ~ variable, scales = "free") +
+  geom_point() +
+  geom_hline(yintercept = c(-2, 0, 2), linetype = "dashed") +
+  geom_smooth(method = "lm") +
+  theme(legend.position = "bottom", axis.title = element_blank())
 ```
 
 1. Sylvain Schmitt
@@ -486,57 +480,28 @@ if(knitr:::is_latex_output()){
 <!-- table 2 -->
 
 ```{r LM}
-# GWM_ses %>% 
-#   filter(!is.na(strata)) %>% 
-#   melt(id.vars = c('strata', 'community')) %>% 
-#   rename(trait = variable) %>% 
-#   rename(SES = value) %>% 
-#   mutate(community = as.character(community)) %>% 
-#   left_join(R, by = "community") %>%
-#   group_by(strata, trait) %>% 
-#   do(reg = step(lm(SES ~ Slope + Curvature + Wetness + SW + Canopy, .), 
-#      direction = 'both', trace = 0)) %>% 
-#   # do(reg = lm(SES ~ Slope + Curvature + Wetness + SW + Canopy, .),
-#   #    direction = 'both', trace = 0) %>%
-#   tidy(reg) %>%
-#   group_by(strata, trait, term) %>%
-#   # transmute(value = paste(format(estimate, scientific = T, digits = 2, trim = T), 
-#                           # stars(p.value, ns = '   '))) %>% 
-#   transmute(value = format(estimate, scientific = T, digits = 2, trim = T)) %>% 
-#   dcast(strata + trait ~ term) %>% 
-#   select(strata, trait, Slope, Curvature, Wetness, SW, Canopy) %>% 
-#   mutate_all(funs(replace(., is.na(.), ' '))) %>% 
-#   left_join( # Inclusion of R2 but should be split
-#     GWM_ses %>% 
-#       filter(!is.na(strata)) %>% 
-#       melt(id.vars = c('strata', 'community')) %>% 
-#       rename(trait = variable) %>% 
-#       rename(SES = value) %>% 
-#       mutate(communtiy = as.character(community)) %>% 
-#       left_join(R, by = "community") %>%
-#       group_by(strata, trait) %>% 
-#       do(reg = step(lm(SES ~ Slope + Curvature + Wetness + SW + Canopy, .), 
-#                     direction = 'both', trace = 0)) %>% 
-#       glance(reg) %>% 
-#       select(r.squared) %>% 
-#       mutate(r.squared = round(r.squared, 2)) %>% 
-#       rename("$R^2$" = r.squared), by = c("strata", "trait")
-#   )%>% # End of R2
-#   filter(trait != 'LES') %>% 
-#   filter(trait != 'WES') %>%
-#   # bold() %>% 
-# Coefficients are unstable depending on random GWM so I entered the one from the last online version
-data.frame(
-  Guild = c(rep("C", 5), rep("U", 5)), Trait = rep(c("SLA", "WD", "LDMC", "LA", "LT"), 2),
-  Slope = c(-9.5*10^-3, "", "", "", 1.3*10^-2, "", 1.3*10^-2, "", "", ""),
-  Curvature = c(-2, 3.8, -3.2, -6, 3, -1.3, 6, 2.9, "", 6.6),
-  Wetness = c(-0.16, "",  -0.28, "", "", -0.22, "", "", 0.32, 0.19),
-  SW = c("", 0.23, "", -0.19, "", "", "", "", "", ""),
-  Canopy = c("", "", "", 1.8*10^-2, "", 2.6*10^-2, -1.5*10^-2, -9*10^-3, "", -1.6*10^-2),
-  R2 =c(0.06, 0.11, 0.04, 0.18, 0.05, 0.5, 0.32, 0.06, 0.04, 0.19)
-) %>% 
-  rename("Adjusted $R^2$" = R2) %>% 
-  kable(caption = 'Variation of standardized effect size (SES) values, for canopy (C) and understory (U) guilds, depending on slope, curvature, wetness, southwesterness (SW), and canopy height (Canopy). Linear model coefficients are reported only for predictors retained after bidirectional stepwise selection, with corresponding adjusted $R^2$ . See Table \\@ref(tab:traits) for trait abbreviations.', format = 'pandoc')
+group_by(SES, strata, trait) %>% 
+  mutate_at(c("Slope", "Curvature", "Wetness", "SW", "Canopy"), scale, center = F) %>%
+  do(reg = step(lm(SES ~ Slope + Curvature + Wetness + SW + Canopy, .), 
+                direction = 'both', trace = 0)) %>%
+  tidy(reg) %>% 
+  filter(term != "(Intercept)") %>% 
+  mutate(estimate = round(estimate, 2)) %>% 
+  group_by(strata, trait, term) %>%
+  dcast(strata + trait ~ term, value.var = "estimate") %>%
+  select(strata, trait, Slope, Curvature, Wetness, SW, Canopy) %>%
+    mutate_all(funs(replace(., is.na(.), ' '))) %>%
+  left_join(group_by(SES, strata, trait) %>% 
+              mutate_at(c("Slope", "Curvature", "Wetness", "SW", "Canopy"), 
+                        scale, center = F) %>%
+              do(reg = step(lm(SES ~ Slope + Curvature + Wetness + SW + Canopy, .), 
+                            direction = 'both', trace = 0)) %>%
+              glance(reg) %>%
+              dplyr::select(r.squared) %>%
+              mutate(r.squared = round(r.squared, 2)), 
+            by = c("strata", "trait")) %>%
+            rename("$R^2$" = r.squared, Guild = strata, Trait = trait) %>%  
+    kable(caption = 'Variation of standardized effect size (SES) values, for canopy (C) and understory (U) guilds, depending on slope, curvature, wetness, southwesterness (SW), and canopy height (Canopy). Linear model coefficients are reported only for predictors retained after bidirectional stepwise selection, with corresponding adjusted $R^2$ . See Table \\@ref(tab:traits) for trait abbreviations.', format = 'pandoc')
 ```
 
 \newpage 
