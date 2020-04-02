@@ -2,18 +2,18 @@
 title: Different environment filters shape the functional composition of canopy and understory guilds in an Indian rainforest
 date: '`r Sys.Date()`'
 output:
-  bookdown::word_document2:
-    reference_docx: ./template/template.docx
+  bookdown::html_document2:
+    number_sections: false  
+    toc: true
+    toc_float: yes
   bookdown::pdf_document2:
     includes:
       before_body: ./template/doc_prefix.tex
       in_header: ./template/preamble.tex
     number_sections: false
     toc: false
-  bookdown::html_document2:
-    number_sections: false  
-    toc: true
-    toc_float: yes
+  bookdown::word_document2:
+    reference_docx: ./template/template.docx
 linestretch: 1.5
 csl: /home/sylvain/Documents/Bibliography/csl/joe.csl
 bibliography: /home/sylvain/Documents/Bibliography/library.bib
@@ -35,7 +35,7 @@ library(ggfortify)
 theme_set(bayesplot::theme_default())
 opts_chunk$set(echo = F, message = F, warning = F, 
                fig.height = 8, fig.width = 8,
-               cache = T, cache.lazy = F)
+               cache = F, cache.lazy = F)
 cv <- function(x, na.rm = T)
   sd(x, na.rm = na.rm)/mean(x, na.rm = na.rm)
 n = 999 # Random repetitions
@@ -76,8 +76,7 @@ trees <- genTrees() %>%
   mutate(community = (XY %over% com)[,1]) %>% 
   filter(!is.na(community)) %>% 
   group_by(community, SpCode) %>% 
-  summarise(Abundance = n()) %>% 
-  filter(community != "C99")
+  summarise(Abundance = n())
 # Matrix R
 load(file.path("draft_save", 'R.Rdata'))
 # GWM
@@ -98,7 +97,7 @@ left_join(GWM, R) %>%
 # nGWM
 nGWM <- lapply(1:n, function(n) 
   left_join(trees, 
-            group_by(PFT, strata) %>% 
+            group_by(PFT, trait, strata) %>% 
               mutate(SpCode = sample(SpCode)),
             by = "SpCode") %>% 
     filter(!is.na(strata)) %>% 
@@ -559,7 +558,7 @@ geom_tile(data = DCM, aes(x = x, y = y, fill = Height),  alpha = 0.6) +
 
 <!-- figure 2 -->
 
-```{r pca,  fig.cap='Principal Component Analysis (PCA) of species mean trait values (A) and density distribution of species per guild (C canopy, U understory) along the first two PCA axes (B). Subplot A shows PCA biplot in plan 1-2, whereas boxplots in B show guild differentiation on the first and second PCA axes, with the associated Wilcoxon test. See Table  \\@ref(tab:traits) for trait abbreviations.'}
+```{r pca,  fig.cap='Principal Component Analysis (PCA) of species mean trait values (A) and density distribution of species per guild (C canopy, U understory) along the first two PCA axes (B). Subplot A shows PCA biplot in plan 1-2, whereas boxplots in B show guild differentiation on the first and second PCA axes, with the associated Wilcoxon test. See Table  \\@ref(tab:traits) for trait abbreviations.', eval=F}
 pca.plot <- autoplot(PFT.pca, 
          data = Q %>% 
            left_join(L %>% 
@@ -593,18 +592,13 @@ spectrum.boxplots <- pca.plot$data %>%
   facet_wrap(~spectrum, nrow = 2) +
   scale_fill_discrete("Guild")
 cowplot::plot_grid(pca.plot, spectrum.boxplots, rel_widths = c(2,1))
-# ggsave(cowplot::plot_grid(pca.plot, spectrum.boxplots, rel_widths = c(2,1), labels = c("A", "B")),
-#        file = "PCA.png",
-#        path = './data/',
-#        width = 200, height = 150, unit = 'mm',
-#        dpi = 300)
 ```
   
 \newpage 
 
 <!-- figure 3 -->
 
-```{r GWMboxplot, fig.cap="Guild weighted mean (GWM) of specific leaf area (SLA), wood density (WD), leaf dry matter content (LDMC), leaf area (LA) and leaf thickness (LT) for canopy (C) and understory (U) guilds. Boxplots include the median value, the interquartile range (horizontal edges of the box) and an estimated 95% confidence interval (vertical lines). Asterisks represent significant differences between the two guilds (*** p-value<0.001).", fig.height=4}
+```{r GWMboxplot, fig.cap="Guild weighted mean (GWM) of specific leaf area (SLA), wood density (WD), leaf dry matter content (LDMC), leaf area (LA) and leaf thickness (LT) for canopy (C) and understory (U) guilds. Boxplots include the median value, the interquartile range (horizontal edges of the box) and an estimated 95% confidence interval (vertical lines). Asterisks represent significant differences between the two guilds (*** p-value<0.001).", fig.height=4, eval=F}
 L %>%
   melt(id.var = "com",
        variable.name = "SpCode",
