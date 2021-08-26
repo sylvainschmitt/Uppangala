@@ -14,3 +14,4 @@ data/*
 *_save
 # BRIDGE_test
 BRIDGE_test/*.txt
+figures

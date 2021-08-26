@@ -1,18 +1,18 @@
 ---
 title: Contrasting influences of topography and canopy height on the functional assembly of canopy and understory tree guilds in an Indian rainforest
 output:
-  bookdown::word_document2:
-    reference_docx: ./template/template.docx
+  bookdown::html_document2:
+    number_sections: false  
+    toc: true
+    toc_float: yes
   bookdown::pdf_document2:
     includes:
       before_body: ./template/doc_prefix.tex
       in_header: ./template/preamble.tex
     number_sections: false
     toc: false
-  bookdown::html_document2:
-    number_sections: false  
-    toc: true
-    toc_float: yes
+  bookdown::word_document2:
+    reference_docx: ./template/template.docx
 linestretch: 1.5
 csl: /home/sylvain/Documents/Bibliography/csl/journal-of-vegetation-science.csl
 bibliography: /home/sylvain/Documents/Bibliography/library.bib
@@ -35,15 +35,43 @@ library(rstan)
 options(mc.cores = 4)
 rstan_options(auto_write = T)
 library(bayesplot)
+library(ggmap)
 theme_set(bayesplot::theme_default())
 opts_chunk$set(echo = F, message = F, warning = F, 
                fig.height = 8, fig.width = 8,
                cache = T, cache.lazy = F)
-cv <- function(x, na.rm = T)
-  sd(x, na.rm = na.rm)/mean(x, na.rm = na.rm)
 n = 999 # Random repetitions
 sapply(list.files("R", full.names = T), source)
 ```
+
+
+```{r, eval=FALSE}
+Env <- genEnv()
+Trees <- genTrees()
+Trees$ID <- row.names(Trees)
+# Trees <- merge(Trees, PFT_sp)
+row.names(Trees) <- Trees$ID
+Trees <- Trees[-which(names(Trees) == 'ID')]
+com <- quadrats(cs = c(30,30))
+XY <- Trees[c('x', 'y')]
+coordinates(XY) <- ~ x + y
+proj4string(XY) <- crs(com)
+Trees$com <- (XY %over% com)[,1]
+com@data$Elevation <- raster::extract(Env$DEM, as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
+Deriv <- DEMderiv(raster(com, 'Elevation'), c('slope', 'curvature', 'plancurvature', 'profcurvature', 'cosaspect'), path = '/usr/bin/')
+names(Deriv)[5] <- 'SW'
+com@data <- cbind(com@data, raster::extract(Deriv, as(com, "SpatialPolygons"), df = T, fun = mean)[-1])
+com@data$Wetness <- raster::extract(DEMderiv(Env$DEM, 'wetness', path = '/usr/bin/'),
+                                    as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
+com@data$Canopy <- raster::extract(Env$Canopy, as(com, "SpatialPolygons"), df = T, fun = mean)[,2]
+BA <- aggregate(Trees$Girth, list(Trees$com), function(x){sum(pi*(x/(2*pi))^2, na.rm = T)})
+com@data$BA <- BA$x[match(com@data$id, BA$Group.1)]
+R <- com@data[c('Slope', 'Curvature', 'Wetness', 'SW', 'Canopy', 'BA')]
+row.names(R) <- com@data$id
+R <- rownames_to_column(R, "community")
+save(R, file = file.path("draft_save", 'R2.Rdata'))
+```
+
 
 ```{r data, include = F}
 # Sp level PFT
@@ -79,9 +107,10 @@ trees <- genTrees() %>%
   mutate(community = (XY %over% com)[,1]) %>% 
   filter(!is.na(community)) %>% 
   group_by(community, SpCode) %>% 
-  summarise(Abundance = n())
+  dplyr::summarise(Abundance = n())
 # Matrix R
-load(file.path("draft_save", 'R.Rdata'))
+# load(file.path("draft_save", 'R.Rdata'))
+load(file.path("draft_save", 'R2.Rdata'))
 # GWM
 GWM <- trees %>% 
   left_join(PFT) %>% 
@@ -89,14 +118,14 @@ GWM <- trees %>%
   group_by(strata, community, trait) %>% 
   summarise(GWM = weighted.mean(traitvalue, Abundance, na.rm = T))
 # GWM plot
-left_join(GWM, R) %>% 
-  reshape2::melt(id.vars = c("strata", "community", "trait", "GWM")) %>% 
-  filter(variable != "BA") %>% 
-  ggplot(aes(value, GWM, col = strata)) +
-  facet_grid(trait ~ variable, scales = "free") +
-  geom_point() +
-  geom_smooth(method = "lm") +
-  theme(legend.position = "bottom", axis.title = element_blank())
+# left_join(GWM, R) %>% 
+#   reshape2::melt(id.vars = c("strata", "community", "trait", "GWM")) %>% 
+#   filter(variable != "BA") %>% 
+#   ggplot(aes(value, GWM, col = strata)) +
+#   facet_grid(trait ~ variable, scales = "free") +
+#   geom_point() +
+#   geom_smooth(method = "lm") +
+#   theme(legend.position = "bottom", axis.title = element_blank())
 # nGWM
 nGWM <- lapply(1:n, function(n) 
   left_join(trees, 
@@ -122,15 +151,25 @@ SES <- GWM %>%
   dplyr::select(-GWM, -nGWMmean, -nGWMsd) %>% 
   left_join(R)
 # SES plot
-# reshape2::melt(SES, id.vars = c("strata", "community", "trait", "SES")) %>% 
-#   filter(variable != "BA") %>% 
+# reshape2::melt(SES, id.vars = c("strata", "community", "trait", "SES")) %>%
+#   filter(variable != "BA") %>%
 #   ggplot(aes(value, SES, col = strata)) +
 #   facet_grid(trait ~ variable, scales = "free") +
 #   geom_point() +
 #   geom_hline(yintercept = c(-2, 0, 2), linetype = "dashed") +
 #   geom_smooth(method = "lm") +
 #   theme(legend.position = "bottom", axis.title = element_blank())
+
 ```
+
+```{r, eval=FALSE}
+trees %>% 
+  left_join(PFT) %>% 
+  filter(!is.na(strata)) %>% 
+  dplyr::group_by(strata, community, trait) %>% 
+  summarise(GWM = weighted.mean(traitvalue, Abundance, na.rm = T))
+```
+
 
 ```{r, eval=F}
 filter(trees, community %in% filter(R, Canopy < 20, Slope > 30)$community) %>% 
@@ -174,8 +213,40 @@ left_join(trees, filter(PFT, trait == "WD")) %>%
   facet_wrap(~ WDclass, scales = "free", nrow = 2) +
   ggtitle("Number of trees per community along slope gradient",
           "depending on WD category (low < 0.5 and high > 0.7).")
+
+trees %>% 
+  group_by(community, SpCode) %>% 
+  summarise(Abundance = sum(Abundance)) %>% 
+  left_join(select(PFT,SpCode, strata)) %>% 
+  unique() %>% 
+  filter(!is.na(strata)) %>% 
+  group_by(community, strata) %>% 
+  summarise(N = sum(Abundance), S = length(unique(SpCode))) %>% 
+  group_by(strata) %>% 
+  # summarise(N = sd(N), S = sd(S))
+  summarise(N = mean(N), Nsd = sd(N),
+            S = mean(S), Ssd = sd(S))
+  # group_by(strata, community) %>% summarise(N = sum(Abundance), S = length(unique(SpCode))) %>% group_by(strata) %>% summarise(N = mean(N), S = mean(S))
 ```
 
+
+```{r, eval=F}
+data <- genPFT() %>% 
+  mutate(LA = log(LA)) %>% 
+  mutate(SLA = log(SLA)) %>% 
+  select(-CE) %>% 
+  mutate(LMA = 1/SLA, LT.LDMC = LT*LDMC) %>% 
+  group_by(Tree, Sp, SpCode) %>% 
+  summarise_all(mean, na.rm = T)
+summary(lm(LMA ~ LT.LDMC, data))
+ggplot(data, aes(LT.LDMC, LMA)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  ggtitle("LMA = 0.30 + 0.17 LT x LDMC",
+          "r2 = 0.48; n = 267; P < 0.001") +
+  xlab("LT x LDMC")
+
+```
 
 1. Sylvain Schmitt
     - Corresponding author
@@ -269,8 +340,13 @@ colnames(DEM) <- c("Elevation", "x", "y")
 DCM <- as(DCM, "SpatialPixelsDataFrame")
 DCM <- as.data.frame(DCM)
 colnames(DCM) <- c("Height", "x", "y")
-ggplot() +  
-geom_tile(data = DCM, aes(x = x, y = y, fill = Height),  alpha = 0.6) +
+d <- 12
+lng <- 75.662778
+lat <- 12.537500
+bbox <- c(left = lng-d, bottom = lat-d, right = lng+d, top = lat+d)
+map <- get_stamenmap(bbox, zoom = 5)
+g <- ggplot() +  
+  geom_tile(data = DCM, aes(x = x, y = y, fill = Height),  alpha = 0.6) +
   geom_contour(data = DEM, aes(x = x, y = y, z = Elevation),
                colour = "black", alpha = 0.5, breaks = seq(300, 500, by = 25)) +
   directlabels::geom_dl(data = DEM, aes(x = x, y = y, z = Elevation, label = paste0(..level.., "m")),
@@ -280,23 +356,25 @@ geom_tile(data = DCM, aes(x = x, y = y, fill = Height),  alpha = 0.6) +
                aes(long, lat, group=group),
                colour = "black", lwd = 1.1, alpha = 0) +
   coord_equal() +
-  cowplot::theme_map() +
+  theme(axis.line = element_blank(), legend.position = c(0.9, 0.5), axis.text = element_text(face = "bold"),
+        legend.background = element_rect(fill = "white", colour = NA)) +
   scale_fill_distiller("Canopy\nheight (m)", palette = "Spectral") +
   ggsn::scalebar(dist = 50, dist_unit = "m", x.min = min(DCM$x) + 5, x.max = max(DCM$x), y.min = min(DCM$y) + 20, y.max = max(DCM$y),
                  transform = F, model = "WGS84", location = "bottomleft") +
-    annotation_custom(grob = ggplotGrob(ggplot() +  
-                                        geom_polygon(data = fortify(india),
-                                                     aes(long, lat, group=group),
-                                                     colour = "black", alpha = 0) +
-                                        geom_point(data = data.frame(long = 75.662778, lat = 12.537500), 
-                                                   aes(long, lat), col = "red", size = 3) +
-                                        coord_equal() +
-                                        cowplot::theme_map() +
-                                        theme(panel.border = element_rect(color = "black",size = .5,fill = NA),
-                                              plot.background	= element_rect(fill = "white"))), 
-                    xmin = min(DCM$x), xmax = min(DCM$x) + 150, 
-                    ymin = max(DCM$y) - 150, ymax = max(DCM$y))
-  # ggsave(file = "Plot.png", path = './data/', width = 150, height = 200, unit = 'mm', dpi = 300)
+  ggsn::north(symbol = 10, x.min = min(DCM$x) + 5, x.max = max(DCM$x), y.min = min(DCM$y) + 30, y.max = max(DCM$y)-10) +
+  xlab("Longitude") + ylab("Latitude") +
+  scale_x_continuous(expand=c(0,0)) + scale_y_continuous(expand=c(0,0)) +
+  annotation_custom(grob = ggplotGrob(
+    ggmap(map) +
+      geom_point(x = lng, y = lat, colour = "red", size = 4) +
+      theme(axis.title = element_blank(), axis.line = element_blank(), 
+            axis.ticks = element_blank(), axis.text = element_blank(),
+            panel.border = element_rect(fill = NA))
+  ),
+  xmin = min(DCM$x), xmax = min(DCM$x) + 200,
+  ymin = max(DCM$y) - 200, ymax = max(DCM$y))
+# ggsave(file = "Plot.png", path = './data/', width = 150, height = 200, unit = 'mm', dpi = 300)
+ggsave(g, filename = "figures/Figure_1.tiff", device = "tiff", dpi = 600, bg = "white", width = 8, height = 8, compression = "lzw")
 ```
 
 ## Census data and vertical guilds
@@ -435,7 +513,30 @@ We found an overall increase of functional trait variation from intra-individual
 The first axis of the PCA of species trait values (Fig. \@ref(fig:pca)A) was mostly related to wood density and structural leaf traits (LT, LA, LDMC), and opposed species with thick, big leaves and lightwood to species with dense leaves and hardwood. The second axis mostly opposed SLA to LDMC. WD was orthogonal to SLA in the plan 1-2 of the PCA, suggesting that WD and SLA provided independent information. Canopy and understory species did not show significant differentiation along the first and second PCA axes (Wilcoxon p>0.2, Fig. \@ref(fig:pca)B).
 
 ```{r pca,  fig.cap='Principal Component Analysis (PCA) of species mean trait values (A) and density distribution of species per guild (C canopy, U understory) along the first two PCA axes (B). Subplot A shows PCA biplot in plan 1-2, whereas boxplots in B show guild differentiation on the first and second PCA axes, with the associated Wilcoxon test. See trait abbreviations in Table \\@ref(tab:traits).'}
-pca.plot <- autoplot(PFT.pca, 
+# pca.plot <- autoplot(PFT.pca, 
+#          data = na.omit(reshape2::dcast(PFT, strata + SpCode ~ trait, value.var = "traitvalue")),
+#          colour = "strata",
+#          loadings.label.size = 6,
+#          loadings.label.colour = 'black',
+#          loadings = T, loadings.label = T, loadings.colour = 'black',
+#          loadings.label.vjust = 1.2) +
+#   coord_equal() +
+#   geom_hline(aes(yintercept = 0), col = 'green', linetype = "dotted") +
+#   geom_vline(aes(xintercept = 0), col = 'purple', linetype = "dotted") +
+#   xlab('Axis 1') + ylab('Axis 2') +
+#   theme(legend.position = c(1, 1), 
+#         legend.justification = c(1, 1)) +
+#   scale_color_discrete("Guild")
+# spectrum.boxplots <- pca.plot$data %>%
+  # select(Comp.1, Comp.2, strata) %>%
+  # rename(`Axis 1` = Comp.1, `Axis 2` = Comp.2) %>%
+  # melt(id.vars = "strata", variable.name = "spectrum") %>%
+  # ggplot(aes(strata, value, fill = strata)) +
+  # # ggpubr::stat_compare_means(aes(label = ..p.signif..)) +
+  # geom_boxplot() +
+  # facet_wrap(~spectrum, nrow = 2) +
+  # scale_fill_discrete("Guild")
+g <- autoplot(PFT.pca, 
          data = na.omit(reshape2::dcast(PFT, strata + SpCode ~ trait, value.var = "traitvalue")),
          colour = "strata",
          loadings.label.size = 6,
@@ -445,32 +546,46 @@ pca.plot <- autoplot(PFT.pca,
   coord_equal() +
   geom_hline(aes(yintercept = 0), col = 'green', linetype = "dotted") +
   geom_vline(aes(xintercept = 0), col = 'purple', linetype = "dotted") +
-  xlab('Axe 1 − 33.66 %') + ylab('Axe 2 − 29.07 %') +
+  stat_ellipse(aes(group = strata, col = strata), linetype = "dashed") +
+  xlab('Axis 1') + ylab('Axis 2') +
   theme(legend.position = c(1, 1), 
-        legend.justification = c(1, 1)) +
+        legend.justification = c(1, 1),
+        panel.border = element_rect(colour = "black", fill=NA, size=1)) +
   scale_color_discrete("Guild")
-spectrum.boxplots <- pca.plot$data %>%
-  select(Comp.1, Comp.2, strata) %>%
-  rename(`Axe 1` = Comp.1, `Axe 2` = Comp.2) %>%
-  melt(id.vars = "strata", variable.name = "spectrum") %>%
-  ggplot(aes(strata, value, fill = strata)) +
-  # ggpubr::stat_compare_means(aes(label = ..p.signif..)) +
-  geom_boxplot() +
-  facet_wrap(~spectrum, nrow = 2) +
-  scale_fill_discrete("Guild")
-cowplot::plot_grid(pca.plot, spectrum.boxplots, rel_widths = c(2,1))
+ggsave(g, filename = "figures/Figure_2.tiff", device = "tiff", dpi = 600, bg = "white", width = 8, height = 8, compression = "lzw")
 ```
 
 ## Changes in functional composition with environment 
 
 At community level, the guild weighted mean (GWM) of all traits significantly differed in subplots between understory and canopy guild assemblages (paired Student p<0.001,  Fig. \@ref(fig:GWMboxplot)). We found lower GWM values of canopy assemblages for SLA and WD with almost no overlap and, to a lesser extent, for LA but higher for LDMC and LT than understory tree assemblages. In other words, understory guild assemblages had larger, thinner and lighter leaves with higher SLA and denser woods, compared to canopy guild assemblages.
 
-```{r GWMboxplot, fig.cap="Guild weighted mean (GWM) of leaf area (LA) , wood density (WD), leaf thickness (LT), leaf dry matter content (LDMC) and  specific leaf area (SLA) for canopy (C) and understory (U) guilds. Boxplots include the median value, the interquartile range (horizontal edges of the box) and an estimated 95% confidence interval (vertical lines). Asterisks represent significant differences between the two guilds (*** paired Student p-value<0.001).", fig.height=4}
-ggplot(GWM, aes(x = strata, y = GWM, fill = strata)) +
+```{r GWMboxplot, fig.cap="Guild weighted mean (GWM) of leaf area (LA) , wood density (WD), leaf thickness (LT), leaf dry matter content (LDMC) and  specific leaf area (SLA) for canopy (C) and understory (U) guilds. Boxplots include the median value, the interquartile range (horizontal edges of the box) and an estimated 95% confidence interval (vertical lines). Asterisks represent significant differences between the two guilds (*** paired Student p-value<0.001).", fig.height=4, fig.width=10}
+g <- GWM %>% 
+  mutate(trait = recode(trait, 
+                        "SLA" = "A", 
+                        "LDMC" = "B",
+                        "LT" = "C", 
+                        "LA" = "D",
+                        "WD" = "E")) %>% 
+  mutate(trait = factor(trait, levels = c("A", "B", "C", "D", "E"))) %>%
+  ggplot(aes(x = strata, y = GWM, fill = strata)) +
   geom_boxplot() +
-  facet_wrap(~trait, scales = "free", nrow = 1) +
-  xlab("Guild") + scale_fill_discrete(guide = "none") +
-  ggpubr::stat_compare_means(aes(label = paste(substr(..p.signif.., 1,3))))
+  geom_text(aes(label = label), label.size = 0.2,
+            data.frame(
+              strata = "C",
+              trait = LETTERS[1:5],
+              label = c("A SLA", "B LDMC", "C LT", "D LA", "E WD"),
+              GWM = c(2.8, 435, 28, 10, 0.7)
+            )) +
+  facet_wrap(~trait, scales = "free", nrow = 1,
+             strip.position = "left", 
+             labeller = as_labeller(c(A = "SLA (m²/kg)", B = "LDMC (mg/g)",
+                                      C = "LT (µm)", D = "LA (mm²)", E = "WD (g/cm³)") ) )  +
+  ylab(NULL) +
+  theme(strip.background = element_blank(),
+        strip.placement = "outside") +
+  xlab("Guild") + scale_fill_discrete(guide = "none")
+ggsave(g, filename = "figures/Figure_3.tiff", device = "tiff", dpi = 600, bg = "white", width = 10, height = 4, compression = "lzw")
 ```
 
 Slope, curvature and wetness significantly influenced SES values of canopy and understory guild assemblages. Southwesterness influenced SES of canopy guild assemblages, while canopy height mostly played on SES of understory guild assemblages (Fig. \@ref(fig:LMres)). Overall, curvature was the most influential factor (7 significant effects out of 10 tested), with a negative effect on SLA and a positive effect on LT for both canopy and understory assemblages. In addition, curvature positively influenced SES of WD and LDMC only in the understory assemblages, and negatively influenced SES of LA only in the canopy assemblages. Wetness had a negative effect on SLA in both canopy and understory assemblages, and a positive effect on LT in understory assemblages. Still, wetness had a negative effect on LDMC in canopy assemblages. Slope had a negative effect on SLA and a positive effect on LT in canopy assemblages. and a positive effect on WD in the understory assemblages. Southwesterness only influenced canopy assemblages, with a positive effect on WD and a negative effect on LA. Canopy height mainly influenced understory assemblages, with a positive effect on SLA and a negative effect on WD, LDMC and LT. Still, canopy height had a positive effect on LA in canopy assemblages.
@@ -496,12 +611,14 @@ generated quantities {
 ```
 
 ```{r LMres, fig.cap="Effects of slope, curvature, wetness, southwesterness, and canopy height on standardized effect size (SES) values of functional traits (display on the left)  for canopy and understory guilds. The effects of predictors (shown with different colors) was estimated as the posterior distribution of the slope parameters. Circles represent the mean estimate, thick lines the 50% credible interval, and thin lines the 90% credible interval. Non-significant posteriors are transparent and significant posteriors (p < 0.05) are opaque . See trait abbreviations in Table \\@ref(tab:traits)."}
-mdata <- group_by(SES, strata, trait) %>% 
-  mutate_at(c("Slope", "Curvature", "Wetness", "SW", "Canopy"), scale) %>% 
-  group_by(strata, trait) %>% 
-  do(mdata = list(N = nrow(.), K = 5, SES = .$SES, X = as.matrix(.[c("Slope", "Curvature", "Wetness", "SW", "Canopy")])))
-fits <- lapply(mdata$mdata, function(m) sampling(lm, data = m))
-names(fits) <- paste0(mdata$strata, "_", mdata$trait)
+# mdata <- group_by(SES, strata, trait) %>%
+#   mutate_at(c("Slope", "Curvature", "Wetness", "SW", "Canopy"), scale) %>%
+#   group_by(strata, trait) %>%
+#   do(mdata = list(N = nrow(.), K = 5, SES = .$SES, X = as.matrix(.[c("Slope", "Curvature", "Wetness", "SW", "Canopy")])))
+# fits <- lapply(mdata$mdata, function(m) sampling(lm, data = m))
+# names(fits) <- paste0(mdata$strata, "_", mdata$trait)
+# save(fits, file = "data/fits.Rdata")
+load(file = "data/fits.Rdata")
 R2 <- lapply(fits, mcmc_intervals_data, regex_pars = "R2") %>% 
   bind_rows(.id = "model") %>% 
   separate(model, c("Guild", "Trait"), "_") %>% 
@@ -510,9 +627,22 @@ R2 <- lapply(fits, mcmc_intervals_data, regex_pars = "R2") %>%
                            "U" = "Understory",
                            "C" = "Canopy")) %>% 
   dplyr::select(Guild, Trait, R2) %>% 
-  mutate(Variable = "Canopy height", Significance = 1) %>% 
-  mutate(R2 = paste0("R²=", round(R2, 2)))
-lapply(fits, mcmc_intervals_data, regex_pars = "beta") %>% 
+  mutate(Variable = "Canopy height", Significance = "significant") %>% 
+  mutate(R2 = paste0("R²=", round(R2, 2))) %>% 
+   mutate(label = paste(Trait, "-", Guild)) %>% 
+  mutate(label = recode(label,
+                        "LA - Canopy" = "A LA - Canopy",
+                        "LA - Understory" = "B LA - Understory",
+                        "LDMC - Canopy" = "C LDMC - Canopy",
+                        "LDMC - Understory" = "D LDMC - Understory",
+                        "LT - Canopy" = "E LT - Canopy",
+                        "LT - Understory" = "F LT - Understory",
+                        "SLA - Canopy" = "G SLA - Canopy",
+                        "SLA - Understory" = "H SLA - Understory",
+                        "WD - Canopy" = "I WD - Canopy",
+                        "WD - Understory" = "J WD - Understory"
+                        )) 
+t <- lapply(fits, mcmc_intervals_data, regex_pars = "beta") %>% 
   bind_rows(.id = "model") %>% 
   separate(model, c("Guild", "Trait"), "_") %>% 
   mutate(Variable = recode(parameter, 
@@ -524,28 +654,45 @@ lapply(fits, mcmc_intervals_data, regex_pars = "beta") %>%
     mutate(Guild = recode(Guild, 
                            "U" = "Understory",
                            "C" = "Canopy")) %>% 
-  mutate(Significance = 0) %>% 
-  mutate(Significance = ifelse(m > 0 & ll > 0, 1, Significance)) %>% 
-  mutate(Significance = ifelse(m < 0 & hh < 0, 1, Significance)) %>% 
+  mutate(Significance = "non significant") %>% 
+  mutate(Significance = ifelse(m > 0 & ll > 0, "significant", Significance)) %>% 
+  mutate(Significance = ifelse(m < 0 & hh < 0, "significant", Significance)) %>% 
+  mutate(Var2 = ifelse(Significance == "significant", as.character(Variable), "A"))
+
+g <- t %>% 
+  mutate(label = paste(Trait, "-", Guild)) %>% 
+  mutate(label = recode(label,
+                        "LA - Canopy" = "A LA - Canopy",
+                        "LA - Understory" = "B LA - Understory",
+                        "LDMC - Canopy" = "C LDMC - Canopy",
+                        "LDMC - Understory" = "D LDMC - Understory",
+                        "LT - Canopy" = "E LT - Canopy",
+                        "LT - Understory" = "F LT - Understory",
+                        "SLA - Canopy" = "G SLA - Canopy",
+                        "SLA - Understory" = "H SLA - Understory",
+                        "WD - Canopy" = "I WD - Canopy",
+                        "WD - Understory" = "J WD - Understory"
+                        )) %>% 
   ggplot(aes(x = Variable, xend = Variable,
-             color = Variable, fill = Variable,
-             alpha = as.factor(Significance))) +
+             color = Var2)) +
   geom_hline(yintercept = 0, color = "gray90", size = 1) +
   geom_hline(yintercept = c(-0.25, 0.25), 
              color = "gray90", size = 0.5, lty = "dashed") +
-  geom_point(aes(y = m), shape = 21, size = 3) +
+  geom_point(aes(y = m, fill = Var2), shape = 21, size = 3) +
   geom_segment(aes(y = ll, yend = hh),
                size = 1, show.legend = F) +
   geom_segment(aes(y = l, yend = h), size = 2) +
   geom_text(y = -0.35, aes(label = R2), col = "black", data = R2) +
   coord_flip() +
-  facet_grid(Trait ~ Guild, labeller = label_parsed, 
-              scales = "free_y") +
+    facet_wrap(~ label,
+              scales = "free_y", ncol = 2
+              ) +
   xaxis_title(F) +
   ylab("Standardised effect size") +
-  scale_color_discrete(guide = "none") +
-  scale_fill_discrete(guide = "none") +
-  scale_alpha_manual(guide = "none", values = c(0.3, 1))
+  scale_color_manual(guide = "none", values = c("grey", RColorBrewer::brewer.pal(5, "Set1"))) +
+  scale_fill_manual(guide = "none", values = c("grey", RColorBrewer::brewer.pal(5, "Set1"))) +
+  theme(legend.position = "bottom", strip.text.x = element_text(hjust = -0.01))
+ggsave(g, filename = "figures/Figure_4.tiff", device = "tiff", dpi = 600, bg = "white", width = 10, height = 4, compression = "lzw")
 ```
 
 # Discussion

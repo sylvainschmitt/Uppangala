@@ -87,7 +87,7 @@ DEMderiv = function(DEM, choices = c('slope', 'curvature', 'plancurvature', 'pro
       Deriv <- stack(Deriv, Aspect)
     }
     if('cosaspect' %in% choices){
-      Cosaspect <- cos((Aspect + dir) / 180 * pi)
+      Cosaspect <- sin((Aspect + dir) / 180 * pi)
       names(Cosaspect) <- 'Cosaspect'
       Deriv <- stack(Deriv, Cosaspect)
     }
